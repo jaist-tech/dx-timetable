@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>時刻表ビューア</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Helvetica Neue', Arial, 'Hiragino Sans', sans-serif; background: #f5f5f5; padding: 20px; color: #333; }
+  h1 { text-align: center; margin-bottom: 4px; font-size: 1.6em; }
+  .meta { text-align: center; color: #666; margin-bottom: 20px; font-size: 0.9em; }
+  .controls { display: flex; justify-content: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+  .controls select { padding: 8px 12px; border: 2px solid #999; border-radius: 6px; font-size: 1em; background: #fff; cursor: pointer; max-width: 400px; }
+  .controls select:focus { border-color: #333; outline: none; }
+  .tabs { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; }
+  .tabs button { padding: 8px 20px; border: 2px solid #999; background: #fff; border-radius: 6px; cursor: pointer; font-size: 1em; }
+  .tabs button.active { background: #333; color: #fff; border-color: #333; }
+  .route-header { padding: 10px 16px; color: #fff; border-radius: 8px 8px 0 0; font-size: 1.1em; font-weight: bold; }
+  .route-note { padding: 4px 16px; background: #fff3e0; font-size: 0.85em; color: #e65100; }
+  table { width: 100%; border-collapse: collapse; background: #fff; }
+  th { background: #f0f0f0; padding: 6px 8px; font-size: 0.8em; white-space: nowrap; border: 1px solid #ddd; position: sticky; top: 0; }
+  td { padding: 5px 8px; text-align: center; font-size: 0.85em; border: 1px solid #eee; white-space: nowrap; }
+  tr:nth-child(even) { background: #fafafa; }
+  tr:hover { background: #e3f2fd; }
+  .shadow { box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; margin-bottom: 24px; }
+  .loading { text-align: center; padding: 40px; color: #999; }
+</style>
+</head>
+<body>
+
+<h1 id="title">時刻表ビューア</h1>
+<div class="meta" id="meta"></div>
+
+<div class="controls">
+  <select id="jsonSelect" onchange="loadSelected()">
+    <option value="">-- JSONファイルを選択 --</option>
+  </select>
+</div>
+
+<div class="tabs">
+  <button class="active" onclick="switchDay('weekday')">平日</button>
+  <button onclick="switchDay('weekend')">土日祝</button>
+</div>
+
+<div id="content"><div class="loading">JSONファイルを選択してください</div></div>
+
+<script>
+// 最新の出力フォルダを指定（run_all.py 実行後に更新）
+const OUTPUT_DIR = 'output/20260324_212754';
+
+const JSON_FILES = [
+  { file: OUTPUT_DIR + '/shuttle_tsurugi.json', label: 'JAISTシャトル鶴来線' },
+  { file: OUTPUT_DIR + '/shuttle_komatsu.json', label: 'JAISTシャトル小松線' },
+  { file: OUTPUT_DIR + '/ishikawa_line.json', label: '北陸鉄道 石川線' },
+  { file: OUTPUT_DIR + '/ir_ishikawa.json', label: 'IRいしかわ鉄道' },
+  { file: OUTPUT_DIR + '/limo_komatsu.json', label: '小松空港連絡バス' },
+];
+
+let data = null;
+let currentDay = 'weekday';
+
+// セレクタを構築
+const select = document.getElementById('jsonSelect');
+JSON_FILES.forEach(entry => {
+  const opt = document.createElement('option');
+  opt.value = entry.file;
+  opt.textContent = entry.label;
+  select.appendChild(opt);
+});
+
+async function loadSelected() {
+  const file = select.value;
+  if (!file) return;
+
+  document.getElementById('content').innerHTML = '<div class="loading">読み込み中...</div>';
+
+  try {
+    const res = await fetch(file);
+    if (!res.ok) throw new Error(res.status);
+    data = await res.json();
+    const name = data.meta.university_name || data.meta.railway_name || data.meta.operator || '';
+    document.getElementById('title').textContent = name + ' 時刻表';
+    const vf = data.meta.valid_from;
+    const vu = data.meta.valid_until;
+    let metaText = '';
+    if (vf && vu) {
+      metaText = '有効期間: ' + vf + ' ～ ' + vu;
+    } else if (vf) {
+      metaText = vf + ' 改正～';
+    }
+    document.getElementById('meta').textContent = metaText;
+    render();
+  } catch (e) {
+    document.getElementById('content').innerHTML =
+      '<div class="loading">読み込みに失敗しました: ' + e.message + '</div>';
+  }
+}
+
+function switchDay(day) {
+  currentDay = day;
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (data) render();
+}
+
+function render() {
+  const container = document.getElementById('content');
+  container.innerHTML = '';
+
+  data.routes.forEach(route => {
+    const trips = route.schedules[currentDay];
+    const stops = route.stops;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'shadow';
+
+    const header = document.createElement('div');
+    header.className = 'route-header';
+    header.style.background = route.color;
+    header.textContent = route.name + '（' + trips.length + '便）';
+    wrapper.appendChild(header);
+
+    if (route.note) {
+      const note = document.createElement('div');
+      note.className = 'route-note';
+      note.textContent = route.note;
+      wrapper.appendChild(note);
+    }
+
+    const table = document.createElement('table');
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    const thStop = document.createElement('th');
+    thStop.textContent = 'バス停/駅';
+    headerRow.appendChild(thStop);
+
+    trips.forEach((_, i) => {
+      const th = document.createElement('th');
+      th.textContent = (i + 1) + '便';
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    stops.forEach((stop, si) => {
+      const tr = document.createElement('tr');
+      const tdStop = document.createElement('td');
+      tdStop.style.fontWeight = 'bold';
+      tdStop.style.textAlign = 'left';
+      tdStop.textContent = stop;
+      tr.appendChild(tdStop);
+
+      trips.forEach(trip => {
+        const td = document.createElement('td');
+        td.textContent = trip[si] || '―';
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    wrapper.appendChild(table);
+
+    container.appendChild(wrapper);
+  });
+}
+</script>
+</body>
+</html>

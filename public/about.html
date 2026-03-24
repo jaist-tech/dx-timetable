@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>このアプリについて - JAISTバス案内</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#1565C0;
+  --bg:#F0F2F5;
+  --card:#FFFFFF;
+  --text:#1A1A2E;
+  --text-secondary:#5F6368;
+  --border:#E0E0E0;
+  --shadow:0 2px 8px rgba(0,0,0,0.08);
+  --radius:12px;
+  --header-height:56px;
+}
+html{font-size:16px}
+body{
+  font-family:'Noto Sans JP',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.7;
+  min-height:100dvh;
+}
+header{
+  height:var(--header-height);
+  background:var(--primary);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  padding:0 16px;
+  gap:12px;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+header a{
+  color:#fff;
+  text-decoration:none;
+  display:flex;
+  align-items:center;
+}
+header h1{font-size:1.1rem;font-weight:700}
+.back-btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  transition:background 0.2s;
+}
+.back-btn:hover{background:rgba(255,255,255,0.15)}
+.back-btn svg{width:20px;height:20px}
+.content{
+  max-width:540px;
+  margin:0 auto;
+  padding:16px;
+}
+.card{
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:20px;
+  margin-bottom:16px;
+}
+.card h2{
+  font-size:0.95rem;
+  font-weight:700;
+  color:var(--primary);
+  margin-bottom:10px;
+  padding-bottom:8px;
+  border-bottom:2px solid var(--bg);
+}
+.card p, .card li{
+  font-size:0.82rem;
+  color:var(--text-secondary);
+  line-height:1.8;
+}
+.card ul{
+  list-style:none;
+  padding:0;
+}
+.card li{
+  padding:4px 0;
+  padding-left:1em;
+  text-indent:-1em;
+}
+.card li::before{
+  content:"\00B7\0020";
+  font-weight:700;
+}
+.card a{
+  color:var(--primary);
+  text-decoration:none;
+}
+.card a:hover{text-decoration:underline}
+.app-name{
+  text-align:center;
+  padding:24px 0 8px;
+  font-size:1.2rem;
+  font-weight:700;
+  color:var(--text);
+}
+.app-version{
+  text-align:center;
+  font-size:0.75rem;
+  color:var(--text-secondary);
+  margin-bottom:20px;
+}
+.warn{
+  background:#FFF8E1;
+  border-left:3px solid #FFB300;
+  padding:12px 16px;
+  border-radius:0 var(--radius) var(--radius) 0;
+  margin-bottom:16px;
+}
+.warn p{
+  font-size:0.82rem;
+  color:#5D4037;
+  line-height:1.8;
+}
+.warn strong{color:#E65100}
+
+/* Dark theme */
+[data-theme="dark"]{
+  --primary:#1976D2;--bg:#121212;--card:#1E1E1E;
+  --text:#E0E0E0;--text-secondary:#9E9E9E;--border:#333;
+  --shadow:0 2px 8px rgba(0,0,0,0.3);
+}
+[data-theme="dark"] header{background:#1A237E}
+[data-theme="dark"] .warn{background:#332B00;border-left-color:#FFB300}
+[data-theme="dark"] .warn p{color:#FFD54F}
+[data-theme="dark"] .warn strong{color:#FFB300}
+[data-theme="dark"] details summary h2{color:var(--primary-light,#42A5F5)}
+.icon-moon{display:none}
+[data-theme="dark"] .icon-sun{display:none}
+[data-theme="dark"] .icon-moon{display:block}
+.theme-btn{
+  color:#fff;opacity:0.7;display:flex;align-items:center;justify-content:center;
+  width:32px;height:32px;border-radius:50%;transition:opacity 0.2s,background 0.2s;
+  margin-left:auto;background:none;border:none;cursor:pointer;
+}
+.theme-btn:hover{opacity:1;background:rgba(255,255,255,0.15)}
+</style>
+<script>
+(function(){
+  const saved = localStorage.getItem('theme');
+  if (saved) {
+    document.documentElement.setAttribute('data-theme', saved);
+  }
+})();
+</script>
+</head>
+<body>
+<header>
+  <a href="index.html" class="back-btn" aria-label="戻る">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+  </a>
+  <h1>このアプリについて</h1>
+  <button class="theme-btn" onclick="toggleTheme()" aria-label="テーマ切替">
+    <svg class="icon-sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    <svg class="icon-moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+<script>
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+}
+</script>
+
+<div class="content">
+  <div class="app-name">JAISTバス案内 (BusDX)</div>
+  <div class="app-version">2026年4月版ダイヤ準拠</div>
+
+  <div class="card">
+    <h2>このアプリについて</h2>
+    <p>JAISTと周辺地域を結ぶ交通手段の時刻表・乗換案内アプリです。以下の路線に対応しています。</p>
+    <ul>
+      <li><strong>JAISTシャトルバス</strong> — 鶴来線（JAIST↔鶴来駅）・小松線（JAIST↔小松駅）</li>
+      <li><strong>北陸鉄道 石川線</strong> — 鶴来駅↔野町駅</li>
+      <li><strong>IRいしかわ鉄道</strong> — 小松駅↔金沢駅</li>
+      <li><strong>小松空港連絡バス</strong> — 小松駅↔小松空港</li>
+    </ul>
+    <p>JAISTから金沢駅・小松空港などへの乗換ルートを検索し、次の便や所要時間をリアルタイムで確認できます。</p>
+  </div>
+
+  <details class="card">
+    <summary><h2 style="display:inline;cursor:pointer">免責事項</h2></summary>
+    <ul>
+      <li>本アプリはJAISTの公式サービスではありません。学生サークルが独自に開発した非公式の情報提供ツールです。</li>
+      <li>本アプリに掲載されている時刻表は、各交通機関の公式時刻表PDFから自動抽出したデータに基づいています。抽出処理の都合上、誤りが含まれる可能性があります。内容の正確性・最新性を保証するものではありません。</li>
+      <li>小松空港→小松駅の発車時刻は、航空便到着の約15分後・所要約12分として算出した推定値です。実際の発車時刻は航空便の到着状況により変動します。</li>
+      <li>マップ上に表示される運行ルート（経路線）およびバス停・駅の位置情報は、実際の位置を推測して作成したものであり、正確な位置を保証するものではありません。</li>
+      <li>ダイヤ改正・臨時運休・遅延・天候等により、実際の運行状況と異なる場合があります。</li>
+      <li>本アプリの利用により生じたいかなる損害（乗り遅れ等を含む）についても、開発者は責任を負いかねます。</li>
+      <li>正確な運行情報については、各交通機関の公式サイトにてご確認ください。</li>
+    </ul>
+  </details>
+
+  <div class="card">
+    <h2>時刻表を確認する</h2>
+    <p>本アプリで使用している全路線の時刻表データを一覧で確認できます。</p>
+    <p style="margin-top:8px"><a href="timetable.html">時刻表一覧ページを開く</a></p>
+  </div>
+
+  <div class="card">
+    <h2>時刻表データの出典</h2>
+    <p>本アプリの時刻表データは、以下の公式情報に基づいています。最新のダイヤは各公式ページをご確認ください。</p>
+    <ul>
+      <li><a href="https://www.jaist.ac.jp/top/access/" target="_blank" rel="noopener">JAIST アクセス情報</a> — シャトルバス時刻表（鶴来線・小松線）</li>
+      <li><a href="https://www.ishikawa-railway.jp/timetable/" target="_blank" rel="noopener">IRいしかわ鉄道 時刻表</a></li>
+      <li><a href="https://www.hokutetsu.co.jp/railway/ishikawasen/" target="_blank" rel="noopener">北陸鉄道 石川線</a></li>
+    </ul>
+  </div>
+
+  <!-- ライセンス・帰属表示 -->
+  <div class="card">
+    <h2>ライセンス・帰属表示</h2>
+    <ul>
+      <li><strong>Noto Sans JP</strong> — Google Fonts より提供。<a href="https://scripts.sil.org/OFL" target="_blank" rel="noopener">SIL Open Font License 1.1</a> に基づき使用しています。</li>
+      <li><strong>Leaflet</strong> — <a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a> (BSD 2-Clause License) を使用しています。</li>
+      <li><strong>OpenStreetMap</strong> — 地図データは <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">&copy; OpenStreetMap contributors</a> より提供されています。</li>
+      <li><strong>バスアイコン画像</strong> — 本アプリで使用しているバスアイコン画像の著作権は、それぞれの作成者に帰属します。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>開発</h2>
+    <p><a href="https://www.jaist.ac.jp/misc/circles/tech/" target="_blank" rel="noopener">JAIST Techサークル</a></p>
+  </div>
+</div>
+</body>
+</html>

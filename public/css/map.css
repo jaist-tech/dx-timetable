@@ -1,0 +1,49 @@
+/* ===== Map Tab ===== */
+#tab-map{padding:8px}
+.map-wrapper{
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.map-info-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px;
+  font-size:0.75rem;
+  color:var(--text-secondary);
+  border-bottom:1px solid var(--border);
+}
+#leaflet-map{
+  width:100%;
+  height:calc(100dvh - var(--header-height) - var(--nav-height) - 90px);
+  min-height:300px;
+}
+.map-legend{
+  display:flex;gap:16px;padding:10px 16px;
+  font-size:0.7rem;color:var(--text-secondary);
+  flex-wrap:wrap;
+  border-top:1px solid var(--border);
+}
+.map-legend .legend-item{display:flex;align-items:center;gap:4px}
+.map-legend .legend-dot{width:10px;height:10px;border-radius:50%}
+
+/* Bus icon markers on Leaflet */
+/* NOTE: transformはLeafletがマーカー位置指定に使うため、animationで上書きしてはいけない */
+.bus-icon-selected{
+  animation:busIconPulse 2s ease-in-out infinite;
+}
+@keyframes busIconPulse{
+  0%,100%{filter:drop-shadow(0 2px 4px rgba(0,0,0,0.4)) brightness(1)}
+  50%{filter:drop-shadow(0 3px 8px rgba(0,0,0,0.5)) brightness(1.15)}
+}
+.bus-icon-static{filter:drop-shadow(0 1px 2px rgba(0,0,0,0.3))}
+.bus-label-container{background:none !important;border:none !important}
+.bus-label{
+  font-size:11px;font-weight:700;
+  white-space:nowrap;
+  text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff;
+}
+.stop-tooltip{
+  font-family:'Noto Sans JP',sans-serif;
+  font-size:11px;font-weight:600;
+}

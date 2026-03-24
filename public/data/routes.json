@@ -1,0 +1,171 @@
+{
+  "default_transfer_min": 5,
+  "walk_transfers": [
+    { "from": "新西金沢駅", "to": "西金沢駅", "walk_min": 10 },
+    { "from": "西金沢駅", "to": "新西金沢駅", "walk_min": 10 }
+  ],
+  "geo_mappings": {
+    "ishikawa_line": {
+      "geo_file": "tsurugi_shinnishikanazawa_nomachi",
+      "from_stop": "鶴来駅",
+      "to_stop": "新西金沢駅"
+    },
+    "ir_ishikawa_south": {
+      "geo_file": "komatsu_kanazawa",
+      "from_stop": "小松駅",
+      "to_stop": "金沢駅"
+    }
+  },
+  "segment_files": [
+    {
+      "name": "shuttle_komatsu",
+      "file": "shuttle_komatsu",
+      "geo_file": "jaist_komatsu",
+      "type": "bus",
+      "directions": {
+        "outbound": "komatsu_outbound",
+        "inbound": "komatsu_inbound"
+      }
+    },
+    {
+      "name": "shuttle_tsurugi",
+      "file": "shuttle_tsurugi",
+      "geo_file": "jaist_tsurugi",
+      "type": "bus",
+      "directions": {
+        "outbound": "tsurugi_outbound",
+        "inbound": "tsurugi_inbound"
+      }
+    },
+    {
+      "name": "ishikawa_line",
+      "file": "ishikawa_line",
+      "type": "train",
+      "directions": {
+        "outbound": "ishikawa_upbound",
+        "inbound": "ishikawa_downbound"
+      }
+    },
+    {
+      "name": "ir_ishikawa_south",
+      "file": "ir_ishikawa",
+      "type": "train",
+      "directions": {
+        "outbound": "ir_ishikawa_down_south",
+        "inbound": "ir_ishikawa_up_south"
+      }
+    },
+    {
+      "name": "limo_komatsu",
+      "file": "limo_komatsu",
+      "geo_file": "komatsu_airport",
+      "type": "bus",
+      "directions": {
+        "outbound": "limo_komatsu_to_airport",
+        "inbound": "limo_komatsu_from_airport"
+      }
+    }
+  ],
+  "direct_routes": [
+    {
+      "id": "tsurugi_outbound",
+      "name": "鶴来線（大学 → 鶴来駅）",
+      "short_name": "鶴来線 下り",
+      "color": "#4CAF50",
+      "segment": "shuttle_tsurugi",
+      "direction": "outbound",
+      "reverse_id": "tsurugi_inbound"
+    },
+    {
+      "id": "tsurugi_inbound",
+      "name": "鶴来線（鶴来駅 → 大学）",
+      "short_name": "鶴来線 上り",
+      "color": "#2196F3",
+      "segment": "shuttle_tsurugi",
+      "direction": "inbound",
+      "reverse_id": "tsurugi_outbound"
+    },
+    {
+      "id": "komatsu_outbound",
+      "name": "小松線（大学 → 小松駅）",
+      "short_name": "小松線 下り",
+      "color": "#FF9800",
+      "segment": "shuttle_komatsu",
+      "direction": "outbound",
+      "reverse_id": "komatsu_inbound"
+    },
+    {
+      "id": "komatsu_inbound",
+      "name": "小松線（小松駅 → 大学）",
+      "short_name": "小松線 上り",
+      "color": "#E91E63",
+      "segment": "shuttle_komatsu",
+      "direction": "inbound",
+      "reverse_id": "komatsu_outbound"
+    }
+  ],
+  "multi_routes": [
+    {
+      "id": "jaist_komatsu_kanazawa",
+      "name": "JAIST → 小松駅 → 金沢駅",
+      "short_name": "JAIST → 小松 → 金沢",
+      "reverse_id": "kanazawa_komatsu_jaist",
+      "segments": [
+        { "segment": "shuttle_komatsu", "direction": "outbound" },
+        { "segment": "ir_ishikawa_south", "direction": "outbound", "from_stop": "小松駅", "to_stop": "金沢駅" }
+      ]
+    },
+    {
+      "id": "kanazawa_komatsu_jaist",
+      "name": "金沢駅 → 小松駅 → JAIST",
+      "short_name": "金沢 → 小松 → JAIST",
+      "reverse_id": "jaist_komatsu_kanazawa",
+      "segments": [
+        { "segment": "ir_ishikawa_south", "direction": "inbound", "from_stop": "金沢駅", "to_stop": "小松駅" },
+        { "segment": "shuttle_komatsu", "direction": "inbound" }
+      ]
+    },
+    {
+      "id": "jaist_tsurugi_kanazawa",
+      "name": "JAIST → 鶴来駅 → 金沢駅",
+      "short_name": "JAIST → 鶴来 → 金沢",
+      "reverse_id": "kanazawa_tsurugi_jaist",
+      "segments": [
+        { "segment": "shuttle_tsurugi", "direction": "outbound" },
+        { "segment": "ishikawa_line", "direction": "outbound", "from_stop": "鶴来駅", "to_stop": "新西金沢駅" },
+        { "segment": "ir_ishikawa_south", "direction": "outbound", "from_stop": "西金沢駅", "to_stop": "金沢駅" }
+      ]
+    },
+    {
+      "id": "kanazawa_tsurugi_jaist",
+      "name": "金沢駅 → 鶴来駅 → JAIST",
+      "short_name": "金沢 → 鶴来 → JAIST",
+      "reverse_id": "jaist_tsurugi_kanazawa",
+      "segments": [
+        { "segment": "ir_ishikawa_south", "direction": "inbound", "from_stop": "金沢駅", "to_stop": "西金沢駅" },
+        { "segment": "ishikawa_line", "direction": "inbound", "from_stop": "新西金沢駅", "to_stop": "鶴来駅" },
+        { "segment": "shuttle_tsurugi", "direction": "inbound" }
+      ]
+    },
+    {
+      "id": "jaist_komatsu_airport",
+      "name": "JAIST → 小松駅 → 小松空港",
+      "short_name": "JAIST → 小松 → 空港",
+      "reverse_id": "airport_komatsu_jaist",
+      "segments": [
+        { "segment": "shuttle_komatsu", "direction": "outbound" },
+        { "segment": "limo_komatsu", "direction": "outbound" }
+      ]
+    },
+    {
+      "id": "airport_komatsu_jaist",
+      "name": "小松空港 → 小松駅 → JAIST",
+      "short_name": "空港 → 小松 → JAIST",
+      "reverse_id": "jaist_komatsu_airport",
+      "segments": [
+        { "segment": "limo_komatsu", "direction": "inbound" },
+        { "segment": "shuttle_komatsu", "direction": "inbound" }
+      ]
+    }
+  ]
+}

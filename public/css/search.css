@@ -1,0 +1,183 @@
+/* ===== Search Tab ===== */
+
+/* Controls */
+.search-controls{margin-bottom:12px}
+.search-field{margin-bottom:10px}
+.search-field:last-child{margin-bottom:0}
+.search-field label{
+  font-size:0.75rem;font-weight:600;
+  color:var(--text-secondary);
+  display:block;margin-bottom:4px;
+}
+.search-field select{
+  width:100%;padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  font-size:0.85rem;
+  background:var(--card);
+  color:var(--text);
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235F6368' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 12px center;
+  padding-right:32px;
+}
+.search-stops-row{
+  display:flex;
+  align-items:flex-end;
+  gap:8px;
+}
+.search-field-half{flex:1;min-width:0}
+.swap-btn{
+  display:flex;align-items:center;justify-content:center;
+  width:36px;height:36px;
+  border-radius:50%;
+  background:var(--bg);
+  color:var(--primary);
+  flex-shrink:0;
+  transition:transform 0.3s;
+  margin-bottom:0;
+}
+.swap-btn:active{transform:rotate(180deg)}
+.swap-btn svg{width:20px;height:20px}
+
+/* Countdown Hero */
+.countdown-hero{
+  background:linear-gradient(135deg,var(--primary),var(--primary-light));
+  color:#fff;
+  border-radius:var(--radius);
+  padding:16px;
+  margin-bottom:12px;
+  text-align:center;
+}
+.countdown-hero .label{font-size:0.78rem;opacity:0.9;margin-bottom:2px}
+.countdown-hero .time-big{font-size:2.4rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2}
+.countdown-hero .route-name{font-size:0.8rem;margin-top:4px;opacity:0.9}
+.countdown-hero .depart-info{font-size:0.72rem;margin-top:2px;opacity:0.7}
+.countdown-hero.no-bus{background:linear-gradient(135deg,#546E7A,#78909C)}
+
+/* Trip List */
+.trip-list-card{padding:12px}
+.trip-list-card .card-title{padding:0 4px;margin-bottom:8px}
+.trip-list{
+  max-height:40vh;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.trip-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px;
+  border-radius:var(--radius-sm);
+  margin-bottom:4px;
+  cursor:pointer;
+  transition:background 0.15s;
+  border:2px solid transparent;
+}
+.trip-item:active{background:#F0F0F0}
+.trip-item.selected{
+  border-color:var(--primary);
+  background:#F3F7FD;
+}
+.trip-item.past{opacity:0.4}
+.trip-item.past.selected{opacity:1}
+.trip-item.next-dep{border:2px solid var(--text)}
+.next-dep-badge{
+  font-size:0.65rem;font-weight:700;
+  color:var(--text);
+  border:1px solid var(--text);
+  border-radius:3px;
+  padding:1px 5px;
+  margin-left:6px;
+  white-space:nowrap;
+}
+.trip-times{display:flex;align-items:center;gap:8px}
+.trip-dep,.trip-arr{font-size:1.05rem;font-weight:700;font-variant-numeric:tabular-nums}
+.trip-arrow{color:var(--text-light);font-size:0.8rem}
+.trip-meta{text-align:right}
+.trip-duration{font-size:0.75rem;color:var(--text-secondary);display:block}
+.trip-transfers{font-size:0.7rem;color:#E65100;font-weight:600;display:block}
+.trip-countdown{font-size:0.72rem;color:var(--primary);font-weight:600}
+
+/* Multi-route trip items */
+.trip-item.multi-trip{
+  flex-direction:column;
+  align-items:stretch;
+}
+.trip-item.multi-trip > .trip-times,
+.trip-item.multi-trip > .trip-meta{
+  display:flex;
+  align-items:center;
+}
+.trip-item.multi-trip > .trip-times{
+  gap:8px;
+  margin-bottom:2px;
+}
+.trip-item.multi-trip > .trip-meta{
+  gap:10px;
+  justify-content:flex-start;
+}
+.trip-item.multi-trip .trip-duration,
+.trip-item.multi-trip .trip-transfers{display:inline}
+
+/* Segment details */
+.trip-segments{
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid var(--border);
+  font-size:0.8rem;
+}
+.seg-stop-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:3px 0;
+}
+.seg-stop-row.seg-stop-transfer{
+  align-items:flex-start;
+}
+.seg-stop-name{
+  font-weight:600;
+  white-space:nowrap;
+  min-width:5em;
+}
+.seg-stop-time{
+  font-variant-numeric:tabular-nums;
+  color:var(--text-secondary);
+  white-space:nowrap;
+}
+.seg-stop-times-col{
+  display:flex;
+  flex-direction:column;
+  gap:1px;
+}
+.seg-dur{
+  color:var(--text-light);
+  font-size:0.72rem;
+  margin-left:auto;
+  white-space:nowrap;
+}
+.seg-stop-times-col .seg-dur{
+  margin-left:6px;
+  display:inline;
+}
+.seg-transfer{
+  padding:3px 0 3px 12px;
+  font-size:0.72rem;
+  color:var(--text-secondary);
+}
+.seg-transfer.walk{color:#E65100}
+
+/* ===== End of Service Banner ===== */
+.no-service-banner{
+  text-align:center;
+  padding:14px 16px;
+  margin-bottom:8px;
+  background:#FFF3E0;
+  border:1px solid #FFB74D;
+  border-radius:var(--radius-sm);
+  color:#E65100;
+  font-size:0.85rem;
+  font-weight:600;
+}

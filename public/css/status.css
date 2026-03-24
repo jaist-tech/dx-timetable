@@ -1,0 +1,196 @@
+/* ===== Status Tab ===== */
+
+.status-header-card{text-align:center;margin-bottom:12px}
+.status-route-name{font-size:0.85rem;font-weight:600;color:var(--text-secondary)}
+.status-trip-info{font-size:1.1rem;font-weight:700;margin:4px 0;font-variant-numeric:tabular-nums}
+.status-badge{
+  display:inline-block;
+  font-size:0.7rem;font-weight:700;
+  color:#fff;
+  padding:3px 12px;
+  border-radius:12px;
+  margin-top:4px;
+}
+.status-badge.before{background:var(--text-light)}
+.status-badge.running{background:var(--primary)}
+.status-badge.arrived{background:#78909C}
+
+/* Timeline */
+.status-timeline-card{padding:20px 16px}
+.timeline-stop{
+  display:flex;
+  align-items:flex-start;
+  position:relative;
+  padding-left:28px;
+  padding-bottom:24px;
+}
+.timeline-stop:last-child{padding-bottom:0}
+
+.timeline-dot{
+  position:absolute;
+  left:0;top:2px;
+  width:14px;height:14px;
+  border-radius:50%;
+  background:var(--border);
+  border:3px solid var(--card);
+  box-shadow:0 0 0 2px var(--border);
+  z-index:1;
+}
+.timeline-stop.passed .timeline-dot{
+  background:var(--primary);
+  box-shadow:0 0 0 2px var(--primary);
+}
+.timeline-stop.current .timeline-dot{
+  background:var(--primary);
+  box-shadow:0 0 0 2px var(--primary),0 0 0 7px rgba(21,101,192,0.2);
+  width:16px;height:16px;
+  left:-1px;top:1px;
+}
+
+.timeline-line{
+  position:absolute;
+  left:6px;top:18px;
+  width:2px;
+  bottom:0;
+  background:var(--border);
+}
+.timeline-stop.passed .timeline-line{background:var(--primary)}
+.timeline-stop.current .timeline-line{
+  background:linear-gradient(to bottom,var(--primary) 40%,var(--border) 100%);
+}
+
+/* Dashed line for transfer connections */
+.timeline-line.line-transfer{
+  border-left:2px dashed var(--border);
+  background:none !important;
+  width:0;
+  left:7px;
+}
+
+.timeline-info{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  width:100%;
+  min-height:18px;
+}
+.timeline-stop-body{width:100%}
+
+.timeline-stop-name{font-size:0.85rem;font-weight:500;color:var(--text)}
+.timeline-stop.passed .timeline-stop-name{color:var(--text-secondary)}
+.timeline-stop.current .timeline-stop-name{font-weight:700;color:var(--primary)}
+
+.timeline-stop-time{
+  font-size:0.85rem;font-weight:600;
+  font-variant-numeric:tabular-nums;
+  color:var(--text);
+  white-space:nowrap;
+}
+.timeline-stop.upcoming .timeline-stop-time{color:var(--text-light)}
+.timeline-stop.current .timeline-stop-time{color:var(--primary);font-weight:700}
+
+.time-label{
+  font-size:0.65rem;
+  font-weight:400;
+  margin-left:2px;
+}
+
+.timeline-stop-marker{
+  font-size:0.6rem;font-weight:700;
+  color:var(--primary);
+  margin-left:6px;
+  white-space:nowrap;
+}
+
+/* Sub-labels within stops (transport type, transfer info) */
+.timeline-seg-type{
+  display:block;
+  font-size:0.7rem;
+  color:var(--text-light);
+  margin-top:2px;
+}
+.timeline-transfer-text{
+  display:block;
+  font-size:0.7rem;
+  color:#E65100;
+  margin-top:2px;
+}
+
+/* Collapsible intermediate stops */
+.timeline-expand-row{
+  display:flex;
+  align-items:center;
+  position:relative;
+  padding-left:28px;
+  padding-bottom:8px;
+  cursor:pointer;
+}
+.timeline-expand-line{
+  position:absolute;
+  left:6px;top:0;
+  width:2px;
+  bottom:0;
+  background:var(--border);
+}
+.timeline-expand-btn{
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:3px 12px;
+  font-size:0.7rem;
+  color:var(--text-secondary);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+.timeline-expand-btn:hover{
+  background:var(--border);
+  color:var(--text);
+}
+.expand-icon{
+  font-size:0.55rem;
+  display:inline-block;
+}
+
+.timeline-mid-stops{
+  overflow:hidden;
+  transition:max-height 0.3s ease, opacity 0.2s ease;
+  max-height:1000px;
+  opacity:1;
+}
+.timeline-mid-stops.collapsed{
+  max-height:0;
+  opacity:0;
+}
+
+.timeline-stop-mid{
+  padding-bottom:16px;
+}
+.timeline-mid-stops .timeline-stop:last-child{
+  padding-bottom:16px;
+}
+.timeline-stop-mid .timeline-dot{
+  width:10px;height:10px;
+  left:2px;top:4px;
+  border-width:2px;
+}
+.timeline-stop-mid .timeline-stop-name{
+  font-size:0.78rem;
+  color:var(--text-secondary);
+}
+.timeline-stop-mid .timeline-stop-time{
+  font-size:0.78rem;
+}
+.timeline-stop-mid.current .timeline-dot{
+  width:12px;height:12px;
+  left:1px;top:3px;
+}
+
+/* Progress coloring for expand row line */
+.timeline-stop.passed + .timeline-expand-row .timeline-expand-line{
+  background:var(--primary);
+}
+.timeline-stop.current + .timeline-expand-row .timeline-expand-line{
+  background:linear-gradient(to bottom,var(--primary) 40%,var(--border) 100%);
+}
