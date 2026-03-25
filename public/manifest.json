@@ -1,7 +1,8 @@
 {
   "name": "JAISTバス案内",
   "short_name": "バス案内",
-  "start_url": "/",
+  "start_url": "/dx-timetable/",
+  "scope": "/dx-timetable/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1976d2",

@@ -34,7 +34,7 @@ JAISTと周辺地域を結ぶ交通手段の時刻表・乗換案内Webアプリ
 ## ディレクトリ構成
 
 ```
-bus_dx/
+dx-timetable/
 ├── public/                  # Webアプリ本体（GitHub Pagesで配信）
 │   ├── index.html           # メイン画面
 │   ├── about.html           # アプリ情報・免責事項

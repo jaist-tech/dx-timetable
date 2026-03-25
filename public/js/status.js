@@ -1,7 +1,6 @@
 // ===== Status Tab =====
 
-// Track which segment indices are expanded (survives re-renders)
-let _expandedSegs = new Set();
+// _expandedSegs is declared in utils.js (global state)
 
 function updateStatus() {
   const header = document.getElementById('status-header');
@@ -149,10 +148,27 @@ function updateMultiStatus(header, timeline) {
   `;
 
   // Determine visible segment range based on selected from/to
-  const visSeg0 = fromEntry ? fromEntry.segIdx : 0;
-  const visSeg1 = toEntry ? toEntry.segIdx : conn.segments.length - 1;
-  const visStop0 = fromEntry ? fromEntry.stopIdx : 0;
-  const visStop1 = toEntry ? toEntry.stopIdx : conn.segments[visSeg1].stops.length - 1;
+  let visSeg0 = fromEntry ? fromEntry.segIdx : 0;
+  let visSeg1 = toEntry ? toEntry.segIdx : conn.segments.length - 1;
+  let visStop0 = fromEntry ? fromEntry.stopIdx : 0;
+  let visStop1 = toEntry ? toEntry.stopIdx : conn.segments[visSeg1].stops.length - 1;
+
+  // Skip zero-duration first segment at non-walk transfer boundary
+  if (visSeg0 < visSeg1 && visStop0 === conn.segments[visSeg0].stops.length - 1) {
+    const tr = conn.transfers[visSeg0];
+    if (tr && !tr.isWalk) {
+      visSeg0++;
+      visStop0 = 0;
+    }
+  }
+  // Skip zero-duration last segment at non-walk transfer boundary
+  if (visSeg1 > visSeg0 && visStop1 === 0) {
+    const tr = conn.transfers[visSeg1 - 1];
+    if (tr && !tr.isWalk) {
+      visSeg1--;
+      visStop1 = conn.segments[visSeg1].stops.length - 1;
+    }
+  }
 
   // Build timeline for multi-route with collapsible intermediate stops
   let timelineHtml = '';

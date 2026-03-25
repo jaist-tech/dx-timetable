@@ -1,11 +1,11 @@
 /* ===== Status Tab ===== */
 
 .status-header-card{text-align:center;margin-bottom:12px}
-.status-route-name{font-size:0.85rem;font-weight:600;color:var(--text-secondary)}
-.status-trip-info{font-size:1.1rem;font-weight:700;margin:4px 0;font-variant-numeric:tabular-nums}
+.status-route-name{font-size:0.95rem;font-weight:600;color:var(--text-secondary)}
+.status-trip-info{font-size:1.2rem;font-weight:700;margin:4px 0;font-variant-numeric:tabular-nums}
 .status-badge{
   display:inline-block;
-  font-size:0.7rem;font-weight:700;
+  font-size:0.8rem;font-weight:700;
   color:#fff;
   padding:3px 12px;
   border-radius:12px;
@@ -76,12 +76,12 @@
 }
 .timeline-stop-body{width:100%}
 
-.timeline-stop-name{font-size:0.85rem;font-weight:500;color:var(--text)}
+.timeline-stop-name{font-size:0.95rem;font-weight:500;color:var(--text)}
 .timeline-stop.passed .timeline-stop-name{color:var(--text-secondary)}
 .timeline-stop.current .timeline-stop-name{font-weight:700;color:var(--primary)}
 
 .timeline-stop-time{
-  font-size:0.85rem;font-weight:600;
+  font-size:0.95rem;font-weight:600;
   font-variant-numeric:tabular-nums;
   color:var(--text);
   white-space:nowrap;
@@ -90,13 +90,13 @@
 .timeline-stop.current .timeline-stop-time{color:var(--primary);font-weight:700}
 
 .time-label{
-  font-size:0.65rem;
+  font-size:0.75rem;
   font-weight:400;
   margin-left:2px;
 }
 
 .timeline-stop-marker{
-  font-size:0.6rem;font-weight:700;
+  font-size:0.7rem;font-weight:700;
   color:var(--primary);
   margin-left:6px;
   white-space:nowrap;
@@ -105,13 +105,13 @@
 /* Sub-labels within stops (transport type, transfer info) */
 .timeline-seg-type{
   display:block;
-  font-size:0.7rem;
+  font-size:0.8rem;
   color:var(--text-light);
   margin-top:2px;
 }
 .timeline-transfer-text{
   display:block;
-  font-size:0.7rem;
+  font-size:0.8rem;
   color:#E65100;
   margin-top:2px;
 }
@@ -137,7 +137,7 @@
   border:1px solid var(--border);
   border-radius:12px;
   padding:3px 12px;
-  font-size:0.7rem;
+  font-size:0.8rem;
   color:var(--text-secondary);
   cursor:pointer;
   display:flex;
@@ -176,11 +176,11 @@
   border-width:2px;
 }
 .timeline-stop-mid .timeline-stop-name{
-  font-size:0.78rem;
+  font-size:0.88rem;
   color:var(--text-secondary);
 }
 .timeline-stop-mid .timeline-stop-time{
-  font-size:0.78rem;
+  font-size:0.88rem;
 }
 .timeline-stop-mid.current .timeline-dot{
   width:12px;height:12px;

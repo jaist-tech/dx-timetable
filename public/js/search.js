@@ -32,6 +32,7 @@ function initSearch() {
     sel.addEventListener('change', () => {
       selectedRouteId = sel.value;
       selectedTripIdx = -1;
+      _scrollToSelected = true;
       if (isMultiRoute(selectedRouteId)) {
         rebuildMultiStopSelects();
         updateMultiTripList();
@@ -49,6 +50,7 @@ function initSearch() {
     sel.addEventListener('change', () => {
       selectedFromStop = sel.value;
       selectedTripIdx = -1;
+      _scrollToSelected = true;
       if (isMultiRoute(selectedRouteId)) {
         rebuildMultiToSelects();
         updateMultiTripList();
@@ -66,6 +68,7 @@ function initSearch() {
     sel.addEventListener('change', () => {
       selectedToStop = sel.value;
       selectedTripIdx = -1;
+      _scrollToSelected = true;
       syncControls();
       if (isMultiRoute(selectedRouteId)) {
         updateMultiTripList();
@@ -81,6 +84,7 @@ function initSearch() {
     btn.addEventListener('click', swapRoute);
   });
 
+  _scrollToSelected = true;
   if (isMultiRoute(selectedRouteId)) {
     rebuildMultiStopSelects();
     updateMultiTripList();
@@ -111,6 +115,7 @@ function rebuildToSelects() {
   const route = getRoute(selectedRouteId);
   const fromIdx = route.stops.indexOf(selectedFromStop);
   const toOptions = route.stops.slice(fromIdx + 1);
+  if (toOptions.length === 0) return;
   const toOpts = toOptions.map(s =>
     `<option value="${s}">${s}</option>`
   ).join('');
@@ -145,6 +150,7 @@ function rebuildMultiToSelects() {
   const stopNames = _multiStops.map(s => s.name);
   const fromIdx = stopNames.indexOf(selectedFromStop);
   const toOptions = stopNames.slice(fromIdx + 1);
+  if (toOptions.length === 0) return;
   const toOpts = toOptions.map(s =>
     `<option value="${s}">${s}</option>`
   ).join('');
@@ -177,6 +183,7 @@ function swapRoute() {
     if (mr && mr.reverse_id) {
       selectedRouteId = mr.reverse_id;
       selectedTripIdx = -1;
+      _scrollToSelected = true;
       rebuildMultiStopSelects();
       syncControls();
       updateMultiTripList();
@@ -212,6 +219,7 @@ function swapRoute() {
 
   syncControls();
   selectedTripIdx = -1;
+  _scrollToSelected = true;
   updateTripList();
   if (currentTab === 'status') updateStatus();
 }
@@ -253,18 +261,17 @@ function updateTripList() {
   if (selectedTripIdx < 0) {
     for (let i = 0; i < sched.length; i++) {
       const depTime = sched[i][fromIdx];
-      if (depTime && timeToMin(depTime) > now) {
+      if (depTime && timeToMin(depTime) >= now) {
         selectedTripIdx = i;
         break;
       }
     }
-    // Don't auto-select last trip when all buses are done
   }
 
   let nextDepIdx = -1;
   for (let i = 0; i < sched.length; i++) {
     const depTime = sched[i][fromIdx];
-    if (depTime && timeToMin(depTime) > now) {
+    if (depTime && timeToMin(depTime) >= now) {
       nextDepIdx = i;
       break;
     }
@@ -285,7 +292,7 @@ function updateTripList() {
     const depMin = timeToMin(depTime);
     const arrMin = timeToMin(arrTime);
     const duration = arrMin - depMin;
-    const isPast = depMin <= now;
+    const isPast = depMin < now;
     const isSelected = i === selectedTripIdx;
     const isNext = i === nextDepIdx;
 
@@ -317,10 +324,15 @@ function updateTripList() {
 
   document.getElementById('trip-list').innerHTML = html;
 
-  if (!_initialLoad) {
+  if (_scrollToSelected) {
+    _scrollToSelected = false;
     requestAnimationFrame(() => {
       const sel = document.querySelector('.trip-item.selected');
-      if (sel) sel.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      if (sel) {
+          const container = document.getElementById('trip-list');
+          const top = sel.offsetTop - container.offsetTop - container.clientHeight / 2 + sel.clientHeight / 2;
+          container.scrollTo({ top, behavior: 'smooth' });
+        }
     });
   }
   _initialLoad = false;
@@ -350,12 +362,11 @@ function updateMultiTripList() {
   if (selectedTripIdx < 0) {
     for (let i = 0; i < currentConnections.length; i++) {
       const depTime = getConnDepTime(currentConnections[i], useFromStop);
-      if (timeToMin(depTime) > now) {
+      if (timeToMin(depTime) >= now) {
         selectedTripIdx = i;
         break;
       }
     }
-    // Don't auto-select last trip when all buses are done
   }
 
   if (selectedTripIdx >= currentConnections.length) {
@@ -366,7 +377,7 @@ function updateMultiTripList() {
   let nextDepIdx = -1;
   for (let i = 0; i < currentConnections.length; i++) {
     const depTime = getConnDepTime(currentConnections[i], useFromStop);
-    if (timeToMin(depTime) > now) {
+    if (timeToMin(depTime) >= now) {
       nextDepIdx = i;
       break;
     }
@@ -385,7 +396,7 @@ function updateMultiTripList() {
     const depMin = timeToMin(depTime);
     const arrMin = timeToMin(arrTime);
     const totalDuration = arrMin - depMin;
-    const isPast = depMin <= now;
+    const isPast = depMin < now;
     const isSelected = i === selectedTripIdx;
     const isNext = i === nextDepIdx;
     // Transfer count for selected from/to range
@@ -412,10 +423,21 @@ function updateMultiTripList() {
 
     // Build segment detail lines (visible when selected)
     // Filter to only show segments/stops between selected from/to
-    const visSeg0 = fromEntry ? fromEntry.segIdx : 0;
-    const visSeg1 = toEntry ? toEntry.segIdx : conn.segments.length - 1;
-    const visStop0 = fromEntry ? fromEntry.stopIdx : 0;
-    const visStop1 = toEntry ? toEntry.stopIdx : conn.segments[visSeg1].stops.length - 1;
+    let visSeg0 = fromEntry ? fromEntry.segIdx : 0;
+    let visSeg1 = toEntry ? toEntry.segIdx : conn.segments.length - 1;
+    let visStop0 = fromEntry ? fromEntry.stopIdx : 0;
+    let visStop1 = toEntry ? toEntry.stopIdx : conn.segments[visSeg1].stops.length - 1;
+
+    // Skip zero-duration first segment at non-walk transfer boundary
+    if (visSeg0 < visSeg1 && visStop0 === conn.segments[visSeg0].stops.length - 1) {
+      const tr = conn.transfers[visSeg0];
+      if (tr && !tr.isWalk) { visSeg0++; visStop0 = 0; }
+    }
+    // Skip zero-duration last segment at non-walk transfer boundary
+    if (visSeg1 > visSeg0 && visStop1 === 0) {
+      const tr = conn.transfers[visSeg1 - 1];
+      if (tr && !tr.isWalk) { visSeg1--; visStop1 = conn.segments[visSeg1].stops.length - 1; }
+    }
 
     let detailHtml = '<div class="trip-segments">';
     let skipNextDep = false;
@@ -523,14 +545,18 @@ function updateMultiTripList() {
 
   document.getElementById('trip-list').innerHTML = html;
 
-  if (_initialLoad) {
-    _initialLoad = false;
-  } else {
+  if (_scrollToSelected) {
+    _scrollToSelected = false;
     requestAnimationFrame(() => {
       const sel = document.querySelector('.trip-item.selected');
-      if (sel) sel.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      if (sel) {
+          const container = document.getElementById('trip-list');
+          const top = sel.offsetTop - container.offsetTop - container.clientHeight / 2 + sel.clientHeight / 2;
+          container.scrollTo({ top, behavior: 'smooth' });
+        }
     });
   }
+  _initialLoad = false;
 
   updateSearchCountdown();
 }
@@ -575,7 +601,7 @@ function updateSearchCountdown() {
   let hasNextDep = false;
   for (let i = 0; i < sched.length; i++) {
     const dt = sched[i][fromIdx];
-    if (dt && timeToMin(dt) > nowMin()) { hasNextDep = true; break; }
+    if (dt && timeToMin(dt) >= nowMin()) { hasNextDep = true; break; }
   }
 
   if (selectedTripIdx < 0 || !sched[selectedTripIdx]) {
@@ -629,7 +655,7 @@ function updateMultiSearchCountdown() {
     const nowM = nowMin();
     for (let i = 0; i < currentConnections.length; i++) {
       const dt = getConnDepTime(currentConnections[i], selectedFromStop);
-      if (timeToMin(dt) > nowM) { hasNextConn = true; break; }
+      if (timeToMin(dt) >= nowM) { hasNextConn = true; break; }
     }
   }
 
@@ -682,7 +708,7 @@ function updateTripCountdowns() {
   const now = nowMin();
   document.querySelectorAll('.trip-countdown').forEach(el => {
     const depMin = parseInt(el.dataset.depMin);
-    if (depMin > now) {
+    if (depMin >= now) {
       el.textContent = `あと${formatCountdown(depMin - now)}`;
     } else {
       el.textContent = '';

@@ -11,6 +11,8 @@ let selectedFromStop = '';
 let selectedToStop = '';
 let selectedTripIdx = -1;
 let _initialLoad = true;
+let _scrollToSelected = false;
+let _expandedSegs = new Set();
 
 // ===== Debug =====
 // true: 選択中ルートの1/3付近の便が走行中（出発2分後）になる
@@ -65,18 +67,15 @@ function formatCountdownSec(diffSec) {
 
 // ===== Debug Time Simulation =====
 
-let _debugState = { startReal: null, baseTimeSec: null, routeId: null, runningTripIdx: -1 };
+let _debugState = { startReal: null, baseTimeSec: null, routeId: null };
 
 function debugNowSec() {
   if (_debugState.routeId !== selectedRouteId) {
-    _debugState = { startReal: null, baseTimeSec: null, routeId: selectedRouteId, runningTripIdx: -1 };
+    _debugState = { startReal: null, baseTimeSec: null, routeId: selectedRouteId };
   }
   if (_debugState.baseTimeSec === null) {
     _debugState.baseTimeSec = calcDebugBaseTime();
     _debugState.startReal = Date.now() / 1000;
-    if (_debugState.runningTripIdx >= 0) {
-      selectedTripIdx = _debugState.runningTripIdx;
-    }
   }
   const elapsed = Date.now() / 1000 - _debugState.startReal;
   return Math.floor(_debugState.baseTimeSec + elapsed);
@@ -87,7 +86,6 @@ function calcDebugBaseTime() {
   if (trips.length === 0 || !trips[0][0]) return 0;
 
   const runIdx = Math.max(0, Math.floor(trips.length / 3));
-  _debugState.runningTripIdx = runIdx;
   return timeToMin(trips[runIdx][0]) * 60 + 120; // 出発2分後
 }
 
@@ -171,6 +169,13 @@ function getSegRefLastStop(segRef) {
   if (!dirData) return null;
   if (segRef.to_stop) return segRef.to_stop;
   return dirData.stops[dirData.stops.length - 1];
+}
+
+function getSegRefFirstStop(segRef) {
+  const dirData = getSegmentData(segRef.segment, segRef.direction);
+  if (!dirData) return null;
+  if (segRef.from_stop) return segRef.from_stop;
+  return dirData.stops[0];
 }
 
 // ===== Multi-route Connection Finder =====
