@@ -60,6 +60,7 @@ body{
   color:var(--text);
   line-height:1.6;
   overflow:hidden;
+  height:100vh;
   height:100dvh;
   width:100vw;
 }
@@ -67,7 +68,7 @@ button{font-family:inherit;border:none;cursor:pointer;background:none}
 input,select{font-family:inherit}
 
 /* ===== App Layout ===== */
-#app{display:flex;flex-direction:column;height:100dvh;width:100%}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;width:100%}
 header{
   height:var(--header-height);
   background:var(--primary);
@@ -128,7 +129,7 @@ main{
   overflow-y:auto;
   overflow-x:hidden;
   -webkit-overflow-scrolling:touch;
-  padding-bottom:8px;
+  padding-bottom:calc(var(--nav-height) + env(safe-area-inset-bottom) + 8px);
 }
 .tab-content{display:none;padding:12px 16px;animation:fadeIn 0.2s ease}
 .tab-content.active{display:block}
@@ -136,11 +137,14 @@ main{
 
 /* ===== Bottom Nav ===== */
 #bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
   height:var(--nav-height);
   background:var(--card);
   border-top:1px solid var(--border);
   display:flex;
-  flex-shrink:0;
   z-index:10;
   padding-bottom:env(safe-area-inset-bottom);
 }
@@ -198,4 +202,5 @@ main::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
 }
 @media(min-width:900px){
   #app{max-width:480px;margin:0 auto;border-left:1px solid var(--border);border-right:1px solid var(--border)}
+  #bottom-nav{max-width:480px;left:50%;transform:translateX(-50%)}
 }
