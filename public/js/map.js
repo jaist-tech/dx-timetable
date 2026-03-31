@@ -425,14 +425,14 @@ function buildRouteLayersForRoute(routeId, userFrom, userTo) {
         fillOpacity: 1
       });
       if (isKey) {
-        marker.bindTooltip(stop.name, {
+        marker.bindTooltip(tStop(stop.name), {
           permanent: true,
           direction: 'top',
           offset: [0, -8],
           className: 'stop-tooltip'
         });
       } else {
-        marker.bindPopup(stop.name, { className: 'stop-popup' });
+        marker.bindPopup(tStop(stop.name), { className: 'stop-popup' });
       }
       marker.addTo(layer);
     });
@@ -626,12 +626,12 @@ function updateMap() {
       // Dep time label
       let depLabel = '';
       if (isMultiRoute(selectedRouteId) && currentConnections[selectedTripIdx]) {
-        depLabel = currentConnections[selectedTripIdx].depTime + '発';
+        depLabel = currentConnections[selectedTripIdx].depTime + t('trip.dep');
       } else {
         const route = getRoute(selectedRouteId);
         if (route) {
           const trip = route.schedules[dayType][selectedTripIdx];
-          if (trip) depLabel = trip[0] + '発';
+          if (trip) depLabel = trip[0] + t('trip.dep');
         }
       }
       if (depLabel) {
@@ -663,7 +663,7 @@ function showStaticBusMarker(now) {
     const conn = currentConnections[selectedTripIdx];
     depSec = timeToMin(conn.depTime) * 60;
     arrSec = timeToMin(conn.arrTime) * 60;
-    label = now < depSec ? `${conn.depTime}発 待機中` : '到着済';
+    label = now < depSec ? `${conn.depTime}${t('trip.dep')} ${t('map.waiting')}` : t('status.arrived');
   } else {
     const route = getRoute(selectedRouteId);
     if (!route) return;
@@ -671,7 +671,7 @@ function showStaticBusMarker(now) {
     if (!trip) return;
     depSec = timeToMin(trip[0]) * 60;
     arrSec = timeToMin(trip[trip.length - 1]) * 60;
-    label = now < depSec ? `${trip[0]}発 待機中` : '到着済';
+    label = now < depSec ? `${trip[0]}${t('trip.dep')} ${t('map.waiting')}` : t('status.arrived');
   }
 
   const segId = now < depSec ? segIds[0] : segIds[segIds.length - 1];
@@ -701,7 +701,7 @@ function updateMapInfoBar(now) {
       const mr = getMultiRoute(selectedRouteId);
       const conn = currentConnections[selectedTripIdx];
       if (mr && conn) {
-        routeName = mr.short_name || mr.name;
+        routeName = tRouteDisplay(selectedRouteId, mr.short_name, mr.name);
         depTime = conn.depTime;
         arrTime = conn.arrTime;
       }
@@ -710,7 +710,7 @@ function updateMapInfoBar(now) {
       if (route) {
         const trip = route.schedules[dayType][selectedTripIdx];
         if (trip) {
-          routeName = route.short_name || route.name;
+          routeName = tRouteDisplay(selectedRouteId, route.short_name, route.name);
           depTime = trip[0];
           arrTime = trip[trip.length - 1];
         }
@@ -721,15 +721,15 @@ function updateMapInfoBar(now) {
       const depSec = timeToMin(depTime) * 60;
       const arrSec = timeToMin(arrTime) * 60;
       let status = '';
-      if (now < depSec) status = '出発前';
-      else if (now <= arrSec) status = '運行中';
-      else status = '到着済';
-      infoEl.textContent = `${routeName} ${depTime}発 - ${status}`;
+      if (now < depSec) status = t('status.before');
+      else if (now <= arrSec) status = t('status.running');
+      else status = t('status.arrived');
+      infoEl.textContent = `${routeName} ${depTime}${t('trip.dep')} - ${status}`;
     } else {
-      infoEl.textContent = '便を選択してください';
+      infoEl.textContent = t('map.selectTrip');
     }
   } else {
-    infoEl.textContent = '便を選択してください';
+    infoEl.textContent = t('map.selectTrip');
   }
 
   let mH, mM;

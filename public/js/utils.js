@@ -49,13 +49,6 @@ function getDayType() {
   return (d === 0 || d === 6) ? 'weekend' : 'weekday';
 }
 
-function formatCountdown(diffMin) {
-  if (diffMin < 0) return '--:--';
-  const h = Math.floor(diffMin / 60);
-  const m = diffMin % 60;
-  return h > 0 ? `${h}時間${m}分` : `${m}分`;
-}
-
 function formatCountdownSec(diffSec) {
   if (diffSec < 0) return '--:--';
   const h = Math.floor(diffSec / 3600);

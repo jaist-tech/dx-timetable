@@ -6,11 +6,11 @@ let _multiStops = []; // array of { name, segIdx, stopIdx }
 // Route presets: displayed in dropdown with ↔ notation.
 // Selecting a preset sets the forward (rightward) route ID.
 const ROUTE_PRESETS = [
-  { id: 'komatsu_outbound',        reverseId: 'komatsu_inbound',        label: 'JAIST↔小松駅' },
-  { id: 'tsurugi_outbound',        reverseId: 'tsurugi_inbound',        label: 'JAIST↔鶴来駅' },
-  { id: 'jaist_tsurugi_kanazawa',  reverseId: 'kanazawa_tsurugi_jaist', label: 'JAIST↔鶴来駅↔金沢駅' },
-  { id: 'jaist_komatsu_kanazawa',  reverseId: 'kanazawa_komatsu_jaist', label: 'JAIST↔小松駅↔金沢駅' },
-  { id: 'jaist_komatsu_airport',   reverseId: 'airport_komatsu_jaist',  label: 'JAIST↔小松駅↔小松空港' },
+  { id: 'komatsu_outbound',        reverseId: 'komatsu_inbound',        i18nKey: 'route.jaist_komatsu' },
+  { id: 'tsurugi_outbound',        reverseId: 'tsurugi_inbound',        i18nKey: 'route.jaist_tsurugi' },
+  { id: 'jaist_tsurugi_kanazawa',  reverseId: 'kanazawa_tsurugi_jaist', i18nKey: 'route.jaist_tsurugi_kanazawa' },
+  { id: 'jaist_komatsu_kanazawa',  reverseId: 'kanazawa_komatsu_jaist', i18nKey: 'route.jaist_komatsu_kanazawa' },
+  { id: 'jaist_komatsu_airport',   reverseId: 'airport_komatsu_jaist',  i18nKey: 'route.jaist_komatsu_airport' },
 ];
 
 // Map any route ID (forward or reverse) back to the preset's forward ID
@@ -22,7 +22,7 @@ function getPresetValue(routeId) {
 function initSearch() {
   // Build route options from presets
   const routeOpts = ROUTE_PRESETS.map(p =>
-    `<option value="${p.id}">${p.label}</option>`
+    `<option value="${p.id}">${t(p.i18nKey)}</option>`
   ).join('');
 
   // Route selects
@@ -99,7 +99,7 @@ function initSearch() {
 function rebuildStopSelects() {
   const route = getRoute(selectedRouteId);
   const fromOpts = route.stops.slice(0, -1).map(s =>
-    `<option value="${s}">${s}</option>`
+    `<option value="${s}">${tStop(s)}</option>`
   ).join('');
   selectedFromStop = route.stops[0];
 
@@ -117,7 +117,7 @@ function rebuildToSelects() {
   const toOptions = route.stops.slice(fromIdx + 1);
   if (toOptions.length === 0) return;
   const toOpts = toOptions.map(s =>
-    `<option value="${s}">${s}</option>`
+    `<option value="${s}">${tStop(s)}</option>`
   ).join('');
   selectedToStop = toOptions[toOptions.length - 1];
 
@@ -134,7 +134,7 @@ function rebuildMultiStopSelects() {
   const stopNames = _multiStops.map(s => s.name);
 
   const fromOpts = stopNames.slice(0, -1).map(s =>
-    `<option value="${s}">${s}</option>`
+    `<option value="${s}">${tStop(s)}</option>`
   ).join('');
   selectedFromStop = stopNames[0];
 
@@ -152,7 +152,7 @@ function rebuildMultiToSelects() {
   const toOptions = stopNames.slice(fromIdx + 1);
   if (toOptions.length === 0) return;
   const toOpts = toOptions.map(s =>
-    `<option value="${s}">${s}</option>`
+    `<option value="${s}">${tStop(s)}</option>`
   ).join('');
   selectedToStop = toOptions[toOptions.length - 1];
 
@@ -250,7 +250,7 @@ function updateTripList() {
 
   if (fromIdx < 0 || toIdx < 0 || fromIdx >= toIdx) {
     document.getElementById('trip-list').innerHTML =
-      '<div class="no-results">条件に合う便がありません</div>';
+      `<div class="no-results">${t('trip.noResults')}</div>`;
     updateSearchCountdown();
     return;
   }
@@ -282,7 +282,7 @@ function updateTripList() {
 
   let html = '';
   if (allDone) {
-    html += '<div class="no-service-banner">本日の便は終了しました</div>';
+    html += `<div class="no-service-banner">${t('trip.serviceEnded')}</div>`;
   }
   sched.forEach((trip, i) => {
     const depTime = trip[fromIdx];
@@ -303,10 +303,10 @@ function updateTripList() {
 
     let countdown = '';
     if (!isPast) {
-      countdown = `<span class="trip-countdown" data-dep-min="${depMin}">あと${formatCountdown(depMin - now)}</span>`;
+      countdown = `<span class="trip-countdown" data-dep-min="${depMin}">${t('trip.remaining')}${formatCountdownI18n(depMin - now)}</span>`;
     }
 
-    const nextBadge = isNext ? '<span class="next-dep-badge">次発</span>' : '';
+    const nextBadge = isNext ? `<span class="next-dep-badge">${t('trip.nextDep')}</span>` : '';
 
     html += `<div class="${cls}" data-idx="${i}" onclick="selectTrip(${i})">
       <div class="trip-times">
@@ -316,7 +316,7 @@ function updateTripList() {
         ${nextBadge}
       </div>
       <div class="trip-meta">
-        <span class="trip-duration">${duration}分</span>
+        <span class="trip-duration">${duration}${t('trip.min')}</span>
         ${countdown}
       </div>
     </div>`;
@@ -388,7 +388,7 @@ function updateMultiTripList() {
 
   let html = '';
   if (allDone) {
-    html += '<div class="no-service-banner">本日の便は終了しました</div>';
+    html += `<div class="no-service-banner">${t('trip.serviceEnded')}</div>`;
   }
   currentConnections.forEach((conn, i) => {
     const depTime = getConnDepTime(conn, useFromStop);
@@ -416,10 +416,10 @@ function updateMultiTripList() {
 
     let countdown = '';
     if (!isPast) {
-      countdown = `<span class="trip-countdown" data-dep-min="${depMin}">あと${formatCountdown(depMin - now)}</span>`;
+      countdown = `<span class="trip-countdown" data-dep-min="${depMin}">${t('trip.remaining')}${formatCountdownI18n(depMin - now)}</span>`;
     }
 
-    const nextBadge = isNext ? '<span class="next-dep-badge">次発</span>' : '';
+    const nextBadge = isNext ? `<span class="next-dep-badge">${t('trip.nextDep')}</span>` : '';
 
     // Build segment detail lines (visible when selected)
     // Filter to only show segments/stops between selected from/to
@@ -460,8 +460,8 @@ function updateMultiTripList() {
       // Departure stop (skip for zero-duration segments and when skipNextDep)
       if (!skipNextDep && !isZeroDuration) {
         detailHtml += `<div class="seg-stop-row">`;
-        detailHtml += `<span class="seg-stop-name">${vDepName}</span>`;
-        detailHtml += `<span class="seg-stop-time">${vDepTime} 発</span>`;
+        detailHtml += `<span class="seg-stop-name">${tStop(vDepName)}</span>`;
+        detailHtml += `<span class="seg-stop-time">${vDepTime} ${t('trip.dep')}</span>`;
         detailHtml += `</div>`;
       }
       skipNextDep = false;
@@ -475,49 +475,49 @@ function updateMultiTripList() {
           // skip arrival row, just show transfer and next departure
           if (tr.isWalk) {
             detailHtml += `<div class="seg-transfer walk">`;
-            detailHtml += `徒歩（乗換${tr.waitMin}分）`;
+            detailHtml += t('trip.walkTransfer', { n: tr.waitMin });
             detailHtml += `</div>`;
             detailHtml += `<div class="seg-stop-row">`;
-            detailHtml += `<span class="seg-stop-name">${nextSeg.stops[0]}</span>`;
-            detailHtml += `<span class="seg-stop-time">${nextSeg.depTime} 発</span>`;
+            detailHtml += `<span class="seg-stop-name">${tStop(nextSeg.stops[0])}</span>`;
+            detailHtml += `<span class="seg-stop-time">${nextSeg.depTime} ${t('trip.dep')}</span>`;
             detailHtml += `</div>`;
           } else {
             detailHtml += `<div class="seg-stop-row">`;
-            detailHtml += `<span class="seg-stop-name">${nextSeg.stops[0]}</span>`;
-            detailHtml += `<span class="seg-stop-time">${nextSeg.depTime} 発 <span class="seg-dur">${tr.waitMin}分待</span></span>`;
+            detailHtml += `<span class="seg-stop-name">${tStop(nextSeg.stops[0])}</span>`;
+            detailHtml += `<span class="seg-stop-time">${nextSeg.depTime} ${t('trip.dep')} <span class="seg-dur">${t('trip.waitTransfer', { n: tr.waitMin })}</span></span>`;
             detailHtml += `</div>`;
           }
           skipNextDep = true;
         } else if (!tr.isWalk) {
           // Same-station transfer: merge arrival + next departure
           detailHtml += `<div class="seg-stop-row seg-stop-transfer">`;
-          detailHtml += `<span class="seg-stop-name">${vArrName}</span>`;
+          detailHtml += `<span class="seg-stop-name">${tStop(vArrName)}</span>`;
           detailHtml += `<div class="seg-stop-times-col">`;
-          detailHtml += `<span class="seg-stop-time">${vArrTime} 着 <span class="seg-dur">${segDur}分</span></span>`;
-          detailHtml += `<span class="seg-stop-time">${nextSeg.depTime} 発 <span class="seg-dur">${tr.waitMin}分待</span></span>`;
+          detailHtml += `<span class="seg-stop-time">${vArrTime} ${t('trip.arr')} <span class="seg-dur">${segDur}${t('trip.min')}</span></span>`;
+          detailHtml += `<span class="seg-stop-time">${nextSeg.depTime} ${t('trip.dep')} <span class="seg-dur">${t('trip.waitTransfer', { n: tr.waitMin })}</span></span>`;
           detailHtml += `</div></div>`;
           skipNextDep = true;
         } else {
           detailHtml += `<div class="seg-stop-row">`;
-          detailHtml += `<span class="seg-stop-name">${vArrName}</span>`;
-          detailHtml += `<span class="seg-stop-time">${vArrTime} 着</span>`;
-          detailHtml += `<span class="seg-dur">${segDur}分</span>`;
+          detailHtml += `<span class="seg-stop-name">${tStop(vArrName)}</span>`;
+          detailHtml += `<span class="seg-stop-time">${vArrTime} ${t('trip.arr')}</span>`;
+          detailHtml += `<span class="seg-dur">${segDur}${t('trip.min')}</span>`;
           detailHtml += `</div>`;
           detailHtml += `<div class="seg-transfer walk">`;
-          detailHtml += `徒歩（乗換${tr.waitMin}分）`;
+          detailHtml += t('trip.walkTransfer', { n: tr.waitMin });
           detailHtml += `</div>`;
           detailHtml += `<div class="seg-stop-row">`;
-          detailHtml += `<span class="seg-stop-name">${nextSeg.stops[0]}</span>`;
-          detailHtml += `<span class="seg-stop-time">${nextSeg.depTime} 発</span>`;
+          detailHtml += `<span class="seg-stop-name">${tStop(nextSeg.stops[0])}</span>`;
+          detailHtml += `<span class="seg-stop-time">${nextSeg.depTime} ${t('trip.dep')}</span>`;
           detailHtml += `</div>`;
           skipNextDep = true;
         }
       } else if (!isZeroDuration) {
         // Last visible segment: show arrival
         detailHtml += `<div class="seg-stop-row">`;
-        detailHtml += `<span class="seg-stop-name">${vArrName}</span>`;
-        detailHtml += `<span class="seg-stop-time">${vArrTime} 着</span>`;
-        detailHtml += `<span class="seg-dur">${segDur}分</span>`;
+        detailHtml += `<span class="seg-stop-name">${tStop(vArrName)}</span>`;
+        detailHtml += `<span class="seg-stop-time">${vArrTime} ${t('trip.arr')}</span>`;
+        detailHtml += `<span class="seg-dur">${segDur}${t('trip.min')}</span>`;
         detailHtml += `</div>`;
       }
     }
@@ -531,8 +531,8 @@ function updateMultiTripList() {
         ${nextBadge}
       </div>
       <div class="trip-meta">
-        <span class="trip-duration">${totalDuration}分</span>
-        ${transferCount > 0 ? `<span class="trip-transfers">乗換${transferCount}回</span>` : ''}
+        <span class="trip-duration">${totalDuration}${t('trip.min')}</span>
+        ${transferCount > 0 ? `<span class="trip-transfers">${tPlural('trip.transfers', transferCount, { n: transferCount })}</span>` : ''}
         ${countdown}
       </div>
       ${isSelected ? detailHtml : ''}
@@ -540,7 +540,7 @@ function updateMultiTripList() {
   });
 
   if (!html) {
-    html = '<div class="no-results">条件に合う便がありません</div>';
+    html = `<div class="no-results">${t('trip.noResults')}</div>`;
   }
 
   document.getElementById('trip-list').innerHTML = html;
@@ -608,12 +608,12 @@ function updateSearchCountdown() {
     hero.classList.add('no-bus');
     if (!hasNextDep && sched.length > 0) {
       document.getElementById('countdown-time').textContent = '';
-      document.getElementById('countdown-route').textContent = '本日の便は終了しました';
+      document.getElementById('countdown-route').textContent = t('countdown.serviceEnded');
       document.getElementById('countdown-depart').textContent = '';
       labelEl.textContent = '';
     } else {
       document.getElementById('countdown-time').textContent = '--:--';
-      document.getElementById('countdown-route').textContent = '便を選択してください';
+      document.getElementById('countdown-route').textContent = t('countdown.selectTrip');
       document.getElementById('countdown-depart').textContent = '';
       labelEl.textContent = '';
     }
@@ -628,17 +628,17 @@ function updateSearchCountdown() {
   const nowS = nowSec();
   const depSec = timeToMin(depTime) * 60;
 
-  document.getElementById('countdown-route').textContent = route.short_name || route.name;
-  document.getElementById('countdown-depart').textContent = `${depTime} 発 → ${arrTime} 着`;
+  document.getElementById('countdown-route').textContent = tRouteDisplay(selectedRouteId, route.short_name, route.name);
+  document.getElementById('countdown-depart').textContent = `${depTime} ${t('trip.dep')} → ${arrTime} ${t('trip.arr')}`;
 
   if (nowS < depSec) {
     hero.classList.remove('no-bus');
-    labelEl.textContent = '出発まで';
+    labelEl.textContent = t('countdown.until');
     document.getElementById('countdown-time').textContent = formatCountdownSec(depSec - nowS);
   } else {
     hero.classList.add('no-bus');
-    labelEl.textContent = '出発済';
-    document.getElementById('countdown-time').textContent = depTime + ' 発';
+    labelEl.textContent = t('countdown.departed');
+    document.getElementById('countdown-time').textContent = depTime + ' ' + t('trip.dep');
   }
 
   updateTripCountdowns();
@@ -663,12 +663,12 @@ function updateMultiSearchCountdown() {
     hero.classList.add('no-bus');
     if (mr && !hasNextConn && currentConnections.length > 0) {
       document.getElementById('countdown-time').textContent = '';
-      document.getElementById('countdown-route').textContent = '本日の便は終了しました';
+      document.getElementById('countdown-route').textContent = t('countdown.serviceEnded');
       document.getElementById('countdown-depart').textContent = '';
       labelEl.textContent = '';
     } else {
       document.getElementById('countdown-time').textContent = '--:--';
-      document.getElementById('countdown-route').textContent = '便を選択してください';
+      document.getElementById('countdown-route').textContent = t('countdown.selectTrip');
       document.getElementById('countdown-depart').textContent = '';
       labelEl.textContent = '';
     }
@@ -685,20 +685,20 @@ function updateMultiSearchCountdown() {
   const fromE = findMultiStopEntry(selectedFromStop);
   const toE = findMultiStopEntry(selectedToStop);
   const userTransfers = (fromE && toE) ? Math.max(0, toE.segIdx - fromE.segIdx) : conn.segments.length - 1;
-  const transferInfo = userTransfers > 0 ? `（乗換${userTransfers}回）` : '';
+  const transferInfo = userTransfers > 0 ? `(${tPlural('trip.transfers', userTransfers, { n: userTransfers })})` : '';
 
-  document.getElementById('countdown-route').textContent = mr.short_name || mr.name;
+  document.getElementById('countdown-route').textContent = tRouteDisplay(selectedRouteId, mr.short_name, mr.name);
   document.getElementById('countdown-depart').textContent =
-    `${depTime} 発 → ${arrTime} 着${transferInfo}`;
+    `${depTime} ${t('trip.dep')} → ${arrTime} ${t('trip.arr')}${transferInfo}`;
 
   if (nowS < depSec) {
     hero.classList.remove('no-bus');
-    labelEl.textContent = '出発まで';
+    labelEl.textContent = t('countdown.until');
     document.getElementById('countdown-time').textContent = formatCountdownSec(depSec - nowS);
   } else {
     hero.classList.add('no-bus');
-    labelEl.textContent = '出発済';
-    document.getElementById('countdown-time').textContent = depTime + ' 発';
+    labelEl.textContent = t('countdown.departed');
+    document.getElementById('countdown-time').textContent = depTime + ' ' + t('trip.dep');
   }
 
   updateTripCountdowns();
@@ -709,7 +709,7 @@ function updateTripCountdowns() {
   document.querySelectorAll('.trip-countdown').forEach(el => {
     const depMin = parseInt(el.dataset.depMin);
     if (depMin >= now) {
-      el.textContent = `あと${formatCountdown(depMin - now)}`;
+      el.textContent = `${t('trip.remaining')}${formatCountdownI18n(depMin - now)}`;
     } else {
       el.textContent = '';
     }

@@ -25,7 +25,6 @@ async function loadData() {
   }
 
   dayType = getDayType();
-  document.getElementById('day-badge').textContent = dayType === 'weekday' ? '平日' : '土日祝';
 
   await loadGeoData();
   initApp();
@@ -93,26 +92,25 @@ function switchTab(tab) {
 
 // ===== Clock =====
 function updateClock() {
-  let h, m, s;
+  let h, m;
   if (DEBUG_FORCE_RUNNING) {
     const sec = nowSec();
     h = Math.floor(sec / 3600);
     m = Math.floor((sec % 3600) / 60);
-    s = sec % 60;
   } else {
     const n = new Date();
     h = n.getHours();
     m = n.getMinutes();
-    s = n.getSeconds();
   }
   document.getElementById('header-time').textContent =
-    `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
 }
 
 // ===== Initialization =====
 function initApp() {
   initTabs();
   initSearch();
+  applyStaticTranslations();
   updateClock();
 
   // Real-time updates (every second)
