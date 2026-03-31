@@ -8,10 +8,9 @@
   "routes": [
     {
       "id": "komatsu_outbound",
-      "name": "小松線（大学 → 小松駅）",
+      "name": "JAISTシャトル 小松線（大学 → 小松駅）",
       "short_name": "小松線 下り",
       "color": "#FF9800",
-      "note": "2026/4/1~4/24 ダイヤ",
       "stops": [
         "JAIST",
         "小松駅"
@@ -97,10 +96,9 @@
     },
     {
       "id": "komatsu_inbound",
-      "name": "小松線（小松駅 → 大学）",
+      "name": "JAISTシャトル 小松線（小松駅 → 大学）",
       "short_name": "小松線 上り",
       "color": "#E91E63",
-      "note": "2026/4/1~4/24 ダイヤ",
       "stops": [
         "小松駅",
         "JAIST"

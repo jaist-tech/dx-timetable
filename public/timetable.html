@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>時刻表一覧 - JAISTバス案内</title>
+<title>時刻表一覧 - JAISTのりかえ</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -148,12 +148,20 @@ td{
   padding:5px 8px;text-align:center;font-size:0.8rem;
   border:1px solid var(--border);white-space:nowrap;
 }
+td:first-child,th:first-child{
+  position:sticky;left:0;z-index:1;
+  background:var(--card);
+}
+th:first-child{background:#f0f0f0}
+[data-theme="dark"] th:first-child{background:#2A2A2A}
 td:first-child{font-weight:600;text-align:left;white-space:normal}
 tr:nth-child(even){background:#fafafa}
 tr:hover{background:#e3f2fd}
 .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .loading{text-align:center;padding:32px;color:var(--text-secondary);font-size:0.85rem}
 .meta-text{text-align:center;color:var(--text-secondary);font-size:0.8rem;margin-bottom:16px}
+.meta-text a{color:var(--primary);text-decoration:none;margin-left:8px}
+.meta-text a:hover{text-decoration:underline}
 
 /* PC: full width */
 @media(min-width:768px){
@@ -231,11 +239,11 @@ function updateClock() {
 }
 
 const JSON_FILES = [
-  { file: 'data/segments/shuttle_tsurugi.json', i18nKey: 'timetable.route.shuttle_tsurugi', color: '#1976D2' },
-  { file: 'data/segments/shuttle_komatsu.json', i18nKey: 'timetable.route.shuttle_komatsu', color: '#43A047' },
-  { file: 'data/segments/ishikawa_line.json', i18nKey: 'timetable.route.ishikawa_line', color: '#6A1B9A' },
-  { file: 'data/segments/ir_ishikawa.json', i18nKey: 'timetable.route.ir_ishikawa', color: '#E65100' },
-  { file: 'data/segments/limo_komatsu.json', i18nKey: 'timetable.route.limo_komatsu', color: '#00838F' },
+  { file: 'data/segments/shuttle_tsurugi.json', i18nKey: 'timetable.route.shuttle_tsurugi', color: '#1976D2', sourceUrl: 'https://www.jaist.ac.jp/top/access/' },
+  { file: 'data/segments/shuttle_komatsu.json', i18nKey: 'timetable.route.shuttle_komatsu', color: '#43A047', sourceUrl: 'https://www.jaist.ac.jp/top/access/' },
+  { file: 'data/segments/ishikawa_line.json', i18nKey: 'timetable.route.ishikawa_line', color: '#6A1B9A', sourceUrl: 'https://www.hokutetsu.co.jp/railway/ishikawasen/' },
+  { file: 'data/segments/ir_ishikawa.json', i18nKey: 'timetable.route.ir_ishikawa', color: '#E65100', sourceUrl: 'https://www.ishikawa-railway.jp/timetable/' },
+  { file: 'data/segments/limo_komatsu.json', i18nKey: 'timetable.route.limo_komatsu', color: '#00838F', sourceUrl: 'https://www.hokutetsu.co.jp/airport-bus#station_airport' },
 ];
 let currentColor = '#666';
 let data = null;
@@ -272,10 +280,16 @@ function updateMeta() {
   if (!data) return;
   var vf = data.meta.valid_from;
   var vu = data.meta.valid_until;
-  var metaText = tOperator(data.meta.operator || '');
-  if (vf && vu) metaText += ' — ' + t('timetable.validPeriod') + vf + ' ~ ' + vu;
-  else if (vf) metaText += ' — ' + t('timetable.validRevised') + vf;
-  document.getElementById('meta').textContent = metaText;
+  var metaHtml = '';
+  if (vf && vu) metaHtml = vf + ' ~ ' + vu;
+  else if (vf) metaHtml = vf + ' ~';
+
+  var entry = JSON_FILES.find(function(e) { return e.file === select.value; });
+  if (entry && entry.sourceUrl) {
+    if (metaHtml) metaHtml += ' ';
+    metaHtml += '<a href="' + entry.sourceUrl + '" target="_blank" rel="noopener">' + t('timetable.sourceLink') + '</a>';
+  }
+  document.getElementById('meta').innerHTML = metaHtml;
 }
 
 function switchDay(day, btn) {
@@ -299,7 +313,7 @@ function render() {
     var header = document.createElement('div');
     header.className = 'route-header';
     header.style.background = currentColor;
-    header.textContent = tSegRouteName(route.name) + t('timetable.tripCount', { n: trips.length });
+    header.textContent = tSegRouteName(route.name);
     wrapper.appendChild(header);
 
     if (route.note) {

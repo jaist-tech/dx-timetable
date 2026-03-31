@@ -2,6 +2,7 @@
 
 // Cached multi-route stop entries for current route
 let _multiStops = []; // array of { name, segIdx, stopIdx }
+let _expandedTrips = new Set(); // track which trip indices are expanded
 
 // Route presets: displayed in dropdown with ↔ notation.
 // Selecting a preset sets the forward (rightward) route ID.
@@ -33,6 +34,7 @@ function initSearch() {
       selectedRouteId = sel.value;
       selectedTripIdx = -1;
       _scrollToSelected = true;
+      _expandedTrips.clear();
       if (isMultiRoute(selectedRouteId)) {
         rebuildMultiStopSelects();
         updateMultiTripList();
@@ -233,12 +235,35 @@ function findMultiStopEntry(stopName) {
 function getConnDepTime(conn, fromStopName) {
   const entry = findMultiStopEntry(fromStopName);
   if (!entry) return conn.depTime;
+
+  // If this stop is the last stop of its segment AND there's a next segment
+  // starting at the same station, use the next segment's departure time instead
+  // (e.g., 鶴来駅: shuttle arrival vs ishikawa line departure)
+  const seg = conn.segments[entry.segIdx];
+  if (seg && entry.stopIdx === seg.stops.length - 1 && entry.segIdx < conn.segments.length - 1) {
+    const nextSeg = conn.segments[entry.segIdx + 1];
+    if (nextSeg && nextSeg.stops[0] === fromStopName && nextSeg.trip[0]) {
+      return nextSeg.trip[0];
+    }
+  }
+
   return getConnectionStopTime(conn, entry) || conn.depTime;
 }
 
 function getConnArrTime(conn, toStopName) {
   const entry = findMultiStopEntry(toStopName);
   if (!entry) return conn.arrTime;
+
+  // If this stop is the first stop of its segment AND there's a previous segment
+  // ending at the same station, use the previous segment's arrival time instead
+  const seg = conn.segments[entry.segIdx];
+  if (seg && entry.stopIdx === 0 && entry.segIdx > 0) {
+    const prevSeg = conn.segments[entry.segIdx - 1];
+    if (prevSeg && prevSeg.stops[prevSeg.stops.length - 1] === toStopName && prevSeg.trip[prevSeg.trip.length - 1]) {
+      return prevSeg.trip[prevSeg.trip.length - 1];
+    }
+  }
+
   return getConnectionStopTime(conn, entry) || conn.arrTime;
 }
 
@@ -277,13 +302,7 @@ function updateTripList() {
     }
   }
 
-  // Check if all buses for today are finished
-  const allDone = nextDepIdx < 0;
-
   let html = '';
-  if (allDone) {
-    html += `<div class="no-service-banner">${t('trip.serviceEnded')}</div>`;
-  }
   sched.forEach((trip, i) => {
     const depTime = trip[fromIdx];
     const arrTime = trip[toIdx];
@@ -306,14 +325,16 @@ function updateTripList() {
       countdown = `<span class="trip-countdown" data-dep-min="${depMin}">${t('trip.remaining')}${formatCountdownI18n(depMin - now)}</span>`;
     }
 
+    const isRunning = depMin <= now && now < arrMin;
     const nextBadge = isNext ? `<span class="next-dep-badge">${t('trip.nextDep')}</span>` : '';
+    const runningBadge = isRunning ? `<span class="running-badge">${t('status.running')}</span>` : '';
 
     html += `<div class="${cls}" data-idx="${i}" onclick="selectTrip(${i})">
       <div class="trip-times">
         <span class="trip-dep">${depTime}</span>
         <span class="trip-arrow">&rarr;</span>
         <span class="trip-arr">${arrTime}</span>
-        ${nextBadge}
+        ${nextBadge}${runningBadge}
       </div>
       <div class="trip-meta">
         <span class="trip-duration">${duration}${t('trip.min')}</span>
@@ -321,6 +342,10 @@ function updateTripList() {
       </div>
     </div>`;
   });
+
+  if (nextDepIdx < 0) {
+    html += `<div class="no-service-banner">${t('trip.serviceEnded')}</div>`;
+  }
 
   document.getElementById('trip-list').innerHTML = html;
 
@@ -335,8 +360,6 @@ function updateTripList() {
         }
     });
   }
-  _initialLoad = false;
-
   updateSearchCountdown();
 }
 
@@ -350,7 +373,7 @@ function updateMultiTripList() {
     _multiStops = getMultiRouteStops(selectedRouteId);
   }
 
-  currentConnections = findConnections(selectedRouteId, dayType);
+  currentConnections = findConnections(selectedRouteId, dayType, selectedFromStop, selectedToStop);
 
   const now = nowMin();
 
@@ -383,13 +406,7 @@ function updateMultiTripList() {
     }
   }
 
-  // Check if all buses for today are finished
-  const allDone = nextDepIdx < 0;
-
   let html = '';
-  if (allDone) {
-    html += `<div class="no-service-banner">${t('trip.serviceEnded')}</div>`;
-  }
   currentConnections.forEach((conn, i) => {
     const depTime = getConnDepTime(conn, useFromStop);
     const arrTime = getConnArrTime(conn, useToStop);
@@ -419,7 +436,9 @@ function updateMultiTripList() {
       countdown = `<span class="trip-countdown" data-dep-min="${depMin}">${t('trip.remaining')}${formatCountdownI18n(depMin - now)}</span>`;
     }
 
+    const isRunning = depMin <= now && now < arrMin;
     const nextBadge = isNext ? `<span class="next-dep-badge">${t('trip.nextDep')}</span>` : '';
+    const runningBadge = isRunning ? `<span class="running-badge">${t('status.running')}</span>` : '';
 
     // Build segment detail lines (visible when selected)
     // Filter to only show segments/stops between selected from/to
@@ -449,7 +468,6 @@ function updateMultiTripList() {
       const vDepTime = seg.trip[vFirst] || seg.depTime;
       const vArrName = seg.stops[vLast];
       const vArrTime = seg.trip[vLast] || seg.arrTime;
-      const segDur = timeToMin(vArrTime) - timeToMin(vDepTime);
       const isZeroDuration = vFirst === vLast;
 
       // Zero-duration segment at the end: previous transfer already showed this stop
@@ -482,9 +500,10 @@ function updateMultiTripList() {
             detailHtml += `<span class="seg-stop-time">${nextSeg.depTime} ${t('trip.dep')}</span>`;
             detailHtml += `</div>`;
           } else {
+            detailHtml += `<div class="seg-transfer walk">${t('trip.waitTransfer', { n: tr.waitMin })}</div>`;
             detailHtml += `<div class="seg-stop-row">`;
             detailHtml += `<span class="seg-stop-name">${tStop(nextSeg.stops[0])}</span>`;
-            detailHtml += `<span class="seg-stop-time">${nextSeg.depTime} ${t('trip.dep')} <span class="seg-dur">${t('trip.waitTransfer', { n: tr.waitMin })}</span></span>`;
+            detailHtml += `<span class="seg-stop-time">${nextSeg.depTime} ${t('trip.dep')}</span>`;
             detailHtml += `</div>`;
           }
           skipNextDep = true;
@@ -493,15 +512,18 @@ function updateMultiTripList() {
           detailHtml += `<div class="seg-stop-row seg-stop-transfer">`;
           detailHtml += `<span class="seg-stop-name">${tStop(vArrName)}</span>`;
           detailHtml += `<div class="seg-stop-times-col">`;
-          detailHtml += `<span class="seg-stop-time">${vArrTime} ${t('trip.arr')} <span class="seg-dur">${segDur}${t('trip.min')}</span></span>`;
-          detailHtml += `<span class="seg-stop-time">${nextSeg.depTime} ${t('trip.dep')} <span class="seg-dur">${t('trip.waitTransfer', { n: tr.waitMin })}</span></span>`;
+          detailHtml += `<span class="seg-stop-time">${vArrTime} ${t('trip.arr')}</span>`;
           detailHtml += `</div></div>`;
+          detailHtml += `<div class="seg-transfer walk">${t('trip.waitTransfer', { n: tr.waitMin })}</div>`;
+          detailHtml += `<div class="seg-stop-row">`;
+          detailHtml += `<span class="seg-stop-name">${tStop(nextSeg.stops[0])}</span>`;
+          detailHtml += `<span class="seg-stop-time">${nextSeg.depTime} ${t('trip.dep')}</span>`;
+          detailHtml += `</div>`;
           skipNextDep = true;
         } else {
           detailHtml += `<div class="seg-stop-row">`;
           detailHtml += `<span class="seg-stop-name">${tStop(vArrName)}</span>`;
           detailHtml += `<span class="seg-stop-time">${vArrTime} ${t('trip.arr')}</span>`;
-          detailHtml += `<span class="seg-dur">${segDur}${t('trip.min')}</span>`;
           detailHtml += `</div>`;
           detailHtml += `<div class="seg-transfer walk">`;
           detailHtml += t('trip.walkTransfer', { n: tr.waitMin });
@@ -517,25 +539,31 @@ function updateMultiTripList() {
         detailHtml += `<div class="seg-stop-row">`;
         detailHtml += `<span class="seg-stop-name">${tStop(vArrName)}</span>`;
         detailHtml += `<span class="seg-stop-time">${vArrTime} ${t('trip.arr')}</span>`;
-        detailHtml += `<span class="seg-dur">${segDur}${t('trip.min')}</span>`;
         detailHtml += `</div>`;
       }
     }
     detailHtml += '</div>';
 
     html += `<div class="${cls}" data-idx="${i}" onclick="selectTrip(${i})">
-      <div class="trip-times">
-        <span class="trip-dep">${depTime}</span>
-        <span class="trip-arrow">&rarr;</span>
-        <span class="trip-arr">${arrTime}</span>
-        ${nextBadge}
+      <div class="trip-header">
+        <div class="trip-header-content">
+          <div class="trip-times">
+            <span class="trip-dep">${depTime}</span>
+            <span class="trip-arrow">&rarr;</span>
+            <span class="trip-arr">${arrTime}</span>
+            ${nextBadge}${runningBadge}
+          </div>
+          <div class="trip-meta">
+            <span class="trip-duration">${totalDuration}${t('trip.min')}</span>
+            ${transferCount > 0 ? `<span class="trip-transfers">${tPlural('trip.transfers', transferCount, { n: transferCount })}</span>` : ''}
+            ${countdown}
+          </div>
+        </div>
+        <button class="trip-expand-btn" onclick="event.stopPropagation();toggleTripExpand(${i})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
       </div>
-      <div class="trip-meta">
-        <span class="trip-duration">${totalDuration}${t('trip.min')}</span>
-        ${transferCount > 0 ? `<span class="trip-transfers">${tPlural('trip.transfers', transferCount, { n: transferCount })}</span>` : ''}
-        ${countdown}
-      </div>
-      ${isSelected ? detailHtml : ''}
+      <div class="trip-segments-wrapper"><div class="trip-segments-inner">${detailHtml}</div></div>
     </div>`;
   });
 
@@ -543,7 +571,17 @@ function updateMultiTripList() {
     html = `<div class="no-results">${t('trip.noResults')}</div>`;
   }
 
+  if (nextDepIdx < 0 && currentConnections.length > 0) {
+    html += `<div class="no-service-banner">${t('trip.serviceEnded')}</div>`;
+  }
+
   document.getElementById('trip-list').innerHTML = html;
+
+  // Restore expanded state after rebuild
+  _expandedTrips.forEach(idx => {
+    const el = document.querySelector(`.trip-item[data-idx="${idx}"]`);
+    if (el) el.classList.add('expanded');
+  });
 
   if (_scrollToSelected) {
     _scrollToSelected = false;
@@ -556,24 +594,28 @@ function updateMultiTripList() {
         }
     });
   }
-  _initialLoad = false;
-
   updateSearchCountdown();
+}
+
+function toggleTripExpand(idx) {
+  const el = document.querySelector(`.trip-item[data-idx="${idx}"]`);
+  if (el) {
+    el.classList.toggle('expanded');
+    if (_expandedTrips.has(idx)) _expandedTrips.delete(idx);
+    else _expandedTrips.add(idx);
+  }
+  selectTrip(idx);
 }
 
 function selectTrip(idx) {
   selectedTripIdx = idx;
-  _expandedSegs = new Set(); // reset expanded state on trip change
+  _expandedSegs = new Set();
 
-  if (isMultiRoute(selectedRouteId)) {
-    updateMultiTripList();
-  } else {
-    document.querySelectorAll('.trip-item').forEach(el => {
-      const elIdx = parseInt(el.dataset.idx);
-      el.classList.toggle('selected', elIdx === idx);
-      if (elIdx === idx) el.classList.remove('past');
-    });
-  }
+  document.querySelectorAll('.trip-item').forEach(el => {
+    const elIdx = parseInt(el.dataset.idx);
+    el.classList.toggle('selected', elIdx === idx);
+    if (elIdx === idx) el.classList.remove('past');
+  });
 
   updateSearchCountdown();
 
@@ -607,15 +649,13 @@ function updateSearchCountdown() {
   if (selectedTripIdx < 0 || !sched[selectedTripIdx]) {
     hero.classList.add('no-bus');
     if (!hasNextDep && sched.length > 0) {
-      document.getElementById('countdown-time').textContent = '';
-      document.getElementById('countdown-route').textContent = t('countdown.serviceEnded');
-      document.getElementById('countdown-depart').textContent = '';
       labelEl.textContent = '';
+      document.getElementById('countdown-time').textContent = t('countdown.serviceEnded');
+      document.getElementById('countdown-depart').textContent = '';
     } else {
-      document.getElementById('countdown-time').textContent = '--:--';
-      document.getElementById('countdown-route').textContent = t('countdown.selectTrip');
-      document.getElementById('countdown-depart').textContent = '';
       labelEl.textContent = '';
+      document.getElementById('countdown-time').textContent = t('countdown.selectTrip');
+      document.getElementById('countdown-depart').textContent = '';
     }
     return;
   }
@@ -628,17 +668,16 @@ function updateSearchCountdown() {
   const nowS = nowSec();
   const depSec = timeToMin(depTime) * 60;
 
-  document.getElementById('countdown-route').textContent = tRouteDisplay(selectedRouteId, route.short_name, route.name);
   document.getElementById('countdown-depart').textContent = `${depTime} ${t('trip.dep')} → ${arrTime} ${t('trip.arr')}`;
 
   if (nowS < depSec) {
     hero.classList.remove('no-bus');
     labelEl.textContent = t('countdown.until');
-    document.getElementById('countdown-time').textContent = formatCountdownSec(depSec - nowS);
+    document.getElementById('countdown-time').innerHTML = formatCountdownSecHtml(depSec - nowS);
   } else {
     hero.classList.add('no-bus');
-    labelEl.textContent = t('countdown.departed');
-    document.getElementById('countdown-time').textContent = depTime + ' ' + t('trip.dep');
+    labelEl.textContent = '';
+    document.getElementById('countdown-time').textContent = t('countdown.departed');
   }
 
   updateTripCountdowns();
@@ -662,15 +701,13 @@ function updateMultiSearchCountdown() {
   if (!mr || selectedTripIdx < 0 || selectedTripIdx >= currentConnections.length) {
     hero.classList.add('no-bus');
     if (mr && !hasNextConn && currentConnections.length > 0) {
-      document.getElementById('countdown-time').textContent = '';
-      document.getElementById('countdown-route').textContent = t('countdown.serviceEnded');
-      document.getElementById('countdown-depart').textContent = '';
       labelEl.textContent = '';
+      document.getElementById('countdown-time').textContent = t('countdown.serviceEnded');
+      document.getElementById('countdown-depart').textContent = '';
     } else {
-      document.getElementById('countdown-time').textContent = '--:--';
-      document.getElementById('countdown-route').textContent = t('countdown.selectTrip');
-      document.getElementById('countdown-depart').textContent = '';
       labelEl.textContent = '';
+      document.getElementById('countdown-time').textContent = t('countdown.selectTrip');
+      document.getElementById('countdown-depart').textContent = '';
     }
     return;
   }
@@ -685,20 +722,19 @@ function updateMultiSearchCountdown() {
   const fromE = findMultiStopEntry(selectedFromStop);
   const toE = findMultiStopEntry(selectedToStop);
   const userTransfers = (fromE && toE) ? Math.max(0, toE.segIdx - fromE.segIdx) : conn.segments.length - 1;
-  const transferInfo = userTransfers > 0 ? `(${tPlural('trip.transfers', userTransfers, { n: userTransfers })})` : '';
+  const transferInfo = userTransfers > 0 ? ` (${tPlural('trip.transfers', userTransfers, { n: userTransfers })})` : '';
 
-  document.getElementById('countdown-route').textContent = tRouteDisplay(selectedRouteId, mr.short_name, mr.name);
   document.getElementById('countdown-depart').textContent =
     `${depTime} ${t('trip.dep')} → ${arrTime} ${t('trip.arr')}${transferInfo}`;
 
   if (nowS < depSec) {
     hero.classList.remove('no-bus');
     labelEl.textContent = t('countdown.until');
-    document.getElementById('countdown-time').textContent = formatCountdownSec(depSec - nowS);
+    document.getElementById('countdown-time').innerHTML = formatCountdownSecHtml(depSec - nowS);
   } else {
     hero.classList.add('no-bus');
-    labelEl.textContent = t('countdown.departed');
-    document.getElementById('countdown-time').textContent = depTime + ' ' + t('trip.dep');
+    labelEl.textContent = '';
+    document.getElementById('countdown-time').textContent = t('countdown.departed');
   }
 
   updateTripCountdowns();

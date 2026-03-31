@@ -1,7 +1,6 @@
 /* ===== Status Tab ===== */
 
 .status-header-card{text-align:center;margin-bottom:12px}
-.status-route-name{font-size:0.95rem;font-weight:600;color:var(--text-secondary)}
 .status-trip-info{font-size:1.2rem;font-weight:700;margin:4px 0;font-variant-numeric:tabular-nums}
 .status-badge{
   display:inline-block;
@@ -13,6 +12,7 @@
 }
 .status-badge.before{background:var(--text-light)}
 .status-badge.running{background:var(--primary)}
+[data-theme="dark"] .status-badge.running{background:#1976D2}
 .status-badge.arrived{background:#78909C}
 
 /* Timeline */
@@ -115,6 +115,7 @@
   color:#E65100;
   margin-top:2px;
 }
+[data-theme="dark"] .timeline-transfer-text{color:#FFB74D}
 
 /* Collapsible intermediate stops */
 .timeline-expand-row{

@@ -8,7 +8,7 @@
   "routes": [
     {
       "id": "tsurugi_outbound",
-      "name": "鶴来線（大学 → 鶴来駅）",
+      "name": "JAISTシャトル 鶴来線（大学 → 鶴来駅）",
       "short_name": "鶴来線 下り",
       "color": "#4CAF50",
       "stops": [
@@ -420,7 +420,7 @@
     },
     {
       "id": "tsurugi_inbound",
-      "name": "鶴来線（鶴来駅 → 大学）",
+      "name": "JAISTシャトル 鶴来線（鶴来駅 → 大学）",
       "short_name": "鶴来線 上り",
       "color": "#2196F3",
       "stops": [

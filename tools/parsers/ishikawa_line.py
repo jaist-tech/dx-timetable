@@ -156,7 +156,7 @@ def extract_ishikawa_line(weekday_pdf, weekend_pdf):
     routes = [
         {
             "id": "ishikawa_upbound",
-            "name": "石川線（鶴来 → 野町）",
+            "name": "北陸鉄道 石川線（鶴来 → 野町）",
             "short_name": "石川線 上り",
             "color": "#7B1FA2",
             "stops": upbound_stops,
@@ -164,7 +164,7 @@ def extract_ishikawa_line(weekday_pdf, weekend_pdf):
         },
         {
             "id": "ishikawa_downbound",
-            "name": "石川線（野町 → 鶴来）",
+            "name": "北陸鉄道 石川線（野町 → 鶴来）",
             "short_name": "石川線 下り",
             "color": "#00796B",
             "stops": downbound_stops,

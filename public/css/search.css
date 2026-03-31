@@ -1,7 +1,7 @@
 /* ===== Search Tab ===== */
 
 /* Controls */
-.search-controls{margin-bottom:12px}
+.search-controls{margin-bottom:8px;flex-shrink:0}
 .search-field{margin-bottom:10px}
 .search-field:last-child{margin-bottom:0}
 .search-field label{
@@ -9,7 +9,8 @@
   color:var(--text-secondary);
   display:block;margin-bottom:4px;
 }
-.search-field select{
+.search-field select,
+.search-field-half select{
   width:100%;padding:10px 12px;
   border:1px solid var(--border);
   border-radius:var(--radius-sm);
@@ -25,6 +26,9 @@
   max-width:100%;
   overflow:hidden;
   text-overflow:ellipsis;
+}
+[data-theme="dark"] .search-controls select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239E9E9E' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
 }
 .search-stops-row{
   display:flex;
@@ -55,36 +59,45 @@
   background:linear-gradient(135deg,var(--primary),var(--primary-light));
   color:#fff;
   border-radius:var(--radius);
-  padding:16px;
-  margin-bottom:12px;
-  text-align:center;
+  padding:12px 16px;
+  margin-bottom:8px;
+  flex-shrink:0;
+  height:80px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  overflow:hidden;
 }
-.countdown-hero .label{font-size:0.88rem;opacity:0.9;margin-bottom:2px}
-.countdown-hero .time-big{font-size:2.6rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2}
-.countdown-hero .route-name{font-size:0.9rem;margin-top:4px;opacity:0.9}
-.countdown-hero .depart-info{font-size:0.82rem;margin-top:2px;opacity:0.7}
+.countdown-row{display:flex;align-items:baseline;gap:10px;justify-content:center}
+.countdown-hero .label{font-size:0.85rem;opacity:0.85;white-space:nowrap;flex-shrink:0}
+.countdown-hero .time-big{font-size:1.8rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2}
+.countdown-hero .depart-info{font-size:0.78rem;opacity:0.7;text-align:center}
+.countdown-unit{font-size:0.55em;font-weight:500;opacity:0.85;margin:0 1px}
 .countdown-hero.no-bus{background:linear-gradient(135deg,#546E7A,#78909C)}
+.countdown-hero.no-bus .time-big{font-size:0.9rem;font-weight:600}
 
 /* Trip List */
-.trip-list-card{padding:12px}
-.trip-list-card .card-title{padding:0 4px;margin-bottom:8px}
+.trip-list-card{padding:8px 12px;flex:1;display:flex;flex-direction:column;min-height:0;margin-bottom:0}
 .trip-list{
-  max-height:40vh;
+  flex:1;
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
 }
 .trip-item{
   display:flex;
-  align-items:center;
-  justify-content:space-between;
+  flex-direction:column;
+  align-items:stretch;
   padding:8px 12px;
   border-radius:var(--radius-sm);
   margin-bottom:2px;
   cursor:pointer;
   transition:background 0.15s;
-  border:2px solid transparent;
+  border:2px solid var(--border);
 }
+.trip-item > .trip-times{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.trip-item > .trip-meta{display:flex;align-items:center;gap:10px}
 .trip-item:active{background:#F0F0F0}
+[data-theme="dark"] .trip-item:active{background:#333}
 .trip-item.selected{
   border-color:var(--primary);
   background:#F3F7FD;
@@ -94,43 +107,64 @@
 .trip-item.next-dep{border:2px solid var(--text)}
 .next-dep-badge{
   font-size:0.75rem;font-weight:700;
-  color:var(--text);
-  border:1px solid var(--text);
+  color:#43A047;
+  border:1px solid #43A047;
   border-radius:3px;
   padding:1px 5px;
   margin-left:6px;
   white-space:nowrap;
 }
+[data-theme="dark"] .next-dep-badge{color:#66BB6A;border-color:#66BB6A}
 .trip-times{display:flex;align-items:center;gap:8px}
 .trip-dep,.trip-arr{font-size:1.15rem;font-weight:700;font-variant-numeric:tabular-nums}
 .trip-arrow{color:var(--text-light);font-size:0.9rem}
-.trip-meta{text-align:right}
-.trip-duration{font-size:0.85rem;color:var(--text-secondary);display:block}
-.trip-transfers{font-size:0.8rem;color:#E65100;font-weight:600;display:block}
+.trip-meta{text-align:left}
+.trip-duration{font-size:0.85rem;color:var(--text-secondary)}
+.trip-transfers{font-size:0.8rem;color:#E65100;font-weight:600}
+[data-theme="dark"] .trip-transfers{color:#FFB74D}
 .trip-countdown{font-size:0.82rem;color:var(--primary);font-weight:600}
+.running-badge{
+  font-size:0.7rem;font-weight:600;
+  color:#1565C0;
+  border:1px solid #1565C0;
+  border-radius:3px;
+  padding:1px 5px;
+  margin-left:6px;
+  white-space:nowrap;
+}
+[data-theme="dark"] .running-badge{color:#64B5F6;border-color:#64B5F6}
 
 /* Multi-route trip items */
-.trip-item.multi-trip{
-  flex-direction:column;
-  align-items:stretch;
-}
-.trip-item.multi-trip > .trip-times,
-.trip-item.multi-trip > .trip-meta{
+.trip-item.multi-trip > .trip-header{
   display:flex;
-  align-items:center;
+  align-items:flex-start;
+  gap:4px;
 }
-.trip-item.multi-trip > .trip-times{
-  gap:8px;
-  margin-bottom:2px;
+.trip-header-content{flex:1;min-width:0}
+.trip-expand-btn{
+  background:none;border:none;cursor:pointer;
+  color:var(--text-light);
+  padding:8px;
+  flex-shrink:0;
+  transition:transform 0.25s;
+  display:flex;align-items:center;justify-content:center;
+  align-self:center;
 }
-.trip-item.multi-trip > .trip-meta{
-  gap:10px;
-  justify-content:flex-start;
-}
-.trip-item.multi-trip .trip-duration,
-.trip-item.multi-trip .trip-transfers{display:inline}
+.trip-expand-btn svg{width:22px;height:22px}
+.trip-item.expanded .trip-expand-btn{transform:rotate(180deg)}
 
 /* Segment details */
+.trip-segments-wrapper{
+  display:grid;
+  grid-template-rows:0fr;
+  transition:grid-template-rows 0.25s ease;
+}
+.trip-item.expanded .trip-segments-wrapper{
+  grid-template-rows:1fr;
+}
+.trip-segments-inner{
+  overflow:hidden;
+}
 .trip-segments{
   margin-top:10px;
   padding-top:10px;
@@ -161,22 +195,13 @@
   flex-direction:column;
   gap:1px;
 }
-.seg-dur{
-  color:var(--text-light);
-  font-size:0.8rem;
-  margin-left:auto;
-  white-space:nowrap;
-}
-.seg-stop-times-col .seg-dur{
-  margin-left:6px;
-  display:inline;
-}
 .seg-transfer{
   padding:3px 0 3px 12px;
   font-size:0.8rem;
   color:var(--text-secondary);
 }
 .seg-transfer.walk{color:#E65100}
+[data-theme="dark"] .seg-transfer.walk{color:#FFB74D}
 
 /* ===== End of Service Banner ===== */
 .no-service-banner{
@@ -189,4 +214,9 @@
   color:#E65100;
   font-size:0.92rem;
   font-weight:600;
+}
+[data-theme="dark"] .no-service-banner{
+  background:#332B00;
+  border-color:#665500;
+  color:#FFB300;
 }

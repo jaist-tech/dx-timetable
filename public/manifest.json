@@ -1,6 +1,6 @@
 {
-  "name": "JAISTバス案内",
-  "short_name": "バス案内",
+  "name": "JAISTのりかえ",
+  "short_name": "のりかえ",
   "start_url": "/dx-timetable/",
   "scope": "/dx-timetable/",
   "display": "standalone",

@@ -32,8 +32,6 @@ function getBusIconUrl(routeId) {
   return 'img/bus_green.png';
 }
 
-const BUS_ICON_URL = 'img/bus_green.png'; // fallback
-
 // ===== GeoJSON Loading =====
 
 async function loadGeoData() {
@@ -90,44 +88,6 @@ function parseGeoJSON(segId, geojson) {
     }));
 
   // Compute fraction of each stop along the line
-  if (ROUTE_LINES[segId] && STOP_POINTS[segId].length > 0) {
-    computeStopFractions(segId);
-  }
-}
-
-function parseGeoJSONMapped(segId, geojson, fromStop, toStop) {
-  const lineFeature = geojson.features.find(f => f.geometry.type === 'LineString');
-  const pointFeatures = geojson.features.filter(f => f.geometry.type === 'Point');
-
-  // Sort all points by id
-  const allStops = pointFeatures
-    .sort((a, b) => (a.id || 0) - (b.id || 0))
-    .map(f => ({
-      name: f.properties.name,
-      latlng: [f.geometry.coordinates[1], f.geometry.coordinates[0]]
-    }));
-
-  // Find from/to indices in the full stop list
-  const fromIdx = allStops.findIndex(s => s.name === fromStop);
-  const toIdx = allStops.findIndex(s => s.name === toStop);
-  if (fromIdx < 0 || toIdx < 0) return;
-
-  const startIdx = Math.min(fromIdx, toIdx);
-  const endIdx = Math.max(fromIdx, toIdx);
-  STOP_POINTS[segId] = allStops.slice(startIdx, endIdx + 1);
-
-  // Clip LineString to the portion between from/to stops
-  if (lineFeature) {
-    const fullLine = lineFeature.geometry.coordinates.map(c => [c[1], c[0]]);
-    const fromProj = projectPointOnLine(STOP_POINTS[segId][0].latlng, fullLine);
-    const toProj = projectPointOnLine(STOP_POINTS[segId][STOP_POINTS[segId].length - 1].latlng, fullLine);
-
-    const startFrac = Math.min(fromProj.fraction, toProj.fraction);
-    const endFrac = Math.max(fromProj.fraction, toProj.fraction);
-
-    ROUTE_LINES[segId] = clipLine(fullLine, startFrac, endFrac);
-  }
-
   if (ROUTE_LINES[segId] && STOP_POINTS[segId].length > 0) {
     computeStopFractions(segId);
   }

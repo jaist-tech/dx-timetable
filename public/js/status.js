@@ -43,7 +43,6 @@ function updateStatus() {
   }
 
   header.innerHTML = `
-    <div class="status-route-name">${tRouteName(selectedRouteId, route.name)}</div>
     <div class="status-trip-info">${depTime} ${t('trip.dep')} → ${arrTime} ${t('trip.arr')}</div>
     <span class="status-badge ${statusClass}">${statusText}</span>
   `;
@@ -133,7 +132,7 @@ function updateMultiStatus(header, timeline) {
     statusText = t('status.before');
     statusClass = 'before';
   } else if (now <= userArrMin) {
-    statusText = t('status.moving');
+    statusText = t('status.running');
     statusClass = 'running';
   } else {
     statusText = t('status.arrived');
@@ -142,7 +141,6 @@ function updateMultiStatus(header, timeline) {
 
   const transferInfo = userTransferCount > 0 ? `(${tPlural('trip.transfers', userTransferCount, { n: userTransferCount })})` : '';
   header.innerHTML = `
-    <div class="status-route-name">${tRouteName(selectedRouteId, mr.name)}</div>
     <div class="status-trip-info">${userDepTime} ${t('trip.dep')} → ${userArrTime} ${t('trip.arr')}${transferInfo}</div>
     <span class="status-badge ${statusClass}">${statusText}</span>
   `;
@@ -174,7 +172,8 @@ function updateMultiStatus(header, timeline) {
   let timelineHtml = '';
   for (let si = visSeg0; si <= visSeg1; si++) {
     const seg = conn.segments[si];
-    const segLabel = seg.type === 'train' ? t('status.train') : t('status.bus');
+    const segMeta = SEGMENTS[seg.segmentId] && SEGMENTS[seg.segmentId].meta;
+    const segLabel = segMeta ? tOperator(segMeta.operator) : (seg.type === 'train' ? t('status.train') : t('status.bus'));
     const isLastVisibleSeg = si === visSeg1;
 
     // Visible stop range within this segment

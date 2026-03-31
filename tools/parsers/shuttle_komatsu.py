@@ -83,7 +83,7 @@ def extract_komatsu_data(pdf_path):
     routes = [
         {
             "id": "komatsu_outbound",
-            "name": "小松線（大学 → 小松駅）",
+            "name": "JAISTシャトル 小松線（大学 → 小松駅）",
             "short_name": "小松線 下り",
             "color": "#FF9800",
             "note": note_text,
@@ -92,7 +92,7 @@ def extract_komatsu_data(pdf_path):
         },
         {
             "id": "komatsu_inbound",
-            "name": "小松線（小松駅 → 大学）",
+            "name": "JAISTシャトル 小松線（小松駅 → 大学）",
             "short_name": "小松線 上り",
             "color": "#E91E63",
             "note": note_text,

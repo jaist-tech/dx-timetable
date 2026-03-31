@@ -3,12 +3,10 @@
 const TRANSLATIONS = {
   ja: {
     // Header
-    'app.title': 'JAISTバス案内',
+    'app.title': 'JAISTのりかえ',
     'header.about': 'このアプリについて',
     'header.themeToggle': 'テーマ切替',
     'header.back': '戻る',
-    'header.weekday': '平日',
-    'header.weekend': '土日祝',
     'header.dow.0': '日',
     'header.dow.1': '月',
     'header.dow.2': '火',
@@ -18,22 +16,19 @@ const TRANSLATIONS = {
     'header.dow.6': '土',
 
     // Search controls
-    'search.route': 'ルート',
     'search.from': '出発',
     'search.to': '到着',
     'search.swap': '入れ替え',
-    'search.timeOptions': '時刻候補',
-    'search.loading': '読み込み中...',
 
     // Countdown
     'countdown.until': '出発まで',
     'countdown.departed': '出発済',
     'countdown.selectTrip': '便を選択してください',
-    'countdown.serviceEnded': '本日の便は終了しました',
+    'countdown.serviceEnded': '本日はすべて出発済み',
 
     // Trip list
     'trip.noResults': '条件に合う便がありません',
-    'trip.serviceEnded': '本日の便は終了しました',
+    'trip.serviceEnded': '本日はすべて出発済み',
     'trip.nextDep': '次発',
     'trip.dep': '発',
     'trip.arr': '着',
@@ -42,17 +37,19 @@ const TRANSLATIONS = {
     'trip.transfers': '乗換${n}回',
     'trip.transfers.1': '乗換${n}回',
     'trip.walkTransfer': '徒歩（乗換${n}分）',
-    'trip.waitTransfer': '${n}分待',
+    'trip.waitTransfer': '乗換${n}分',
 
     // Time format
     'time.hourMin': '${h}時間${m}分',
     'time.min': '${m}分',
+    'time.h': '時間',
+    'time.m': '分',
+    'time.s': '秒',
 
     // Status
     'status.before': '出発前',
     'status.running': '運行中',
     'status.arrived': '到着済',
-    'status.moving': '移動中',
     'status.boarding': '乗車',
     'status.alighting': '降車',
     'status.train': '電車',
@@ -82,9 +79,8 @@ const TRANSLATIONS = {
     'route.jaist_komatsu_airport': 'JAIST↔小松駅↔小松空港',
 
     // About page
-    'about.title': 'このアプリについて - JAISTバス案内',
-    'about.heading': 'このアプリについて',
-    'about.appName': 'JAISTバス案内 (BusDX)',
+    'about.title': 'このアプリについて - JAISTのりかえ',
+    'about.appName': 'JAISTのりかえ',
     'about.appVersion': '2026年4月版ダイヤ準拠',
     'about.aboutHeading': 'このアプリについて',
     'about.aboutText': 'JAISTと周辺地域を結ぶ交通手段の時刻表・乗換案内アプリです。以下の路線に対応しています。',
@@ -104,8 +100,9 @@ const TRANSLATIONS = {
     'about.disclaimer.3': '時刻表データは自動抽出により生成しているため、誤りが含まれる可能性があります。内容の正確性・最新性を保証するものではありません。',
     'about.disclaimer.4': '小松空港→小松駅の発車時刻は、航空便到着の約15分後・所要約12分として算出した推定値です。実際の発車時刻は航空便の到着状況により変動します。',
     'about.disclaimer.5': 'マップ上に表示される運行ルート（経路線）およびバス停・駅の位置情報は、実際の位置を推測して作成したものであり、正確な位置を保証するものではありません。',
-    'about.disclaimer.6': '本アプリの利用により生じたいかなる損害（乗り遅れ等を含む）についても、開発者は責任を負いかねます。',
-    'about.disclaimer.7': '正確な運行情報については、各交通機関の公式サイトにてご確認ください。',
+    'about.disclaimer.6': '乗換検索ではすべての乗換時間を一律5分として計算しています。そのため、他の乗換案内サービスで表示される経路が本アプリでは表示されない場合があります。実際の乗換には余裕をもって移動することをお勧めします。',
+    'about.disclaimer.7': '本アプリの利用により生じたいかなる損害（乗り遅れ等を含む）についても、開発者は責任を負いかねます。',
+    'about.disclaimer.8': '正確な運行情報については、各交通機関の公式サイトにてご確認ください。',
     'about.timetableHeading': '時刻表を確認する',
     'about.timetableText': '本アプリで使用している全路線の時刻表データを一覧で確認できます。',
     'about.timetableLink': '時刻表一覧ページを開く',
@@ -123,19 +120,16 @@ const TRANSLATIONS = {
     'about.devHeading': '開発',
 
     // Timetable page
-    'timetable.title': '時刻表一覧 - JAISTバス案内',
-    'timetable.heading': '時刻表一覧',
+    'timetable.title': '時刻表一覧 - JAISTのりかえ',
     'timetable.selectRoute': '-- 路線を選択 --',
     'timetable.weekday': '平日',
     'timetable.weekend': '土日祝',
     'timetable.loading': '読み込み中...',
     'timetable.loadError': '読み込みに失敗しました: ',
     'timetable.selectPrompt': '路線を選択してください',
+    'timetable.sourceLink': '公式時刻表を確認',
     'timetable.stopHeader': 'バス停/駅',
     'timetable.tripNum': '${n}便',
-    'timetable.tripCount': '（${n}便）',
-    'timetable.validPeriod': '有効期間: ',
-    'timetable.validRevised': '改正～',
     'timetable.route.shuttle_tsurugi': 'JAISTシャトル 鶴来線',
     'timetable.route.shuttle_komatsu': 'JAISTシャトル 小松線',
     'timetable.route.ishikawa_line': '北陸鉄道 石川線',
@@ -145,12 +139,10 @@ const TRANSLATIONS = {
 
   en: {
     // Header
-    'app.title': 'JAIST Bus Guide',
+    'app.title': 'JAIST Norikae',
     'header.about': 'About this app',
     'header.themeToggle': 'Toggle theme',
     'header.back': 'Back',
-    'header.weekday': 'Weekday',
-    'header.weekend': 'Weekend',
     'header.dow.0': 'Sun.',
     'header.dow.1': 'Mon.',
     'header.dow.2': 'Tue.',
@@ -160,22 +152,18 @@ const TRANSLATIONS = {
     'header.dow.6': 'Sat.',
 
     // Search controls
-    'search.route': 'Route',
     'search.from': 'From',
     'search.to': 'To',
     'search.swap': 'Swap',
-    'search.timeOptions': 'Timetable',
-    'search.loading': 'Loading...',
-
     // Countdown
     'countdown.until': 'Departs in',
     'countdown.departed': 'Departed',
     'countdown.selectTrip': 'Select a trip',
-    'countdown.serviceEnded': 'No more trips today',
+    'countdown.serviceEnded': 'All departed for today',
 
     // Trip list
     'trip.noResults': 'No matching trips',
-    'trip.serviceEnded': 'No more trips today',
+    'trip.serviceEnded': 'All departed for today',
     'trip.nextDep': 'Next',
     'trip.dep': 'dep',
     'trip.arr': 'arr',
@@ -184,17 +172,19 @@ const TRANSLATIONS = {
     'trip.transfers': '${n} transfers',
     'trip.transfers.1': '1 transfer',
     'trip.walkTransfer': 'Walk (${n} min)',
-    'trip.waitTransfer': '${n} min wait',
+    'trip.waitTransfer': 'Transfer ${n} min',
 
     // Time format
     'time.hourMin': '${h}h ${m}min',
     'time.min': '${m}min',
+    'time.h': 'h',
+    'time.m': 'm',
+    'time.s': 's',
 
     // Status
     'status.before': 'Before dep.',
     'status.running': 'Running',
     'status.arrived': 'Arrived',
-    'status.moving': 'In transit',
     'status.boarding': 'Board',
     'status.alighting': 'Alight',
     'status.train': 'Train',
@@ -224,9 +214,8 @@ const TRANSLATIONS = {
     'route.jaist_komatsu_airport': 'JAIST↔Komatsu↔Airport',
 
     // About page
-    'about.title': 'About - JAIST Bus Guide',
-    'about.heading': 'About',
-    'about.appName': 'JAIST Bus Guide (BusDX)',
+    'about.title': 'About - JAIST Norikae',
+    'about.appName': 'JAIST Norikae',
     'about.appVersion': 'Based on April 2026 timetable',
     'about.aboutHeading': 'About This App',
     'about.aboutText': 'A timetable and transfer guide app for transportation connecting JAIST and surrounding areas. The following lines are supported:',
@@ -246,8 +235,9 @@ const TRANSLATIONS = {
     'about.disclaimer.3': 'Timetable data is generated by automatic extraction and may contain errors. Accuracy and currency of the content are not guaranteed.',
     'about.disclaimer.4': 'Departure times from Komatsu Airport to Komatsu Station are estimated values calculated as approximately 15 minutes after flight arrival with approximately 12 minutes travel time. Actual departure times vary depending on flight arrival status.',
     'about.disclaimer.5': 'Routes and stop/station positions displayed on the map are created based on estimates and do not guarantee actual positions.',
-    'about.disclaimer.6': 'The developers assume no responsibility for any damages (including missed connections) arising from use of this app.',
-    'about.disclaimer.7': 'Please check the official websites of each transportation operator for accurate service information.',
+    'about.disclaimer.6': 'Transfer searches assume a uniform 5-minute transfer time for all connections. As a result, some routes shown by other transit apps may not appear in this app. We recommend allowing extra time when transferring.',
+    'about.disclaimer.7': 'The developers assume no responsibility for any damages (including missed connections) arising from use of this app.',
+    'about.disclaimer.8': 'Please check the official websites of each transportation operator for accurate service information.',
     'about.timetableHeading': 'View Timetables',
     'about.timetableText': 'View timetable data for all routes used in this app.',
     'about.timetableLink': 'Open timetable page',
@@ -265,19 +255,16 @@ const TRANSLATIONS = {
     'about.devHeading': 'Development',
 
     // Timetable page
-    'timetable.title': 'Timetable - JAIST Bus Guide',
-    'timetable.heading': 'Timetable',
+    'timetable.title': 'Timetable - JAIST Norikae',
     'timetable.selectRoute': '-- Select a route --',
     'timetable.weekday': 'Weekday',
     'timetable.weekend': 'Weekend',
     'timetable.loading': 'Loading...',
     'timetable.loadError': 'Failed to load: ',
     'timetable.selectPrompt': 'Select a route',
+    'timetable.sourceLink': 'View official timetable',
     'timetable.stopHeader': 'Stop / Station',
     'timetable.tripNum': '#${n}',
-    'timetable.tripCount': ' (${n} trips)',
-    'timetable.validPeriod': 'Valid: ',
-    'timetable.validRevised': 'Revised: ',
     'timetable.route.shuttle_tsurugi': 'JAIST Shuttle Tsurugi Line',
     'timetable.route.shuttle_komatsu': 'JAIST Shuttle Komatsu Line',
     'timetable.route.ishikawa_line': 'Hokuriku Railway Ishikawa Line',
@@ -347,10 +334,10 @@ function tStop(name) {
 
 // Route name translations (ja -> en) keyed by route id
 const ROUTE_NAMES_EN = {
-  'tsurugi_outbound':        { name: 'Tsurugi Line (JAIST → Tsurugi Sta.)', short_name: 'Tsurugi Line outbound' },
-  'tsurugi_inbound':         { name: 'Tsurugi Line (Tsurugi Sta. → JAIST)', short_name: 'Tsurugi Line inbound' },
-  'komatsu_outbound':        { name: 'Komatsu Line (JAIST → Komatsu Sta.)', short_name: 'Komatsu Line outbound' },
-  'komatsu_inbound':         { name: 'Komatsu Line (Komatsu Sta. → JAIST)', short_name: 'Komatsu Line inbound' },
+  'tsurugi_outbound':        { name: 'JAIST Shuttle Tsurugi Line (JAIST → Tsurugi Sta.)', short_name: 'Tsurugi Line outbound' },
+  'tsurugi_inbound':         { name: 'JAIST Shuttle Tsurugi Line (Tsurugi Sta. → JAIST)', short_name: 'Tsurugi Line inbound' },
+  'komatsu_outbound':        { name: 'JAIST Shuttle Komatsu Line (JAIST → Komatsu Sta.)', short_name: 'Komatsu Line outbound' },
+  'komatsu_inbound':         { name: 'JAIST Shuttle Komatsu Line (Komatsu Sta. → JAIST)', short_name: 'Komatsu Line inbound' },
   'jaist_komatsu_kanazawa':  { name: 'JAIST → Komatsu Sta. → Kanazawa Sta.', short_name: 'JAIST → Komatsu → Kanazawa' },
   'kanazawa_komatsu_jaist':  { name: 'Kanazawa Sta. → Komatsu Sta. → JAIST', short_name: 'Kanazawa → Komatsu → JAIST' },
   'jaist_tsurugi_kanazawa':  { name: 'JAIST → Tsurugi Sta. → Kanazawa Sta.', short_name: 'JAIST → Tsurugi → Kanazawa' },
@@ -359,24 +346,14 @@ const ROUTE_NAMES_EN = {
   'airport_komatsu_jaist':   { name: 'Komatsu Airport → Komatsu Sta. → JAIST', short_name: 'Airport → Komatsu → JAIST' },
 };
 
-/** Translate a route name/short_name by route id */
-function tRouteName(routeId, jaName) {
-  if (currentLang === 'ja') return jaName;
-  const en = ROUTE_NAMES_EN[routeId];
-  if (!en) return jaName;
-  // Match by checking if jaName is closer to short_name or name
-  // If jaName matches the route's short_name, return English short_name; otherwise name
-  return jaName.length < 15 ? en.short_name : en.name;
-}
-
 // Segment route name translations (from segment JSON route.name)
 const SEG_ROUTE_NAMES_EN = {
-  '鶴来線（大学 → 鶴来駅）': 'Tsurugi Line (JAIST → Tsurugi Sta.)',
-  '鶴来線（鶴来駅 → 大学）': 'Tsurugi Line (Tsurugi Sta. → JAIST)',
-  '小松線（大学 → 小松駅）': 'Komatsu Line (JAIST → Komatsu Sta.)',
-  '小松線（小松駅 → 大学）': 'Komatsu Line (Komatsu Sta. → JAIST)',
-  '石川線（鶴来 → 野町）': 'Ishikawa Line (Tsurugi → Nomachi)',
-  '石川線（野町 → 鶴来）': 'Ishikawa Line (Nomachi → Tsurugi)',
+  'JAISTシャトル 鶴来線（大学 → 鶴来駅）': 'JAIST Shuttle Tsurugi Line (JAIST → Tsurugi Sta.)',
+  'JAISTシャトル 鶴来線（鶴来駅 → 大学）': 'JAIST Shuttle Tsurugi Line (Tsurugi Sta. → JAIST)',
+  'JAISTシャトル 小松線（大学 → 小松駅）': 'JAIST Shuttle Komatsu Line (JAIST → Komatsu Sta.)',
+  'JAISTシャトル 小松線（小松駅 → 大学）': 'JAIST Shuttle Komatsu Line (Komatsu Sta. → JAIST)',
+  '北陸鉄道 石川線（鶴来 → 野町）': 'Hokuriku Railway Ishikawa Line (Tsurugi → Nomachi)',
+  '北陸鉄道 石川線（野町 → 鶴来）': 'Hokuriku Railway Ishikawa Line (Nomachi → Tsurugi)',
   'IRいしかわ鉄道（大聖寺 → 金沢）': 'IR Ishikawa Railway (Daishoji → Kanazawa)',
   'IRいしかわ鉄道（金沢 → 倶利伽羅）': 'IR Ishikawa Railway (Kanazawa → Kurikara)',
   'IRいしかわ鉄道（倶利伽羅 → 金沢）': 'IR Ishikawa Railway (Kurikara → Kanazawa)',
@@ -387,8 +364,6 @@ const SEG_ROUTE_NAMES_EN = {
 
 // Route note translations (from segment JSON route.note / meta.note)
 const ROUTE_NOTES_EN = {
-  '2026/4/1~4/24 ダイヤ': '2026/4/1–4/24 schedule',
-  '「自動」は自動運転バス（途中バス停通過）': '"Auto" indicates autonomous bus (skips intermediate stops)',
   '航空便到着の約15分後発車。小松駅まで概ね12分。時刻は目安です。': 'Departs approx. 15 min after flight arrival. Approx. 12 min to Komatsu Sta. Times are estimates.',
   '時刻が空欄の箇所は、通過または停車設定なしです。': 'Blank cells indicate the stop is passed through or not served.',
   '小松空港→小松駅の時刻は航空便到着の約15分後発車・約12分運行の推定値です。正確な時刻は元のPDFデータをご確認ください。': 'Komatsu Airport → Komatsu Sta. times are estimates (approx. 15 min after flight arrival, approx. 12 min ride). Please refer to the original PDF for exact times.',

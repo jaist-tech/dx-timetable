@@ -10,7 +10,6 @@ let selectedRouteId = 'komatsu_outbound';
 let selectedFromStop = '';
 let selectedToStop = '';
 let selectedTripIdx = -1;
-let _initialLoad = true;
 let _scrollToSelected = false;
 let _expandedSegs = new Set();
 
@@ -49,13 +48,15 @@ function getDayType() {
   return (d === 0 || d === 6) ? 'weekend' : 'weekday';
 }
 
-function formatCountdownSec(diffSec) {
+function formatCountdownSecHtml(diffSec) {
   if (diffSec < 0) return '--:--';
   const h = Math.floor(diffSec / 3600);
   const m = Math.floor((diffSec % 3600) / 60);
   const s = diffSec % 60;
-  if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  return `${m}:${String(s).padStart(2,'0')}`;
+  const u = '<span class="countdown-unit">';
+  const ue = '</span>';
+  if (h > 0) return `${h}${u}${t('time.h')}${ue}${m}${u}${t('time.m')}${ue}${s}${u}${t('time.s')}${ue}`;
+  return `${m}${u}${t('time.m')}${ue}${s}${u}${t('time.s')}${ue}`;
 }
 
 // ===== Debug Time Simulation =====
@@ -100,12 +101,6 @@ function getTripsForSelectedRoute() {
 
 function getRoute(id) {
   return DATA.routes.find(r => r.id === id);
-}
-
-function getAllStops() {
-  const s = new Set();
-  DATA.routes.forEach(r => r.stops.forEach(st => s.add(st)));
-  return [...s];
 }
 
 function isMultiRoute(routeId) {
@@ -173,7 +168,7 @@ function getSegRefFirstStop(segRef) {
 
 // ===== Multi-route Connection Finder =====
 
-function findConnections(multiRouteId, dt) {
+function findConnections(multiRouteId, dt, fromStop, toStop) {
   const mr = getMultiRoute(multiRouteId);
   if (!mr) return [];
 
@@ -194,6 +189,30 @@ function findConnections(multiRouteId, dt) {
 
   if (segInfos.some(s => !s)) return [];
 
+  // Check if from/to are within a single segment
+  if (fromStop && toStop) {
+    const multiStops = getMultiRouteStops(multiRouteId);
+    const fromEntry = multiStops.find(s => s.name === fromStop);
+    const toEntry = multiStops.find(s => s.name === toStop);
+    if (fromEntry && toEntry) {
+      // Resolve boundary stops: if fromStop is at the end of its segment
+      // and the next segment starts with the same stop, treat as next segment
+      let fromSegIdx = fromEntry.segIdx;
+      let fromStopIdx = fromEntry.stopIdx;
+      const fromSeg = segInfos[fromSegIdx];
+      if (fromSeg && fromStopIdx === fromSeg.stops.length - 1 && fromSegIdx + 1 < segInfos.length) {
+        const nextSeg = segInfos[fromSegIdx + 1];
+        if (nextSeg && nextSeg.firstStop === fromStop) {
+          fromSegIdx = fromSegIdx + 1;
+          fromStopIdx = 0;
+        }
+      }
+      if (fromSegIdx === toEntry.segIdx) {
+        return findSingleSegConnections(segInfos, fromSegIdx, fromStopIdx, toEntry.stopIdx);
+      }
+    }
+  }
+
   const connections = [];
   for (let t = 0; t < segInfos[0].trips.length; t++) {
     const firstTrip = segInfos[0].trips[t];
@@ -201,6 +220,62 @@ function findConnections(multiRouteId, dt) {
 
     const journey = buildJourneyFromFirstTrip(segInfos, firstTrip);
     if (journey) connections.push(journey);
+  }
+
+  return deduplicateConnections(connections);
+}
+
+/** Build connections from a single segment's trips (no cross-segment connection required) */
+function findSingleSegConnections(segInfos, segIdx, fromStopIdx, toStopIdx) {
+  const segInfo = segInfos[segIdx];
+  const connections = [];
+
+  for (let t = 0; t < segInfo.trips.length; t++) {
+    const trip = segInfo.trips[t];
+    const depTime = trip[fromStopIdx];
+    const arrTime = trip[toStopIdx];
+    if (!depTime || !arrTime) continue;
+
+    // Build a connection with all segments but using this specific trip for the target segment
+    const journey = {
+      depTime: trip[0],
+      arrTime: trip[trip.length - 1],
+      segments: segInfos.map((si, idx) => {
+        if (idx === segIdx) {
+          return {
+            segmentId: si.segmentId,
+            type: si.type,
+            stops: si.stops,
+            trip: trip,
+            depTime: trip[0],
+            arrTime: trip[trip.length - 1]
+          };
+        }
+        // For other segments, use a placeholder empty trip
+        const emptyTrip = si.stops.map(() => null);
+        return {
+          segmentId: si.segmentId,
+          type: si.type,
+          stops: si.stops,
+          trip: emptyTrip,
+          depTime: null,
+          arrTime: null
+        };
+      }),
+      transfers: []
+    };
+
+    // Build transfer placeholders
+    for (let i = 0; i < segInfos.length - 1; i++) {
+      journey.transfers.push({
+        fromStation: segInfos[i].lastStop,
+        toStation: segInfos[i + 1].firstStop,
+        isWalk: isWalkTransfer(segInfos[i].lastStop, segInfos[i + 1].firstStop),
+        waitMin: 0
+      });
+    }
+
+    connections.push(journey);
   }
 
   return deduplicateConnections(connections);
@@ -230,11 +305,15 @@ function buildJourneyFromFirstTrip(segInfos, firstTrip) {
     const nextTrip = segInfos[i].trips.find(trip => trip[0] && timeToMin(trip[0]) >= earliestDep);
     if (!nextTrip) return null; // no connection possible
 
+    const waitMin = timeToMin(nextTrip[0]) - arrMin;
+    // Reject connections with unreasonably long waits (e.g., overnight)
+    if (waitMin > 180) return null;
+
     journey.transfers.push({
       fromStation: segInfos[i - 1].lastStop,
       toStation: segInfos[i].firstStop,
       isWalk: isWalkTransfer(segInfos[i - 1].lastStop, segInfos[i].firstStop),
-      waitMin: timeToMin(nextTrip[0]) - arrMin
+      waitMin: waitMin
     });
 
     journey.segments.push({
