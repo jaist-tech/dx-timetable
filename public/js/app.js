@@ -1,7 +1,7 @@
 // ===== Data Loading =====
 async function loadData() {
-  // Load routes config and all segment data
-  await loadRoutesConfig();
+  // Load holidays and routes config
+  await Promise.all([loadHolidays(), loadRoutesConfig()]);
 
   // Build DATA.routes and REVERSE_ROUTES from direct_routes + segments
   DATA = { routes: [] };
@@ -70,6 +70,16 @@ async function loadRoutesConfig() {
   }
 }
 
+async function loadHolidays() {
+  try {
+    const res = await fetch('data/holidays.json');
+    const list = await res.json();
+    _holidaySet = new Set(list);
+  } catch (e) {
+    console.warn('Failed to load holidays:', e);
+  }
+}
+
 // ===== Tab Navigation =====
 function initTabs() {
   document.querySelectorAll('#bottom-nav button').forEach(btn => {
@@ -106,12 +116,27 @@ function updateClock() {
     `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
 }
 
+function checkHolidayData() {
+  const year = new Date().getFullYear();
+  const prefix = year + '-';
+  const hasCurrentYear = [..._holidaySet].some(d => d.startsWith(prefix));
+  if (!hasCurrentYear) {
+    const msg = t('holiday.missing', { year: year });
+    // Show as a dismissible banner at the top
+    const banner = document.createElement('div');
+    banner.className = 'holiday-warning';
+    banner.innerHTML = `<span>${msg}</span><button onclick="this.parentElement.remove()">&times;</button>`;
+    document.querySelector('main').prepend(banner);
+  }
+}
+
 // ===== Initialization =====
 function initApp() {
   initTabs();
   initSearch();
   applyStaticTranslations();
   updateClock();
+  checkHolidayData();
 
   // Real-time updates (every second)
   setInterval(() => {

@@ -4,12 +4,6 @@
   --primary:#1565C0;
   --primary-light:#1E88E5;
   --primary-dark:#0D47A1;
-  --tsurugi:#43A047;
-  --tsurugi-light:#66BB6A;
-  --komatsu:#FB8C00;
-  --komatsu-light:#FFA726;
-  --inbound:#1E88E5;
-  --inbound-light:#42A5F5;
   --bg:#F0F2F5;
   --card:#FFFFFF;
   --text:#1A1A2E;
@@ -23,6 +17,29 @@
   --nav-height:64px;
   --header-height:56px;
 }
+/* Holiday Warning Banner */
+.holiday-warning{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:10px 14px;
+  margin:8px 0;
+  background:#FFF3E0;
+  border-left:3px solid #FF9800;
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+  font-size:0.82rem;
+  font-weight:600;
+  color:#E65100;
+  line-height:1.5;
+}
+.holiday-warning button{
+  background:none;border:none;cursor:pointer;
+  font-size:1.2rem;color:#E65100;flex-shrink:0;
+  padding:0 4px;
+}
+[data-theme="dark"] .holiday-warning{background:#332B00;color:#FFB300;border-left-color:#FFB300}
+[data-theme="dark"] .holiday-warning button{color:#FFB300}
 /* ===== Dark Theme ===== */
 [data-theme="dark"]{
   --primary:#64B5F6;

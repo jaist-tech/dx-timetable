@@ -14,6 +14,8 @@ const TRANSLATIONS = {
     'header.dow.4': '木',
     'header.dow.5': '金',
     'header.dow.6': '土',
+    'header.holiday': '祝',
+    'holiday.missing': '${year}年の祝日データが登録されていません。祝日が平日ダイヤで表示される場合があります。',
 
     // Search controls
     'search.from': '出発',
@@ -103,7 +105,7 @@ const TRANSLATIONS = {
     'about.aboutFooter': 'JAISTから金沢駅・小松空港などへの乗換ルートを検索し、次の便や所要時間を確認できます。',
     'about.staticNotice': '本アプリは公式時刻表のデータに基づく静的な情報提供ツールです。リアルタイムの運行状況・位置情報・遅延情報等は反映されません。',
     'about.disclaimerHeading': '免責事項',
-    'about.disclaimer.1': '本アプリはJAISTの公式サービスではありません。学生サークルが独自に開発した非公式の情報提供ツールです。',
+    'about.disclaimer.1': '本アプリはJAISTおよび各交通機関（IRいしかわ鉄道・北陸鉄道等）の公式サービスではありません。学生サークルが独自に開発した非公式の情報提供ツールです。',
     'about.disclaimer.2': '時刻表データや経路情報には誤りが含まれる可能性があります。内容の正確性・最新性を保証するものではありません。',
     'about.disclaimer.3': '本アプリの利用により生じたいかなる損害（乗り遅れ等を含む）についても、開発者は責任を負いかねます。',
     'about.disclaimer.4': '正確な運行情報については、各交通機関の公式サイトにてご確認ください。',
@@ -164,6 +166,8 @@ const TRANSLATIONS = {
     'header.dow.4': 'Thu.',
     'header.dow.5': 'Fri.',
     'header.dow.6': 'Sat.',
+    'header.holiday': 'Hol.',
+    'holiday.missing': 'Holiday data for ${year} is not registered. Holidays may show weekday timetables.',
 
     // Search controls
     'search.from': 'From',
@@ -252,7 +256,7 @@ const TRANSLATIONS = {
     'about.aboutFooter': 'Search transfer routes from JAIST to Kanazawa Station, Komatsu Airport, etc., and check the next departure and travel time.',
     'about.staticNotice': 'This app is a static information tool based on official timetable data. Real-time service status, vehicle locations, and delay information are not reflected.',
     'about.disclaimerHeading': 'Disclaimer',
-    'about.disclaimer.1': 'This app is not an official JAIST service. It is an unofficial information tool independently developed by a student club.',
+    'about.disclaimer.1': 'This app is not an official service of JAIST or any transportation operator (IR Ishikawa Railway, Hokuriku Railway, etc.). It is an unofficial information tool independently developed by a student club.',
     'about.disclaimer.2': 'Timetable data and route information may contain errors. Accuracy and currency of the content are not guaranteed.',
     'about.disclaimer.3': 'The developers assume no responsibility for any damages (including missed connections) arising from use of this app.',
     'about.disclaimer.4': 'Please check the official websites of each transportation operator for accurate service information.',
@@ -548,7 +552,15 @@ function updateHeaderDate() {
   const dowEl = document.getElementById('header-dow');
 
   if (dateEl) dateEl.textContent = `${m}/${d}`;
-  if (dowEl) dowEl.textContent = `(${t('header.dow.' + dow)})`;
+  if (dowEl) {
+    const dateStr = now.getFullYear() + '-' +
+      String(m).padStart(2, '0') + '-' +
+      String(d).padStart(2, '0');
+    const isHoliday = typeof _holidaySet !== 'undefined' && _holidaySet.has(dateStr);
+    const dowText = t('header.dow.' + dow);
+    dowEl.textContent = isHoliday ? `(${dowText}・${t('header.holiday')})` : `(${dowText})`;
+    dowEl.style.width = isHoliday ? 'auto' : '';
+  }
 }
 
 /** Re-render dynamic content after language change (main page only) */

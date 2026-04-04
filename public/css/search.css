@@ -262,7 +262,8 @@ option.minor-stop{color:var(--text-secondary)}
 }
 .trip-item.past{opacity:0.4}
 .trip-item.past.selected{opacity:1}
-.trip-item.next-dep{border:2px solid var(--text)}
+.trip-item.next-dep{border:2px solid #43A047}
+[data-theme="dark"] .trip-item.next-dep{border-color:#66BB6A}
 .next-dep-badge{
   font-size:0.75rem;font-weight:700;
   color:#43A047;

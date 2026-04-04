@@ -449,6 +449,7 @@ function getBusProgress(routeId, tripIdx) {
   const route = getRoute(routeId);
   if (!route) return null;
   const sched = route.schedules[dayType];
+  if (!sched) return null;
   const trip = sched[tripIdx];
   if (!trip) return null;
 

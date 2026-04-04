@@ -43,9 +43,17 @@ function realNowSec() {
   return n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds();
 }
 
+let _holidaySet = new Set();
+
 function getDayType() {
-  const d = new Date().getDay();
-  return (d === 0 || d === 6) ? 'weekend' : 'weekday';
+  const now = new Date();
+  const d = now.getDay();
+  if (d === 0 || d === 6) return 'weekend';
+  const dateStr = now.getFullYear() + '-' +
+    String(now.getMonth() + 1).padStart(2, '0') + '-' +
+    String(now.getDate()).padStart(2, '0');
+  if (_holidaySet.has(dateStr)) return 'weekend';
+  return 'weekday';
 }
 
 function formatCountdownSecHtml(diffSec) {
@@ -390,9 +398,30 @@ function buildJourneyFromLastTrip(segInfos, lastTrip, startIdx, endIdx) {
 function deduplicateConnections(connections) {
   const seen = new Set();
   return connections.filter(c => {
-    const key = c.segments.map(s => s.depTime + '-' + s.arrTime).join('|');
-    if (seen.has(key)) return false;
-    seen.add(key);
+    // Only use active segments (non-placeholder) for deduplication keys
+    const activeKeys = c.segments
+      .filter(s => s.depTime != null)
+      .map(s => s.depTime + '-' + s.arrTime);
+
+    if (activeKeys.length === 0) return true;
+
+    const fullKey = activeKeys.join('|');
+    if (seen.has(fullKey)) return false;
+
+    // If any prefix or suffix of active segments already seen,
+    // this connection only differs in the remaining segment(s) — redundant
+    if (activeKeys.length > 1) {
+      for (let n = 1; n < activeKeys.length; n++) {
+        if (seen.has('pfx' + n + ':' + activeKeys.slice(0, n).join('|'))) return false;
+        if (seen.has('sfx' + n + ':' + activeKeys.slice(-n).join('|'))) return false;
+      }
+      for (let n = 1; n < activeKeys.length; n++) {
+        seen.add('pfx' + n + ':' + activeKeys.slice(0, n).join('|'));
+        seen.add('sfx' + n + ':' + activeKeys.slice(-n).join('|'));
+      }
+    }
+
+    seen.add(fullKey);
     return true;
   });
 }

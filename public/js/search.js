@@ -212,6 +212,9 @@ function syncControls() {
 }
 
 function swapRoute() {
+  const oldFrom = selectedFromStop;
+  const oldTo = selectedToStop;
+
   // Multi-route swap
   if (isMultiRoute(selectedRouteId)) {
     const mr = getMultiRoute(selectedRouteId);
@@ -219,7 +222,21 @@ function swapRoute() {
       selectedRouteId = mr.reverse_id;
       selectedTripIdx = -1;
       _scrollToSelected = true;
+      _expandedTrips.clear();
       rebuildMultiStopSelects();
+
+      // Restore swapped from/to if they exist in the reversed route
+      const stopNames = _multiStops.map(s => s.name);
+      if (stopNames.includes(oldTo)) {
+        selectedFromStop = oldTo;
+        document.querySelectorAll('.from-select').forEach(sel => sel.value = oldTo);
+        rebuildMultiToSelects();
+        if (stopNames.includes(oldFrom)) {
+          selectedToStop = oldFrom;
+          document.querySelectorAll('.to-select').forEach(sel => sel.value = oldFrom);
+        }
+      }
+
       syncControls();
       updateMultiTripList();
       if (currentTab === 'status') updateStatus();
@@ -231,30 +248,24 @@ function swapRoute() {
   const reverseId = REVERSE_ROUTES[selectedRouteId];
   if (!reverseId) return;
 
-  const oldFrom = selectedFromStop;
-  const oldTo = selectedToStop;
-
   selectedRouteId = reverseId;
+  selectedTripIdx = -1;
+  _scrollToSelected = true;
+  _expandedTrips.clear();
   rebuildStopSelects();
 
   const route = getRoute(reverseId);
   if (route.stops.includes(oldTo)) {
     selectedFromStop = oldTo;
-    document.querySelectorAll('.from-select').forEach(sel => {
-      sel.value = oldTo;
-    });
+    document.querySelectorAll('.from-select').forEach(sel => sel.value = oldTo);
     rebuildToSelects();
     if (route.stops.includes(oldFrom)) {
       selectedToStop = oldFrom;
-      document.querySelectorAll('.to-select').forEach(sel => {
-        sel.value = oldFrom;
-      });
+      document.querySelectorAll('.to-select').forEach(sel => sel.value = oldFrom);
     }
   }
 
   syncControls();
-  selectedTripIdx = -1;
-  _scrollToSelected = true;
   updateTripList();
   if (currentTab === 'status') updateStatus();
 }
@@ -407,6 +418,13 @@ function updateMultiTripList() {
   }
 
   currentConnections = findConnections(selectedRouteId, dayType, selectedFromStop, selectedToStop);
+
+  // Sort by user's from-stop departure time (schedule order may differ at intermediate stops)
+  currentConnections.sort((a, b) => {
+    const aTime = timeToMin(getConnDepTime(a, selectedFromStop));
+    const bTime = timeToMin(getConnDepTime(b, selectedFromStop));
+    return aTime - bTime;
+  });
 
   const now = nowMin();
 
