@@ -150,6 +150,26 @@
       ]
     },
     {
+      "id": "jaist_tsurugi_nomachi",
+      "name": "JAIST → 鶴来駅 → 野町駅",
+      "short_name": "JAIST → 鶴来 → 野町",
+      "reverse_id": "nomachi_tsurugi_jaist",
+      "segments": [
+        { "segment": "shuttle_tsurugi", "direction": "outbound" },
+        { "segment": "ishikawa_line", "direction": "outbound" }
+      ]
+    },
+    {
+      "id": "nomachi_tsurugi_jaist",
+      "name": "野町駅 → 鶴来駅 → JAIST",
+      "short_name": "野町 → 鶴来 → JAIST",
+      "reverse_id": "jaist_tsurugi_nomachi",
+      "segments": [
+        { "segment": "ishikawa_line", "direction": "inbound" },
+        { "segment": "shuttle_tsurugi", "direction": "inbound" }
+      ]
+    },
+    {
       "id": "jaist_komatsu_airport",
       "name": "JAIST → 小松駅 → 小松空港",
       "short_name": "JAIST → 小松 → 空港",

@@ -85,6 +85,7 @@ const TRANSLATIONS = {
     'route.jaist_komatsu': 'JAIST↔小松駅',
     'route.jaist_tsurugi': 'JAIST↔鶴来駅',
     'route.jaist_tsurugi_kanazawa': 'JAIST↔鶴来駅↔金沢駅',
+    'route.jaist_tsurugi_nomachi': 'JAIST↔鶴来駅↔野町駅',
     'route.jaist_komatsu_kanazawa': 'JAIST↔小松駅↔金沢駅',
     'route.jaist_komatsu_airport': 'JAIST↔小松駅↔小松空港',
 
@@ -236,6 +237,7 @@ const TRANSLATIONS = {
     'route.jaist_komatsu': 'JAIST↔Komatsu Sta.',
     'route.jaist_tsurugi': 'JAIST↔Tsurugi Sta.',
     'route.jaist_tsurugi_kanazawa': 'JAIST↔Tsurugi Sta.↔Kanazawa Sta.',
+    'route.jaist_tsurugi_nomachi': 'JAIST↔Tsurugi Sta.↔Nomachi Sta.',
     'route.jaist_komatsu_kanazawa': 'JAIST↔Komatsu Sta.↔Kanazawa Sta.',
     'route.jaist_komatsu_airport': 'JAIST↔Komatsu Sta.↔Komatsu Airport',
 

@@ -10,6 +10,7 @@ const ROUTE_PRESETS = [
   { id: 'komatsu_outbound',        reverseId: 'komatsu_inbound',        i18nKey: 'route.jaist_komatsu' },
   { id: 'tsurugi_outbound',        reverseId: 'tsurugi_inbound',        i18nKey: 'route.jaist_tsurugi' },
   { id: 'jaist_tsurugi_kanazawa',  reverseId: 'kanazawa_tsurugi_jaist', i18nKey: 'route.jaist_tsurugi_kanazawa' },
+  { id: 'jaist_tsurugi_nomachi',   reverseId: 'nomachi_tsurugi_jaist',  i18nKey: 'route.jaist_tsurugi_nomachi' },
   { id: 'jaist_komatsu_kanazawa',  reverseId: 'kanazawa_komatsu_jaist', i18nKey: 'route.jaist_komatsu_kanazawa' },
   { id: 'jaist_komatsu_airport',   reverseId: 'airport_komatsu_jaist',  i18nKey: 'route.jaist_komatsu_airport' },
 ];
