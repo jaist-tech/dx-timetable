@@ -53,6 +53,7 @@ function initSearch() {
       selectedFromStop = sel.value;
       selectedTripIdx = -1;
       _scrollToSelected = true;
+      _expandedTrips.clear();
       if (isMultiRoute(selectedRouteId)) {
         rebuildMultiToSelects();
         updateMultiTripList();
@@ -71,6 +72,7 @@ function initSearch() {
       selectedToStop = sel.value;
       selectedTripIdx = -1;
       _scrollToSelected = true;
+      _expandedTrips.clear();
       syncControls();
       if (isMultiRoute(selectedRouteId)) {
         updateMultiTripList();
@@ -94,14 +96,42 @@ function initSearch() {
     rebuildStopSelects();
     updateTripList();
   }
+
+  initFavorites();
+}
+
+// ===== Key Stop Helpers =====
+
+function getKeyStopNames(routeId) {
+  if (isMultiRoute(routeId)) {
+    const mr = getMultiRoute(routeId);
+    const keys = new Set();
+    for (const segRef of mr.segments) {
+      const first = getSegRefFirstStop(segRef);
+      const last = getSegRefLastStop(segRef);
+      if (first) keys.add(first);
+      if (last) keys.add(last);
+    }
+    return keys;
+  }
+  const route = getRoute(routeId);
+  return new Set([route.stops[0], route.stops[route.stops.length - 1]]);
+}
+
+function buildStopOption(name, keyStops) {
+  const isKey = keyStops.has(name);
+  const cls = isKey ? 'key-stop' : 'minor-stop';
+  const prefix = isKey ? '' : '\u3000';
+  return `<option value="${name}" class="${cls}">${prefix}${tStop(name)}</option>`;
 }
 
 // ===== Stop Select Helpers for Direct Routes =====
 
 function rebuildStopSelects() {
   const route = getRoute(selectedRouteId);
+  const keyStops = getKeyStopNames(selectedRouteId);
   const fromOpts = route.stops.slice(0, -1).map(s =>
-    `<option value="${s}">${tStop(s)}</option>`
+    buildStopOption(s, keyStops)
   ).join('');
   selectedFromStop = route.stops[0];
 
@@ -115,11 +145,12 @@ function rebuildStopSelects() {
 
 function rebuildToSelects() {
   const route = getRoute(selectedRouteId);
+  const keyStops = getKeyStopNames(selectedRouteId);
   const fromIdx = route.stops.indexOf(selectedFromStop);
   const toOptions = route.stops.slice(fromIdx + 1);
   if (toOptions.length === 0) return;
   const toOpts = toOptions.map(s =>
-    `<option value="${s}">${tStop(s)}</option>`
+    buildStopOption(s, keyStops)
   ).join('');
   selectedToStop = toOptions[toOptions.length - 1];
 
@@ -134,9 +165,10 @@ function rebuildToSelects() {
 function rebuildMultiStopSelects() {
   _multiStops = getMultiRouteStops(selectedRouteId);
   const stopNames = _multiStops.map(s => s.name);
+  const keyStops = getKeyStopNames(selectedRouteId);
 
   const fromOpts = stopNames.slice(0, -1).map(s =>
-    `<option value="${s}">${tStop(s)}</option>`
+    buildStopOption(s, keyStops)
   ).join('');
   selectedFromStop = stopNames[0];
 
@@ -150,11 +182,12 @@ function rebuildMultiStopSelects() {
 
 function rebuildMultiToSelects() {
   const stopNames = _multiStops.map(s => s.name);
+  const keyStops = getKeyStopNames(selectedRouteId);
   const fromIdx = stopNames.indexOf(selectedFromStop);
   const toOptions = stopNames.slice(fromIdx + 1);
   if (toOptions.length === 0) return;
   const toOpts = toOptions.map(s =>
-    `<option value="${s}">${tStop(s)}</option>`
+    buildStopOption(s, keyStops)
   ).join('');
   selectedToStop = toOptions[toOptions.length - 1];
 
@@ -750,4 +783,289 @@ function updateTripCountdowns() {
       el.textContent = '';
     }
   });
+}
+
+// ===== Favorites =====
+
+function loadFavorites() {
+  try {
+    return JSON.parse(localStorage.getItem('favorites')) || [];
+  } catch (e) { return []; }
+}
+
+function saveFavorites(favs) {
+  localStorage.setItem('favorites', JSON.stringify(favs));
+}
+
+function getFavDisplayName(fav) {
+  // Build a short label: "from → to" using translated stop names
+  return tStop(fav.from) + ' → ' + tStop(fav.to);
+}
+
+function renderFavChips() {
+  const favs = loadFavorites();
+
+  document.querySelectorAll('.fav-chips').forEach(container => {
+    if (favs.length === 0) {
+      container.innerHTML = `<span class="fav-hint" data-i18n="fav.hint">${t('fav.hint')}</span>`;
+      return;
+    }
+
+    container.innerHTML = favs.map((fav, i) =>
+      `<button class="fav-chip" data-fav-idx="${i}">${fav.name || getFavDisplayName(fav)}</button>`
+    ).join('');
+
+    // Attach tap and long-press listeners
+    container.querySelectorAll('.fav-chip').forEach(chip => {
+      const idx = parseInt(chip.dataset.favIdx);
+      let pressTimer = null;
+      let didLongPress = false;
+
+      const startPress = () => {
+        didLongPress = false;
+        pressTimer = setTimeout(() => {
+          didLongPress = true;
+          deleteFav(idx);
+        }, 600);
+      };
+
+      const endPress = () => {
+        clearTimeout(pressTimer);
+        if (!didLongPress) applyFavorite(idx);
+      };
+
+      const cancelPress = () => { clearTimeout(pressTimer); };
+
+      chip.addEventListener('mousedown', startPress);
+      chip.addEventListener('mouseup', endPress);
+      chip.addEventListener('mouseleave', cancelPress);
+      chip.addEventListener('touchstart', startPress, { passive: true });
+      chip.addEventListener('touchend', (e) => { e.preventDefault(); endPress(); });
+      chip.addEventListener('touchcancel', cancelPress);
+    });
+  });
+}
+
+function applyFavorite(idx) {
+  const favs = loadFavorites();
+  const fav = favs[idx];
+  if (!fav) return;
+
+  // Validate route exists
+  const preset = ROUTE_PRESETS.find(p => p.id === fav.route || p.reverseId === fav.route);
+  if (!preset) return;
+
+  selectedRouteId = fav.route;
+  selectedTripIdx = -1;
+  _scrollToSelected = true;
+  _expandedTrips.clear();
+
+  if (isMultiRoute(selectedRouteId)) {
+    rebuildMultiStopSelects();
+    // Override auto-selected from/to with saved values
+    selectedFromStop = fav.from;
+    selectedToStop = fav.to;
+    // Update selects to match
+    document.querySelectorAll('.from-select').forEach(sel => sel.value = fav.from);
+    rebuildMultiToSelects();
+    selectedToStop = fav.to;
+    document.querySelectorAll('.to-select').forEach(sel => sel.value = fav.to);
+    updateMultiTripList();
+  } else {
+    rebuildStopSelects();
+    selectedFromStop = fav.from;
+    selectedToStop = fav.to;
+    document.querySelectorAll('.from-select').forEach(sel => sel.value = fav.from);
+    rebuildToSelects();
+    selectedToStop = fav.to;
+    document.querySelectorAll('.to-select').forEach(sel => sel.value = fav.to);
+    updateTripList();
+  }
+
+  syncControls();
+  renderFavChips();
+  if (currentTab === 'status') updateStatus();
+}
+
+// ===== Favorites Menu =====
+
+function openFavMenu() {
+  const overlay = document.getElementById('fav-overlay');
+  overlay.classList.add('open');
+  renderFavMenuList();
+}
+
+function closeFavMenu() {
+  document.getElementById('fav-overlay').classList.remove('open');
+  _dragState = null;
+}
+
+function saveFavCurrent() {
+  const favs = loadFavorites();
+  // Check for duplicate
+  const dup = favs.find(f => f.route === selectedRouteId && f.from === selectedFromStop && f.to === selectedToStop);
+  if (dup) return;
+
+  const name = prompt(t('fav.namePrompt'), getFavDisplayName({
+    route: selectedRouteId, from: selectedFromStop, to: selectedToStop
+  }));
+  if (name === null) return;
+
+  favs.push({
+    route: selectedRouteId,
+    from: selectedFromStop,
+    to: selectedToStop,
+    name: name || ''
+  });
+  saveFavorites(favs);
+  renderFavChips();
+  renderFavMenuList();
+}
+
+function deleteFav(idx) {
+  const favs = loadFavorites();
+  const name = favs[idx].name || getFavDisplayName(favs[idx]);
+  if (!confirm(t('fav.deleteConfirm', { name: name }))) return;
+  favs.splice(idx, 1);
+  saveFavorites(favs);
+  renderFavChips();
+  renderFavMenuList();
+}
+
+function renderFavMenuList() {
+  const favs = loadFavorites();
+  const list = document.getElementById('fav-menu-list');
+  if (favs.length === 0) {
+    list.innerHTML = `<div class="fav-menu-empty" data-i18n="fav.empty">${t('fav.empty')}</div>`;
+    return;
+  }
+  list.innerHTML = favs.map((fav, i) =>
+    `<div class="fav-menu-item" data-fav-idx="${i}">
+      <span class="fav-drag-handle" aria-label="並べ替え">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>
+      </span>
+      <span class="fav-menu-name">${fav.name || getFavDisplayName(fav)}</span>
+      <button class="fav-delete-btn" onclick="deleteFav(${i})" aria-label="${t('fav.delete')}">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>`
+  ).join('');
+
+  // Attach drag listeners
+  list.querySelectorAll('.fav-drag-handle').forEach(handle => {
+    handle.addEventListener('mousedown', startDrag);
+    handle.addEventListener('touchstart', startDrag, { passive: false });
+  });
+}
+
+// ===== Drag Reorder =====
+
+let _dragState = null;
+
+function startDrag(e) {
+  e.preventDefault();
+  const item = e.target.closest('.fav-menu-item');
+  if (!item) return;
+  const list = document.getElementById('fav-menu-list');
+  const items = [...list.querySelectorAll('.fav-menu-item')];
+  const idx = items.indexOf(item);
+
+  _dragState = {
+    idx: idx,
+    el: item,
+    startY: (e.touches ? e.touches[0].clientY : e.clientY),
+    itemH: item.offsetHeight
+  };
+
+  item.classList.add('dragging');
+
+  document.addEventListener('mousemove', onDragMove);
+  document.addEventListener('mouseup', endDrag);
+  document.addEventListener('touchmove', onDragMove, { passive: false });
+  document.addEventListener('touchend', endDrag);
+}
+
+function onDragMove(e) {
+  if (!_dragState) return;
+  e.preventDefault();
+  const y = e.touches ? e.touches[0].clientY : e.clientY;
+  const dy = y - _dragState.startY;
+  _dragState.el.style.transform = `translateY(${dy}px)`;
+
+  const list = document.getElementById('fav-menu-list');
+  const items = [...list.querySelectorAll('.fav-menu-item')];
+
+  // Determine swap target
+  const steps = Math.round(dy / _dragState.itemH);
+  const targetIdx = Math.max(0, Math.min(items.length - 1, _dragState.idx + steps));
+
+  // Visual feedback: shift other items
+  items.forEach((it, i) => {
+    if (it === _dragState.el) return;
+    if (_dragState.idx < targetIdx && i > _dragState.idx && i <= targetIdx) {
+      it.style.transform = `translateY(-${_dragState.itemH}px)`;
+    } else if (_dragState.idx > targetIdx && i >= targetIdx && i < _dragState.idx) {
+      it.style.transform = `translateY(${_dragState.itemH}px)`;
+    } else {
+      it.style.transform = '';
+    }
+  });
+
+  _dragState.targetIdx = targetIdx;
+}
+
+function endDrag() {
+  if (!_dragState) return;
+
+  document.removeEventListener('mousemove', onDragMove);
+  document.removeEventListener('mouseup', endDrag);
+  document.removeEventListener('touchmove', onDragMove);
+  document.removeEventListener('touchend', endDrag);
+
+  const fromIdx = _dragState.idx;
+  const toIdx = _dragState.targetIdx !== undefined ? _dragState.targetIdx : fromIdx;
+
+  // Reset transforms
+  const list = document.getElementById('fav-menu-list');
+  list.querySelectorAll('.fav-menu-item').forEach(it => {
+    it.style.transform = '';
+    it.classList.remove('dragging');
+  });
+
+  if (fromIdx !== toIdx) {
+    const favs = loadFavorites();
+    const [moved] = favs.splice(fromIdx, 1);
+    favs.splice(toIdx, 0, moved);
+    saveFavorites(favs);
+    renderFavChips();
+    renderFavMenuList();
+  }
+
+  _dragState = null;
+}
+
+// ===== Favorites Init =====
+
+function initFavorites() {
+  document.querySelectorAll('.fav-add-btn').forEach(btn => {
+    btn.addEventListener('click', openFavMenu);
+  });
+  document.getElementById('fav-menu-save').addEventListener('click', saveFavCurrent);
+
+  // Mouse wheel horizontal scroll for chip area
+  document.querySelectorAll('.fav-chips').forEach(el => {
+    el.addEventListener('wheel', (e) => {
+      if (el.scrollWidth > el.clientWidth) {
+        e.preventDefault();
+        el.scrollLeft += e.deltaY;
+      }
+    }, { passive: false });
+  });
+
+  // Close menu on overlay click
+  document.getElementById('fav-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeFavMenu();
+  });
+
+  renderFavChips();
 }

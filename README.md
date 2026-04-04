@@ -20,6 +20,7 @@ JAISTと周辺地域を結ぶ交通手段の時刻表・乗換案内Webアプリ
 - **詳細**: 選択した便のタイムライン表示（乗車駅・乗換駅・降車駅、待ち時間）
 - **マップ**: Leafletによる経路表示、バス位置の表示（時刻表ベースのシミュレーション）
 - **時刻表一覧**: 全路線の全便時刻表をテーブル形式で閲覧（`timetable.html`）
+- **お気に入り**: よく使うルート（出発/到着の組み合わせ）を保存・ワンタップ切替。localStorageに保存
 - **日英切替**: 日本語/英語のUI切替に対応。駅名・路線名・免責事項等を含む全テキストが切り替わる
 - **ダークテーマ**: ライト/ダーク切替対応。設定はlocalStorageに保存
 - **PWA対応**: ホーム画面への追加に対応
@@ -105,7 +106,7 @@ node server.js
 | `ishikawa-line_timetable_weekday*.pdf` | [北陸鉄道 石川線](https://www.hokutetsu.co.jp/railway/ishikawasen/) |
 | `ishikawa-line_timetable_weekend*.pdf` | 同上 |
 | `IR_ishikawa*.pdf` | [IRいしかわ鉄道](https://www.ishikawa-railway.jp/timetable/) |
-| `limo_komatsu*.pdf` | [小松空港リムジンバス](https://www.komatsu-airport.jp/) |
+| `limo_komatsu*.pdf` | [北陸鉄道 空港連絡バス](https://www.hokutetsu.co.jp/airport-bus#station_airport) |
 
 ### 2. JSONを生成
 
@@ -184,17 +185,14 @@ python3 -m http.server 8080
 - `segment_files`: セグメント定義（JSONファイル、GeoJSONファイル、交通種別、方向マッピング）
 - `direct_routes`: 単一セグメントの直通ルート
 - `multi_routes`: 複数セグメントの乗換ルート（`from_stop`/`to_stop` で部分区間を指定可能）
-- `walk_transfers`: 徒歩乗換の定義（例: 新西金沢駅 ↔ 西金沢駅）
+- `transfers`: 乗換時間の定義（同一駅・徒歩乗換の両方を含む）
 - `geo_mappings`: GeoJSONのクリッピング設定
 
 ## 免責事項
 
 - 本アプリはJAISTの公式サービスではありません
-- 公式時刻表PDFから自動抽出したデータに基づいており、リアルタイムの運行状況・車両位置情報・遅延情報等は一切反映されません
-- 時刻表データは自動抽出により生成しているため、誤りが含まれる可能性があります
-- 小松空港→小松駅の時刻は推定値です
-- マップ上の経路・停車位置は推測に基づきます
-- 乗換検索ではすべての乗換時間を一律5分として計算しています
+- 時刻表データや経路情報には誤りが含まれる可能性があります。内容の正確性・最新性を保証するものではありません
+- 本アプリの利用により生じたいかなる損害（乗り遅れ等を含む）についても、開発者は責任を負いかねます
 - 正確な運行情報は各交通機関の公式サイトをご確認ください
 
 ## 開発

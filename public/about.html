@@ -192,13 +192,23 @@ header{
     <summary><h2 style="display:inline;cursor:pointer" data-i18n="about.disclaimerHeading">免責事項</h2></summary>
     <ul>
       <li data-i18n="about.disclaimer.1">本アプリはJAISTの公式サービスではありません。学生サークルが独自に開発した非公式の情報提供ツールです。</li>
-      <li data-i18n="about.disclaimer.2">本アプリは各交通機関の公式時刻表PDFから自動抽出したデータに基づいています。リアルタイムの運行状況・車両位置情報・遅延情報等は一切反映されず、表示内容はあくまで時刻表上の予定です。</li>
-      <li data-i18n="about.disclaimer.3">時刻表データは自動抽出により生成しているため、誤りが含まれる可能性があります。内容の正確性・最新性を保証するものではありません。</li>
-      <li data-i18n="about.disclaimer.4">小松空港→小松駅の発車時刻は、航空便到着の約15分後・所要約12分として算出した推定値です。実際の発車時刻は航空便の到着状況により変動します。</li>
-      <li data-i18n="about.disclaimer.5">マップ上に表示される運行ルート（経路線）およびバス停・駅の位置情報は、実際の位置を推測して作成したものであり、正確な位置を保証するものではありません。</li>
-      <li data-i18n="about.disclaimer.6">乗換検索ではすべての乗換時間を一律5分として計算しています。そのため、他の乗換案内サービスで表示される経路が本アプリでは表示されない場合があります。実際の乗換には余裕をもって移動することをお勧めします。</li>
-      <li data-i18n="about.disclaimer.7">本アプリの利用により生じたいかなる損害（乗り遅れ等を含む）についても、開発者は責任を負いかねます。</li>
-      <li data-i18n="about.disclaimer.8">正確な運行情報については、各交通機関の公式サイトにてご確認ください。</li>
+      <li data-i18n="about.disclaimer.2">時刻表データや経路情報には誤りが含まれる可能性があります。内容の正確性・最新性を保証するものではありません。</li>
+      <li data-i18n="about.disclaimer.3">本アプリの利用により生じたいかなる損害（乗り遅れ等を含む）についても、開発者は責任を負いかねます。</li>
+      <li data-i18n="about.disclaimer.4">正確な運行情報については、各交通機関の公式サイトにてご確認ください。</li>
+    </ul>
+  </details>
+
+  <details class="card">
+    <summary><h2 style="display:inline;cursor:pointer" data-i18n="about.techHeading">データと仕組みについて</h2></summary>
+    <ul>
+      <li data-i18n="about.tech.static">本アプリは独自のサーバーを持たず、ユーザーデータの収集や送信は行っていません（フォント・地図等の外部サービスとの最低限の通信を除く）。</li>
+      <li data-i18n="about.tech.timetable">時刻表データは各交通機関の公式時刻表PDFからプログラムで自動抽出して生成しています。リアルタイムの運行状況・遅延情報等は反映されません。</li>
+      <li data-i18n="about.tech.validity">時刻表データには有効期間があり、ダイヤ改正により内容が変わる場合があります。最新のダイヤは各交通機関の公式サイトをご確認ください。</li>
+      <li data-i18n="about.tech.airport">小松空港→小松駅の発車時刻は、航空便到着の約15分後・所要約12分として算出した推定値です。</li>
+      <li data-i18n="about.tech.transfer">乗換検索では乗換駅ごとに設定された乗換時間（1〜5分）を用いて計算しています。実際の乗換には余裕をもって移動することをお勧めします。</li>
+      <li data-i18n="about.tech.latestConn">乗換がある経路では、乗換駅での待ち時間が最も短くなるよう、できるだけ遅い便を選んで表示しています。余裕をもって早めの便に乗ることもご検討ください。</li>
+      <li data-i18n="about.tech.map">マップ上の経路やバス停・駅の位置は推測に基づいており、正確な位置を保証するものではありません。</li>
+      <li data-i18n="about.tech.storage">お気に入りルートや表示設定（テーマ・言語）はお使いのブラウザに保存されます。ブラウザのサイトデータを削除した場合やプライベートモードでは保存されません。</li>
     </ul>
   </details>
 
@@ -215,6 +225,7 @@ header{
       <li><a href="https://www.jaist.ac.jp/top/access/" target="_blank" rel="noopener" data-i18n="about.source.jaist">JAIST アクセス情報</a> — <span data-i18n="about.source.jaistDesc">シャトルバス時刻表（鶴来線・小松線）</span></li>
       <li><a href="https://www.ishikawa-railway.jp/timetable/" target="_blank" rel="noopener" data-i18n="about.source.ir">IRいしかわ鉄道 時刻表</a></li>
       <li><a href="https://www.hokutetsu.co.jp/railway/ishikawasen/" target="_blank" rel="noopener" data-i18n="about.source.hokutetsu">北陸鉄道 石川線</a></li>
+      <li><a href="https://www.hokutetsu.co.jp/airport-bus#station_airport" target="_blank" rel="noopener" data-i18n="about.source.limo">北陸鉄道 空港連絡バス</a></li>
     </ul>
   </div>
 

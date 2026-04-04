@@ -348,7 +348,7 @@ function buildRouteLayersForRoute(routeId, userFrom, userTo) {
     let stops = STOP_POINTS[segId] || [];
 
     // Clip to from/to stops
-    if ((info.fromStop || info.toStop) && stops.length > 0) {
+    if (info.fromStop && info.toStop && stops.length > 0) {
       const fromIdx = info.fromStop ? stops.findIndex(s => s.name === info.fromStop) : 0;
       const toIdx = info.toStop ? stops.findIndex(s => s.name === info.toStop) : stops.length - 1;
       if (fromIdx >= 0 && toIdx >= 0) {
