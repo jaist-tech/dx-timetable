@@ -7,6 +7,10 @@ const TRANSLATIONS = {
     'header.about': 'このアプリについて',
     'header.themeToggle': 'テーマ切替',
     'header.back': '戻る',
+    'settings.language': '言語',
+    'settings.theme': 'テーマ',
+    'settings.light': 'ライト',
+    'settings.dark': 'ダーク',
     'header.dow.0': '日',
     'header.dow.1': '月',
     'header.dow.2': '火',
@@ -74,12 +78,36 @@ const TRANSLATIONS = {
     'nav.map': 'マップ',
 
     // Favorites
-    'fav.hint': '+ でよく使うルートを保存',
     'fav.save': '現在のルートを保存',
     'fav.namePrompt': 'お気に入りの名前を入力:',
     'fav.delete': '削除',
     'fav.deleteConfirm': '「${name}」を削除しますか？',
     'fav.empty': '保存されたルートはありません',
+
+    // Tutorial
+    'tutorial.skip': 'スキップ',
+    'tutorial.next': '次へ',
+    'tutorial.prev': '戻る',
+    'tutorial.done': 'はじめる',
+    // Page 1 - Welcome
+    'tutorial.welcome.title': 'JAISTのりかえ へようこそ',
+    'tutorial.welcome.unofficial': '本サービスは各交通機関の<strong>公式サービスではありません</strong>。',
+    'tutorial.welcome.static': '公式の時刻表データをもとに動作しており、<strong>リアルタイムの運行状況・遅延情報等は反映されません</strong>。',
+    'tutorial.welcome.official': '正確な運行情報は各交通機関の公式サイトをご確認ください。',
+    // Page 2 - Tabs
+    'tutorial.tabs.title': '各タブの役割',
+    'tutorial.tabs.search': '<strong>便検索</strong>：ルート・出発/到着を選んで便の一覧を表示します。次の便までのカウントダウンも確認できます。',
+    'tutorial.tabs.status': '<strong>詳細</strong>：選択した便のタイムラインを表示します。乗車・乗換・降車の流れと待ち時間がわかります。',
+    'tutorial.tabs.map': '<strong>マップ</strong>：経路とバスの推定位置を地図上に表示します。位置は時刻表ベースの概算です。',
+    // Page 3 - Header
+    'tutorial.header.title': 'ヘッダーの機能',
+    'tutorial.header.about': '<strong>情報</strong>：免責事項やデータ出典などの詳細情報を確認できます。',
+    'tutorial.header.settings': '<strong>表示設定</strong>：言語（日/英）とテーマ（ライト/ダーク）を切り替えられます。',
+    'tutorial.header.fav': '<strong>ルート保存</strong>：よく使うルートを保存して、ワンタップで切り替えられます。',
+    // Page 4 - Done
+    'tutorial.done.title': '準備完了！',
+    'tutorial.done.pwa': 'ホーム画面に追加すると、アプリのように使えます（PWA対応）。',
+    'tutorial.done.reshow': 'このチュートリアルは「このアプリについて」ページからいつでも再表示できます。',
 
     // Route presets
     'route.jaist_komatsu': 'JAIST↔小松駅',
@@ -135,6 +163,9 @@ const TRANSLATIONS = {
     'about.license.osm': '地図データは OpenStreetMap contributors より提供されています。',
     'about.license.busIcon': '本アプリで使用しているバスアイコン画像の著作権は、それぞれの作成者に帰属します。',
     'about.devHeading': '開発',
+    'about.tutorialHeading': 'チュートリアル',
+    'about.tutorialText': '初回起動時に表示されるアプリの使い方ガイドを再表示できます。',
+    'about.tutorialLink': 'チュートリアルを表示する',
 
     // Timetable page
     'timetable.title': '時刻表一覧 - JAISTのりかえ',
@@ -160,6 +191,10 @@ const TRANSLATIONS = {
     'header.about': 'About this app',
     'header.themeToggle': 'Toggle theme',
     'header.back': 'Back',
+    'settings.language': 'Language',
+    'settings.theme': 'Theme',
+    'settings.light': 'Light',
+    'settings.dark': 'Dark',
     'header.dow.0': 'Sun.',
     'header.dow.1': 'Mon.',
     'header.dow.2': 'Tue.',
@@ -226,12 +261,36 @@ const TRANSLATIONS = {
     'nav.map': 'Map',
 
     // Favorites
-    'fav.hint': 'Save frequent routes with +',
     'fav.save': 'Save current route',
     'fav.namePrompt': 'Enter a name for this favorite:',
     'fav.delete': 'Delete',
     'fav.deleteConfirm': 'Delete "${name}"?',
     'fav.empty': 'No saved routes',
+
+    // Tutorial
+    'tutorial.skip': 'Skip',
+    'tutorial.next': 'Next',
+    'tutorial.prev': 'Back',
+    'tutorial.done': 'Get Started',
+    // Page 1 - Welcome
+    'tutorial.welcome.title': 'Welcome to JAIST Norikae',
+    'tutorial.welcome.unofficial': 'This service is <strong>not an official service</strong> of any transit operator.',
+    'tutorial.welcome.static': 'It operates based on official timetable data. <strong>Real-time service status and delay information are not reflected</strong>.',
+    'tutorial.welcome.official': 'Please check each operator\'s official website for accurate service information.',
+    // Page 2 - Tabs
+    'tutorial.tabs.title': 'Tab Overview',
+    'tutorial.tabs.search': '<strong>Search</strong>: Select a route and stops to view the trip list. A countdown to the next departure is also shown.',
+    'tutorial.tabs.status': '<strong>Details</strong>: View the timeline of a selected trip — boarding, transfers, alighting, and wait times.',
+    'tutorial.tabs.map': '<strong>Map</strong>: View the route and estimated bus position on the map. Positions are approximate, based on the timetable.',
+    // Page 3 - Header
+    'tutorial.header.title': 'Header Controls',
+    'tutorial.header.about': '<strong>Info</strong>: View disclaimers, data sources, and other details.',
+    'tutorial.header.settings': '<strong>Display</strong>: Switch language (JA/EN) and theme (light/dark).',
+    'tutorial.header.fav': '<strong>Favorites</strong>: Save frequently used routes and switch with one tap.',
+    // Page 4 - Done
+    'tutorial.done.title': 'You\'re All Set!',
+    'tutorial.done.pwa': 'Add to your home screen to use it like a native app (PWA).',
+    'tutorial.done.reshow': 'You can view this tutorial again from the About page.',
 
     // Route presets
     'route.jaist_komatsu': 'JAIST↔Komatsu Sta.',
@@ -287,6 +346,9 @@ const TRANSLATIONS = {
     'about.license.osm': 'Map data provided by OpenStreetMap contributors.',
     'about.license.busIcon': 'Bus icon images used in this app are copyrighted by their respective creators.',
     'about.devHeading': 'Development',
+    'about.tutorialHeading': 'Tutorial',
+    'about.tutorialText': 'You can view the app guide that is shown on first launch.',
+    'about.tutorialLink': 'Show tutorial',
 
     // Timetable page
     'timetable.title': 'Timetable - JAIST Norikae',
@@ -484,31 +546,71 @@ function setLang(lang) {
   refreshUI();
 }
 
-/** Open/close the language dropdown menu */
-function toggleLangMenu() {
-  const dd = document.getElementById('lang-dropdown');
-  if (dd) dd.classList.toggle('open');
-}
-
-/** Select a language from the dropdown */
-function selectLang(lang) {
-  const dd = document.getElementById('lang-dropdown');
-  if (dd) dd.classList.remove('open');
-  setLang(lang);
-}
-
-// Close dropdown when clicking outside
-document.addEventListener('click', function(e) {
-  const dd = document.getElementById('lang-dropdown');
-  if (dd && !dd.contains(e.target)) {
-    dd.classList.remove('open');
+/** Toggle settings dropdown */
+function toggleSettingsDropdown() {
+  const dd = document.getElementById('settings-dropdown');
+  if (!dd) return;
+  dd.classList.toggle('open');
+  if (dd.classList.contains('open')) {
+    // Close fav dropdown
+    const favDd = document.getElementById('fav-dropdown');
+    if (favDd) favDd.classList.remove('open');
+    updateSettingsChecks();
   }
-});
+}
+
+function closeSettingsDropdown() {
+  const dd = document.getElementById('settings-dropdown');
+  if (dd) dd.classList.remove('open');
+}
+
+/** Update check marks in settings dropdown */
+function updateSettingsChecks() {
+  const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+  document.querySelectorAll('.settings-option').forEach(opt => {
+    const setting = opt.dataset.setting;
+    const value = opt.dataset.value;
+    if (setting === 'lang') {
+      opt.classList.toggle('active', value === currentLang);
+    } else if (setting === 'theme') {
+      opt.classList.toggle('active', value === currentTheme);
+    }
+  });
+}
+
+/** Handle settings option click */
+function onSettingClick(e) {
+  const opt = e.target.closest('.settings-option');
+  if (!opt) return;
+  const setting = opt.dataset.setting;
+  const value = opt.dataset.value;
+  if (setting === 'lang') {
+    setLang(value);
+  } else if (setting === 'theme') {
+    document.documentElement.setAttribute('data-theme', value);
+    localStorage.setItem('theme', value);
+    applyStaticTranslations();
+  }
+  updateSettingsChecks();
+}
+
+/** Initialize settings dropdown */
+function initSettingsDropdown() {
+  const btn = document.getElementById('settings-dropdown-btn');
+  if (btn) btn.addEventListener('click', toggleSettingsDropdown);
+  const backdrop = document.getElementById('settings-backdrop');
+  if (backdrop) backdrop.addEventListener('click', closeSettingsDropdown);
+  const menu = document.getElementById('settings-dropdown-menu');
+  if (menu) menu.addEventListener('click', onSettingClick);
+}
 
 /** Apply translations to elements with data-i18n attributes */
 function applyStaticTranslations() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
     el.textContent = t(el.dataset.i18n);
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    el.innerHTML = t(el.dataset.i18nHtml);
   });
   document.querySelectorAll('[data-i18n-aria]').forEach(el => {
     el.setAttribute('aria-label', t(el.dataset.i18nAria));
@@ -521,14 +623,8 @@ function applyStaticTranslations() {
   // Update header date/dow
   updateHeaderDate();
 
-  // Update lang dropdown
-  const langLabel = document.getElementById('lang-toggle');
-  if (langLabel) {
-    langLabel.textContent = currentLang.toUpperCase();
-  }
-  document.querySelectorAll('.lang-option').forEach(opt => {
-    opt.classList.toggle('active', opt.dataset.lang === currentLang);
-  });
+  // Update settings dropdown checks
+  if (typeof updateSettingsChecks === 'function') updateSettingsChecks();
 
   // Update route select options (main page only)
   if (typeof ROUTE_PRESETS !== 'undefined') {
@@ -596,5 +692,5 @@ function refreshUI() {
     prevRouteId = null;
     updateMap();
   }
-  if (typeof renderFavChips === 'function') renderFavChips();
+  if (typeof renderFavDropdownList === 'function') renderFavDropdownList();
 }

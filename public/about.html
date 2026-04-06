@@ -57,38 +57,35 @@ header{
 }
 .back-btn:hover{background:rgba(255,255,255,0.15)}
 .back-btn svg{width:20px;height:20px}
-.lang-dropdown{position:relative;flex-shrink:0}
-.lang-dropdown-btn{
-  color:#fff;font-size:0.7rem;font-weight:700;letter-spacing:0.5px;
-  background:rgba(255,255,255,0.2);padding:3px 6px 3px 10px;border-radius:12px;
-  display:flex;align-items:center;gap:3px;height:26px;transition:background 0.2s;cursor:pointer;
+.settings-dropdown{position:relative;flex-shrink:0}
+.settings-dropdown-btn{
+  color:#fff;opacity:0.8;background:rgba(255,255,255,0.15);
+  padding:4px 8px;border-radius:14px;display:flex;align-items:center;gap:4px;
+  height:28px;transition:opacity 0.2s,background 0.2s;cursor:pointer;
 }
-.lang-dropdown-btn:hover{background:rgba(255,255,255,0.35)}
-.lang-dropdown-chevron{transition:transform 0.2s;opacity:0.8;flex-shrink:0}
-.lang-dropdown.open .lang-dropdown-chevron{transform:rotate(180deg)}
-.lang-dropdown-menu{
-  display:none;position:absolute;top:calc(100% + 6px);right:0;
-  background:var(--card);border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.18);
-  overflow:hidden;min-width:130px;z-index:100;animation:langDropIn 0.15s ease;
+.settings-dropdown-btn:hover{opacity:1;background:rgba(255,255,255,0.3)}
+.settings-dropdown.open .settings-dropdown-btn{opacity:1;background:rgba(255,255,255,0.3)}
+.settings-sep{width:1px;height:14px;background:rgba(255,255,255,0.4);flex-shrink:0}
+.settings-icon-moon{display:none}
+[data-theme="dark"] .settings-icon-sun{display:none}
+[data-theme="dark"] .settings-icon-moon{display:block}
+.settings-backdrop{display:none;position:fixed;inset:0;z-index:1050}
+.settings-dropdown.open .settings-backdrop{display:block}
+.settings-dropdown-menu{
+  display:none;position:absolute;top:calc(100% + 8px);right:0;
+  background:var(--card);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.18);
+  min-width:160px;z-index:1100;padding:6px 0;animation:settingsDropIn 0.15s ease;
 }
-.lang-dropdown.open .lang-dropdown-menu{display:block}
-@keyframes langDropIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
-.lang-option{
-  display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;
-  font-size:0.82rem;font-weight:600;color:var(--text);background:none;cursor:pointer;transition:background 0.15s;
-}
-.lang-option:hover{background:var(--bg)}
-.lang-option.active{color:var(--primary)}
-.lang-option-name{font-weight:400;color:var(--text-secondary);font-size:0.78rem}
-.theme-btn{
-  color:#fff;opacity:0.7;display:flex;align-items:center;justify-content:center;
-  width:32px;height:32px;border-radius:50%;transition:opacity 0.2s,background 0.2s;
-  flex-shrink:0;
-}
-.theme-btn:hover{opacity:1;background:rgba(255,255,255,0.15)}
-.icon-moon{display:none}
-[data-theme="dark"] .icon-sun{display:none}
-[data-theme="dark"] .icon-moon{display:block}
+.settings-dropdown.open .settings-dropdown-menu{display:block}
+@keyframes settingsDropIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.settings-group{padding:4px 0}
+.settings-group+.settings-group{border-top:1px solid var(--border)}
+.settings-group-label{padding:6px 14px 2px;font-size:0.7rem;font-weight:700;color:var(--text-light,#9AA0A6);text-transform:uppercase;letter-spacing:0.5px}
+.settings-option{display:flex;align-items:center;gap:8px;width:100%;padding:9px 14px;font-size:0.82rem;font-weight:500;color:var(--text);background:none;cursor:pointer;transition:background 0.12s}
+.settings-option:hover{background:var(--bg)}
+.settings-check{width:18px;font-size:0.85rem;font-weight:700;color:var(--primary);visibility:hidden;flex-shrink:0}
+.settings-option.active .settings-check{visibility:visible}
+.settings-option-sub{font-weight:400;color:var(--text-secondary);font-size:0.75rem;margin-left:2px}
 .content{max-width:540px;margin:0 auto;padding:16px}
 .card{
   background:var(--card);border-radius:var(--radius);
@@ -154,20 +151,27 @@ header{
     <span class="header-time" id="header-time">--:--</span>
   </div>
   <div class="header-side header-right">
-    <div class="lang-dropdown" id="lang-dropdown">
-      <button class="lang-dropdown-btn" onclick="toggleLangMenu()">
-        <span class="lang-dropdown-label" id="lang-toggle">EN</span>
-        <svg class="lang-dropdown-chevron" viewBox="0 0 12 8" width="10" height="7" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 1.5l5 5 5-5"/></svg>
+    <div class="settings-dropdown" id="settings-dropdown">
+      <div class="settings-backdrop" id="settings-backdrop"></div>
+      <button class="settings-dropdown-btn" id="settings-dropdown-btn" aria-label="設定">
+        <svg class="settings-icon-lang" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        <span class="settings-sep"></span>
+        <svg class="settings-icon-sun" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg class="settings-icon-moon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
-      <div class="lang-dropdown-menu" id="lang-menu">
-        <button class="lang-option" data-lang="ja" onclick="selectLang('ja')">JA <span class="lang-option-name">日本語</span></button>
-        <button class="lang-option" data-lang="en" onclick="selectLang('en')">EN <span class="lang-option-name">English</span></button>
+      <div class="settings-dropdown-menu" id="settings-dropdown-menu">
+        <div class="settings-group">
+          <div class="settings-group-label" data-i18n="settings.language">言語</div>
+          <button class="settings-option" data-setting="lang" data-value="ja"><span class="settings-check">✓</span>JA <span class="settings-option-sub">日本語</span></button>
+          <button class="settings-option" data-setting="lang" data-value="en"><span class="settings-check">✓</span>EN <span class="settings-option-sub">English</span></button>
+        </div>
+        <div class="settings-group">
+          <div class="settings-group-label" data-i18n="settings.theme">テーマ</div>
+          <button class="settings-option" data-setting="theme" data-value="light"><span class="settings-check">✓</span><span data-i18n="settings.light">ライト</span></button>
+          <button class="settings-option" data-setting="theme" data-value="dark"><span class="settings-check">✓</span><span data-i18n="settings.dark">ダーク</span></button>
+        </div>
       </div>
     </div>
-    <button class="theme-btn" onclick="toggleTheme()" data-i18n-aria="header.themeToggle" aria-label="テーマ切替">
-      <svg class="icon-sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-      <svg class="icon-moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-    </button>
   </div>
 </header>
 
@@ -240,6 +244,12 @@ header{
   </div>
 
   <div class="card">
+    <h2 data-i18n="about.tutorialHeading">チュートリアル</h2>
+    <p data-i18n="about.tutorialText">初回起動時に表示されるアプリの使い方ガイドを再表示できます。</p>
+    <p style="margin-top:8px"><a href="index.html?tutorial=1" data-i18n="about.tutorialLink">チュートリアルを表示する</a></p>
+  </div>
+
+  <div class="card">
     <h2 data-i18n="about.devHeading">開発</h2>
     <p><a href="https://www.jaist.ac.jp/misc/circles/tech/" target="_blank" rel="noopener">JAIST Tech Circle</a></p>
   </div>
@@ -247,12 +257,6 @@ header{
 
 <script src="js/i18n.js"></script>
 <script>
-function toggleTheme() {
-  var c = document.documentElement.getAttribute('data-theme');
-  var n = c === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', n);
-  localStorage.setItem('theme', n);
-}
 function updateClock() {
   var n = new Date();
   var h = String(n.getHours()).padStart(2,'0');
@@ -260,8 +264,9 @@ function updateClock() {
   document.getElementById('header-time').textContent = h + ':' + m;
 }
 function refreshUI() {
-  // About page: static translations cover everything
+  applyStaticTranslations();
 }
+initSettingsDropdown();
 applyStaticTranslations();
 updateClock();
 setInterval(updateClock, 10000);
