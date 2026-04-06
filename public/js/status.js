@@ -1,7 +1,6 @@
 // ===== Status Tab =====
 
-// Track which segment indices are expanded (survives re-renders)
-let _expandedSegs = new Set();
+// _expandedSegs is declared in utils.js (global state)
 
 function updateStatus() {
   const header = document.getElementById('status-header');
@@ -9,7 +8,7 @@ function updateStatus() {
 
   if (selectedTripIdx < 0) {
     header.innerHTML = '';
-    timeline.innerHTML = '<div class="no-results">便検索タブで便を選択してください</div>';
+    timeline.innerHTML = `<div class="no-results">${t('status.selectTrip')}</div>`;
     return;
   }
 
@@ -33,19 +32,18 @@ function updateStatus() {
   // Status badge
   let statusText, statusClass;
   if (now < depMin) {
-    statusText = '出発前';
+    statusText = t('status.before');
     statusClass = 'before';
   } else if (now <= arrMin) {
-    statusText = '運行中';
+    statusText = t('status.running');
     statusClass = 'running';
   } else {
-    statusText = '到着済';
+    statusText = t('status.arrived');
     statusClass = 'arrived';
   }
 
   header.innerHTML = `
-    <div class="status-route-name">${route.name}</div>
-    <div class="status-trip-info">${depTime} 発 → ${arrTime} 着</div>
+    <div class="status-trip-info">${depTime} ${t('trip.dep')} → ${arrTime} ${t('trip.arr')}</div>
     <span class="status-badge ${statusClass}">${statusText}</span>
   `;
 
@@ -81,8 +79,8 @@ function updateStatus() {
 
     // Marker for user's from/to stops
     let marker = '';
-    if (route.stops[i] === selectedFromStop) marker = '<span class="timeline-stop-marker">乗車</span>';
-    if (route.stops[i] === selectedToStop) marker = '<span class="timeline-stop-marker">降車</span>';
+    if (route.stops[i] === selectedFromStop) marker = `<span class="timeline-stop-marker">${t('status.boarding')}</span>`;
+    if (route.stops[i] === selectedToStop) marker = `<span class="timeline-stop-marker">${t('status.alighting')}</span>`;
 
     const isLast = i === route.stops.length - 1;
     timelineHtml += `
@@ -90,7 +88,7 @@ function updateStatus() {
         <div class="timeline-dot"></div>
         ${!isLast ? '<div class="timeline-line"></div>' : ''}
         <div class="timeline-info">
-          <span class="timeline-stop-name">${route.stops[i]}${marker}</span>
+          <span class="timeline-stop-name">${tStop(route.stops[i])}${marker}</span>
           <span class="timeline-stop-time">${stopTime || '-'}</span>
         </div>
       </div>
@@ -104,7 +102,7 @@ function updateMultiStatus(header, timeline) {
   const mr = getMultiRoute(selectedRouteId);
   if (!mr || selectedTripIdx < 0 || selectedTripIdx >= currentConnections.length) {
     header.innerHTML = '';
-    timeline.innerHTML = '<div class="no-results">便検索タブで便を選択してください</div>';
+    timeline.innerHTML = `<div class="no-results">${t('status.selectTrip')}</div>`;
     return;
   }
 
@@ -131,34 +129,51 @@ function updateMultiStatus(header, timeline) {
 
   let statusText, statusClass;
   if (now < userDepMin) {
-    statusText = '出発前';
+    statusText = t('status.before');
     statusClass = 'before';
   } else if (now <= userArrMin) {
-    statusText = '移動中';
+    statusText = t('status.running');
     statusClass = 'running';
   } else {
-    statusText = '到着済';
+    statusText = t('status.arrived');
     statusClass = 'arrived';
   }
 
-  const transferInfo = userTransferCount > 0 ? `（乗換${userTransferCount}回）` : '';
+  const transferInfo = userTransferCount > 0 ? `(${tPlural('trip.transfers', userTransferCount, { n: userTransferCount })})` : '';
   header.innerHTML = `
-    <div class="status-route-name">${mr.name}</div>
-    <div class="status-trip-info">${userDepTime} 発 → ${userArrTime} 着${transferInfo}</div>
+    <div class="status-trip-info">${userDepTime} ${t('trip.dep')} → ${userArrTime} ${t('trip.arr')}${transferInfo}</div>
     <span class="status-badge ${statusClass}">${statusText}</span>
   `;
 
   // Determine visible segment range based on selected from/to
-  const visSeg0 = fromEntry ? fromEntry.segIdx : 0;
-  const visSeg1 = toEntry ? toEntry.segIdx : conn.segments.length - 1;
-  const visStop0 = fromEntry ? fromEntry.stopIdx : 0;
-  const visStop1 = toEntry ? toEntry.stopIdx : conn.segments[visSeg1].stops.length - 1;
+  let visSeg0 = fromEntry ? fromEntry.segIdx : 0;
+  let visSeg1 = toEntry ? toEntry.segIdx : conn.segments.length - 1;
+  let visStop0 = fromEntry ? fromEntry.stopIdx : 0;
+  let visStop1 = toEntry ? toEntry.stopIdx : conn.segments[visSeg1].stops.length - 1;
+
+  // Skip zero-duration first segment at non-walk transfer boundary
+  if (visSeg0 < visSeg1 && visStop0 === conn.segments[visSeg0].stops.length - 1) {
+    const tr = conn.transfers[visSeg0];
+    if (tr && !tr.isWalk) {
+      visSeg0++;
+      visStop0 = 0;
+    }
+  }
+  // Skip zero-duration last segment at non-walk transfer boundary
+  if (visSeg1 > visSeg0 && visStop1 === 0) {
+    const tr = conn.transfers[visSeg1 - 1];
+    if (tr && !tr.isWalk) {
+      visSeg1--;
+      visStop1 = conn.segments[visSeg1].stops.length - 1;
+    }
+  }
 
   // Build timeline for multi-route with collapsible intermediate stops
   let timelineHtml = '';
   for (let si = visSeg0; si <= visSeg1; si++) {
     const seg = conn.segments[si];
-    const segLabel = seg.type === 'train' ? '電車' : 'バス';
+    const segMeta = SEGMENTS[seg.segmentId] && SEGMENTS[seg.segmentId].meta;
+    const segLabel = segMeta ? tOperator(segMeta.operator) : (seg.type === 'train' ? t('status.train') : t('status.bus'));
     const isLastVisibleSeg = si === visSeg1;
 
     // Visible stop range within this segment
@@ -191,8 +206,8 @@ function updateMultiStatus(header, timeline) {
 
     // Helper: marker for user's from/to stops
     function stopMarker(stopName) {
-      if (stopName === selectedFromStop) return '<span class="timeline-stop-marker">乗車</span>';
-      if (stopName === selectedToStop) return '<span class="timeline-stop-marker">降車</span>';
+      if (stopName === selectedFromStop) return `<span class="timeline-stop-marker">${t('status.boarding')}</span>`;
+      if (stopName === selectedToStop) return `<span class="timeline-stop-marker">${t('status.alighting')}</span>`;
       return '';
     }
 
@@ -206,15 +221,15 @@ function updateMultiStatus(header, timeline) {
         // Show as starting point with transfer
         const tr = conn.transfers[si];
         const transferText = tr.isWalk
-          ? `徒歩（乗換${tr.waitMin}分）`
-          : `乗換（${tr.waitMin}分待）`;
+          ? t('status.walkTransfer', { n: tr.waitMin })
+          : t('status.waitTransfer', { n: tr.waitMin });
         timelineHtml += `
           <div class="timeline-stop ${cls}">
             <div class="timeline-dot"></div>
             <div class="timeline-line line-transfer"></div>
             <div class="timeline-stop-body">
               <div class="timeline-info">
-                <span class="timeline-stop-name">${stopName}${stopMarker(stopName)}</span>
+                <span class="timeline-stop-name">${tStop(stopName)}${stopMarker(stopName)}</span>
                 <span class="timeline-stop-time">${stopTime}</span>
               </div>
               <span class="timeline-transfer-text">${transferText}</span>
@@ -228,8 +243,8 @@ function updateMultiStatus(header, timeline) {
             <div class="timeline-dot"></div>
             <div class="timeline-stop-body">
               <div class="timeline-info">
-                <span class="timeline-stop-name">${stopName}${stopMarker(stopName)}</span>
-                <span class="timeline-stop-time">${stopTime} <small class="time-label">着</small></span>
+                <span class="timeline-stop-name">${tStop(stopName)}${stopMarker(stopName)}</span>
+                <span class="timeline-stop-time">${stopTime} <small class="time-label">${t('trip.arr')}</small></span>
               </div>
             </div>
           </div>
@@ -249,8 +264,8 @@ function updateMultiStatus(header, timeline) {
         <div class="timeline-line"></div>
         <div class="timeline-stop-body">
           <div class="timeline-info">
-            <span class="timeline-stop-name">${depStopName}${stopMarker(depStopName)}</span>
-            <span class="timeline-stop-time">${depTime} <small class="time-label">発</small></span>
+            <span class="timeline-stop-name">${tStop(depStopName)}${stopMarker(depStopName)}</span>
+            <span class="timeline-stop-time">${depTime} <small class="time-label">${t('trip.dep')}</small></span>
           </div>
           <span class="timeline-seg-type">${segLabel}</span>
         </div>
@@ -266,7 +281,7 @@ function updateMultiStatus(header, timeline) {
         if (cls === 'passed' || cls === 'current') passedMid++;
       }
       const progressText = now >= vDepMin && now < vArrMin
-        ? `（${passedMid}/${midCount}駅通過）`
+        ? t('status.midProgress', { passed: passedMid, total: midCount })
         : '';
 
       const isExpanded = _expandedSegs.has(si);
@@ -275,7 +290,7 @@ function updateMultiStatus(header, timeline) {
           <div class="timeline-expand-line"></div>
           <button class="timeline-expand-btn" type="button">
             <span class="expand-icon">${isExpanded ? '▼' : '▶'}</span>
-            途中${midCount}駅${progressText}
+            ${t('status.midStops', { n: midCount })}${progressText}
           </button>
         </div>
         <div class="timeline-mid-stops${isExpanded ? '' : ' collapsed'}">
@@ -289,7 +304,7 @@ function updateMultiStatus(header, timeline) {
             <div class="timeline-dot"></div>
             <div class="timeline-line"></div>
             <div class="timeline-info">
-              <span class="timeline-stop-name">${seg.stops[j]}${stopMarker(seg.stops[j])}</span>
+              <span class="timeline-stop-name">${tStop(seg.stops[j])}${stopMarker(seg.stops[j])}</span>
               <span class="timeline-stop-time">${midTime}</span>
             </div>
           </div>
@@ -307,8 +322,8 @@ function updateMultiStatus(header, timeline) {
     if (!isLastVisibleSeg && si < conn.transfers.length) {
       const tr = conn.transfers[si];
       const transferText = tr.isWalk
-        ? `徒歩（乗換${tr.waitMin}分）`
-        : `乗換（${tr.waitMin}分待）`;
+        ? t('status.walkTransfer', { n: tr.waitMin })
+        : t('status.waitTransfer', { n: tr.waitMin });
 
       timelineHtml += `
         <div class="timeline-stop ${arrCls}">
@@ -316,8 +331,8 @@ function updateMultiStatus(header, timeline) {
           <div class="timeline-line line-transfer"></div>
           <div class="timeline-stop-body">
             <div class="timeline-info">
-              <span class="timeline-stop-name">${arrStopName}${arrMarker}</span>
-              <span class="timeline-stop-time">${arrTime} <small class="time-label">着</small></span>
+              <span class="timeline-stop-name">${tStop(arrStopName)}${arrMarker}</span>
+              <span class="timeline-stop-time">${arrTime} <small class="time-label">${t('trip.arr')}</small></span>
             </div>
             <span class="timeline-transfer-text">${transferText}</span>
           </div>
@@ -329,8 +344,8 @@ function updateMultiStatus(header, timeline) {
           <div class="timeline-dot"></div>
           <div class="timeline-stop-body">
             <div class="timeline-info">
-              <span class="timeline-stop-name">${arrStopName}${arrMarker}</span>
-              <span class="timeline-stop-time">${arrTime} <small class="time-label">着</small></span>
+              <span class="timeline-stop-name">${tStop(arrStopName)}${arrMarker}</span>
+              <span class="timeline-stop-time">${arrTime} <small class="time-label">${t('trip.arr')}</small></span>
             </div>
           </div>
         </div>

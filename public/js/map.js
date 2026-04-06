@@ -5,6 +5,8 @@ let busLayer = null;
 let routeLayers = {};   // segmentId -> L.layerGroup
 let activeSegKeys = []; // currently visible segment keys
 let prevRouteId = null;
+let prevFromStop = null;
+let prevToStop = null;
 
 // Extracted data from GeoJSON (keyed by segment_id)
 let ROUTE_LINES = {};   // segmentId -> [[lat,lng], ...]
@@ -29,8 +31,6 @@ function getBusIconUrl(routeId) {
   if (color === '#1976D2') return 'img/bus_blue.png';
   return 'img/bus_green.png';
 }
-
-const BUS_ICON_URL = 'img/bus_green.png'; // fallback
 
 // ===== GeoJSON Loading =====
 
@@ -88,44 +88,6 @@ function parseGeoJSON(segId, geojson) {
     }));
 
   // Compute fraction of each stop along the line
-  if (ROUTE_LINES[segId] && STOP_POINTS[segId].length > 0) {
-    computeStopFractions(segId);
-  }
-}
-
-function parseGeoJSONMapped(segId, geojson, fromStop, toStop) {
-  const lineFeature = geojson.features.find(f => f.geometry.type === 'LineString');
-  const pointFeatures = geojson.features.filter(f => f.geometry.type === 'Point');
-
-  // Sort all points by id
-  const allStops = pointFeatures
-    .sort((a, b) => (a.id || 0) - (b.id || 0))
-    .map(f => ({
-      name: f.properties.name,
-      latlng: [f.geometry.coordinates[1], f.geometry.coordinates[0]]
-    }));
-
-  // Find from/to indices in the full stop list
-  const fromIdx = allStops.findIndex(s => s.name === fromStop);
-  const toIdx = allStops.findIndex(s => s.name === toStop);
-  if (fromIdx < 0 || toIdx < 0) return;
-
-  const startIdx = Math.min(fromIdx, toIdx);
-  const endIdx = Math.max(fromIdx, toIdx);
-  STOP_POINTS[segId] = allStops.slice(startIdx, endIdx + 1);
-
-  // Clip LineString to the portion between from/to stops
-  if (lineFeature) {
-    const fullLine = lineFeature.geometry.coordinates.map(c => [c[1], c[0]]);
-    const fromProj = projectPointOnLine(STOP_POINTS[segId][0].latlng, fullLine);
-    const toProj = projectPointOnLine(STOP_POINTS[segId][STOP_POINTS[segId].length - 1].latlng, fullLine);
-
-    const startFrac = Math.min(fromProj.fraction, toProj.fraction);
-    const endFrac = Math.max(fromProj.fraction, toProj.fraction);
-
-    ROUTE_LINES[segId] = clipLine(fullLine, startFrac, endFrac);
-  }
-
   if (ROUTE_LINES[segId] && STOP_POINTS[segId].length > 0) {
     computeStopFractions(segId);
   }
@@ -284,7 +246,7 @@ function initMap() {
 
 let _routeLayersBuilt = false;
 
-function buildRouteLayersForRoute(routeId) {
+function buildRouteLayersForRoute(routeId, userFrom, userTo) {
   // Clear old layers
   Object.values(routeLayers).forEach(l => { if (map.hasLayer(l)) map.removeLayer(l); });
   routeLayers = {};
@@ -292,63 +254,107 @@ function buildRouteLayersForRoute(routeId) {
   const color = getRouteColor(routeId);
   const segIds = getRouteSegmentIds(routeId);
 
-  // Determine "key stops" — stops always shown with permanent tooltip
-  // These are: first/last of each segment + transfer points
-  const keyStopNames = new Set();
+  // === Determine which segments and stop ranges to show based on user selection ===
+  // For multi-routes: find which segment indices contain userFrom/userTo, show only those
+  // For direct routes: clip the single segment between userFrom/userTo
+
+  let visibleSegInfos = []; // { segId, fromStop, toStop } for each segment to display
+
   if (isMultiRoute(routeId)) {
     const mr = getMultiRoute(routeId);
     if (mr) {
-      mr.segments.forEach(s => {
-        const dirData = getSegmentData(s.segment, s.direction);
-        if (!dirData) return;
-        const stops = dirData.stops;
-        let fi = 0, ti = stops.length - 1;
-        if (s.from_stop) { const i = stops.indexOf(s.from_stop); if (i >= 0) fi = i; }
-        if (s.to_stop) { const i = stops.indexOf(s.to_stop); if (i >= 0) ti = i; }
-        keyStopNames.add(stops[fi]);
-        keyStopNames.add(stops[ti]);
-      });
+      const multiStops = getMultiRouteStops(routeId);
+      const fromEntry = multiStops.find(s => s.name === userFrom);
+      const toEntry = multiStops.find(s => s.name === userTo);
+      let visSeg0 = fromEntry ? fromEntry.segIdx : 0;
+      let visSeg1 = toEntry ? toEntry.segIdx : mr.segments.length - 1;
+      let visStop0 = fromEntry ? fromEntry.stopIdx : 0;
+      let visStop1 = toEntry ? toEntry.stopIdx : null;
+
+      // Skip zero-duration first segment at non-walk transfer boundary
+      if (visSeg0 < visSeg1) {
+        const seg0Dir = getSegmentData(mr.segments[visSeg0].segment, mr.segments[visSeg0].direction);
+        if (seg0Dir) {
+          const { stops: s0 } = clipSegment(seg0Dir, mr.segments[visSeg0], dayType);
+          if (visStop0 === s0.length - 1) {
+            const trDef = mr.segments[visSeg0];
+            const nextDef = mr.segments[visSeg0 + 1];
+            const isWalk = isWalkTransfer(
+              getSegRefLastStop(trDef),
+              getSegRefFirstStop(nextDef)
+            );
+            if (!isWalk) { visSeg0++; visStop0 = 0; }
+          }
+        }
+      }
+      // Skip zero-duration last segment at non-walk transfer boundary
+      if (visSeg1 > visSeg0 && visStop1 === 0) {
+        const prevDef = mr.segments[visSeg1 - 1];
+        const curDef = mr.segments[visSeg1];
+        const isWalk = isWalkTransfer(
+          getSegRefLastStop(prevDef),
+          getSegRefFirstStop(curDef)
+        );
+        if (!isWalk) {
+          visSeg1--;
+          visStop1 = null; // will use full segment
+        }
+      }
+
+      for (let si = visSeg0; si <= visSeg1; si++) {
+        const segDef = mr.segments[si];
+        const dirData = getSegmentData(segDef.segment, segDef.direction);
+        if (!dirData) continue;
+
+        // Get the clipped stops for this segment (same as getMultiRouteStops uses)
+        const { stops: clippedStops } = clipSegment(dirData, segDef, dayType);
+
+        // Determine clip range: start from segment config clip, then narrow by user selection
+        let clipFrom = segDef.from_stop || null;
+        let clipTo = segDef.to_stop || null;
+
+        // Override with user selection for first/last visible segment
+        if (si === visSeg0 && visStop0 > 0) {
+          clipFrom = clippedStops[visStop0] || clipFrom;
+        }
+        if (si === visSeg1 && visStop1 != null) {
+          clipTo = clippedStops[visStop1] || clipTo;
+        }
+
+        visibleSegInfos.push({ segId: segDef.segment, fromStop: clipFrom, toStop: clipTo });
+      }
     }
   } else {
-    const route = getRoute(routeId);
-    if (route && route.stops.length > 0) {
-      keyStopNames.add(route.stops[0]);
-      keyStopNames.add(route.stops[route.stops.length - 1]);
+    // Direct route: single segment, clip to user from/to
+    if (segIds.length > 0) {
+      visibleSegInfos.push({ segId: segIds[0], fromStop: userFrom || null, toStop: userTo || null });
     }
   }
 
-  // Build per-route clipping info from multi_route from_stop/to_stop
-  const segClip = {}; // segId -> { fromStop, toStop }
-  if (isMultiRoute(routeId)) {
-    const mr = getMultiRoute(routeId);
-    if (mr) {
-      mr.segments.forEach(s => {
-        if (s.from_stop || s.to_stop) {
-          segClip[s.segment] = { fromStop: s.from_stop, toStop: s.to_stop };
-        }
-      });
-    }
-  }
+  // Determine "key stops" — first/last of visible range
+  const keyStopNames = new Set();
+  if (userFrom) keyStopNames.add(userFrom);
+  if (userTo) keyStopNames.add(userTo);
 
-  // Build layers for each segment that has geo data and is part of this route
-  segIds.forEach(segId => {
+  // Build layers for each visible segment
+  visibleSegInfos.forEach(info => {
+    const segId = info.segId;
     if (!ROUTE_LINES[segId]) return;
     const seg = SEGMENTS[segId];
     const segType = seg ? seg.type : 'bus';
     const layer = L.layerGroup();
 
-    // Clip geo data to from_stop/to_stop if specified
     let line = ROUTE_LINES[segId];
     let stops = STOP_POINTS[segId] || [];
-    const clip = segClip[segId];
-    if (clip && stops.length > 0) {
-      const fromIdx = clip.fromStop ? stops.findIndex(s => s.name === clip.fromStop) : 0;
-      const toIdx = clip.toStop ? stops.findIndex(s => s.name === clip.toStop) : stops.length - 1;
+
+    // Clip to from/to stops
+    if (info.fromStop && info.toStop && stops.length > 0) {
+      const fromIdx = info.fromStop ? stops.findIndex(s => s.name === info.fromStop) : 0;
+      const toIdx = info.toStop ? stops.findIndex(s => s.name === info.toStop) : stops.length - 1;
       if (fromIdx >= 0 && toIdx >= 0) {
         const startIdx = Math.min(fromIdx, toIdx);
         const endIdx = Math.max(fromIdx, toIdx);
         stops = stops.slice(startIdx, endIdx + 1);
-        // Clip line between first and last visible stop
         if (STOP_FRACTIONS[segId]) {
           const fracs = STOP_FRACTIONS[segId];
           const startFrac = fracs[stops[0].name];
@@ -369,7 +375,7 @@ function buildRouteLayersForRoute(routeId) {
       dashArray: segType === 'train' ? '8 4' : null
     }).addTo(layer);
 
-    stops.forEach((stop, idx) => {
+    stops.forEach(stop => {
       const isKey = keyStopNames.has(stop.name);
       const marker = L.circleMarker(stop.latlng, {
         radius: isKey ? 7 : 4,
@@ -379,14 +385,14 @@ function buildRouteLayersForRoute(routeId) {
         fillOpacity: 1
       });
       if (isKey) {
-        marker.bindTooltip(stop.name, {
+        marker.bindTooltip(tStop(stop.name), {
           permanent: true,
           direction: 'top',
           offset: [0, -8],
           className: 'stop-tooltip'
         });
       } else {
-        marker.bindPopup(stop.name, { className: 'stop-popup' });
+        marker.bindPopup(tStop(stop.name), { className: 'stop-popup' });
       }
       marker.addTo(layer);
     });
@@ -397,9 +403,9 @@ function buildRouteLayersForRoute(routeId) {
   _routeLayersBuilt = true;
 }
 
-function showRouteLayers(routeId) {
-  // Rebuild layers with route-specific color and key stops
-  buildRouteLayersForRoute(routeId);
+function showRouteLayers(routeId, userFrom, userTo) {
+  // Rebuild layers with route-specific color, key stops, and user-selected range
+  buildRouteLayersForRoute(routeId, userFrom, userTo);
 
   // Hide all current layers
   activeSegKeys.forEach(key => {
@@ -407,17 +413,14 @@ function showRouteLayers(routeId) {
   });
   activeSegKeys = [];
 
-  // Show layers for the selected route
-  const segIds = getRouteSegmentIds(routeId);
-  segIds.forEach(segId => {
-    if (routeLayers[segId]) {
-      routeLayers[segId].addTo(map);
-      activeSegKeys.push(segId);
-    }
+  // Show layers for the visible segments
+  Object.keys(routeLayers).forEach(segId => {
+    routeLayers[segId].addTo(map);
+    activeSegKeys.push(segId);
   });
 
-  // Fit bounds to all visible segments
-  fitMapToSegments(segIds);
+  // Fit bounds to visible segments
+  fitMapToSegments(activeSegKeys);
 }
 
 function fitMapToSegments(segIds) {
@@ -446,6 +449,7 @@ function getBusProgress(routeId, tripIdx) {
   const route = getRoute(routeId);
   if (!route) return null;
   const sched = route.schedules[dayType];
+  if (!sched) return null;
   const trip = sched[tripIdx];
   if (!trip) return null;
 
@@ -546,16 +550,20 @@ function updateMap() {
     initMap();
     setTimeout(() => {
       map.invalidateSize();
-      showRouteLayers(selectedRouteId);
+      showRouteLayers(selectedRouteId, selectedFromStop, selectedToStop);
     }, 100);
     prevRouteId = selectedRouteId;
+    prevFromStop = selectedFromStop;
+    prevToStop = selectedToStop;
     return;
   }
 
-  // Switch visible route layers when route changes
-  if (prevRouteId !== selectedRouteId) {
-    showRouteLayers(selectedRouteId);
+  // Rebuild layers when route or from/to stops change
+  if (prevRouteId !== selectedRouteId || prevFromStop !== selectedFromStop || prevToStop !== selectedToStop) {
+    showRouteLayers(selectedRouteId, selectedFromStop, selectedToStop);
     prevRouteId = selectedRouteId;
+    prevFromStop = selectedFromStop;
+    prevToStop = selectedToStop;
   }
 
   busLayer.clearLayers();
@@ -579,12 +587,12 @@ function updateMap() {
       // Dep time label
       let depLabel = '';
       if (isMultiRoute(selectedRouteId) && currentConnections[selectedTripIdx]) {
-        depLabel = currentConnections[selectedTripIdx].depTime + '発';
+        depLabel = currentConnections[selectedTripIdx].depTime + t('trip.dep');
       } else {
         const route = getRoute(selectedRouteId);
         if (route) {
           const trip = route.schedules[dayType][selectedTripIdx];
-          if (trip) depLabel = trip[0] + '発';
+          if (trip) depLabel = trip[0] + t('trip.dep');
         }
       }
       if (depLabel) {
@@ -616,7 +624,7 @@ function showStaticBusMarker(now) {
     const conn = currentConnections[selectedTripIdx];
     depSec = timeToMin(conn.depTime) * 60;
     arrSec = timeToMin(conn.arrTime) * 60;
-    label = now < depSec ? `${conn.depTime}発 待機中` : '到着済';
+    label = now < depSec ? `${conn.depTime}${t('trip.dep')} ${t('map.waiting')}` : t('status.arrived');
   } else {
     const route = getRoute(selectedRouteId);
     if (!route) return;
@@ -624,7 +632,7 @@ function showStaticBusMarker(now) {
     if (!trip) return;
     depSec = timeToMin(trip[0]) * 60;
     arrSec = timeToMin(trip[trip.length - 1]) * 60;
-    label = now < depSec ? `${trip[0]}発 待機中` : '到着済';
+    label = now < depSec ? `${trip[0]}${t('trip.dep')} ${t('map.waiting')}` : t('status.arrived');
   }
 
   const segId = now < depSec ? segIds[0] : segIds[segIds.length - 1];
@@ -654,7 +662,7 @@ function updateMapInfoBar(now) {
       const mr = getMultiRoute(selectedRouteId);
       const conn = currentConnections[selectedTripIdx];
       if (mr && conn) {
-        routeName = mr.short_name || mr.name;
+        routeName = tRouteDisplay(selectedRouteId, mr.short_name, mr.name);
         depTime = conn.depTime;
         arrTime = conn.arrTime;
       }
@@ -663,7 +671,7 @@ function updateMapInfoBar(now) {
       if (route) {
         const trip = route.schedules[dayType][selectedTripIdx];
         if (trip) {
-          routeName = route.short_name || route.name;
+          routeName = tRouteDisplay(selectedRouteId, route.short_name, route.name);
           depTime = trip[0];
           arrTime = trip[trip.length - 1];
         }
@@ -674,15 +682,15 @@ function updateMapInfoBar(now) {
       const depSec = timeToMin(depTime) * 60;
       const arrSec = timeToMin(arrTime) * 60;
       let status = '';
-      if (now < depSec) status = '出発前';
-      else if (now <= arrSec) status = '運行中';
-      else status = '到着済';
-      infoEl.textContent = `${routeName} ${depTime}発 - ${status}`;
+      if (now < depSec) status = t('status.before');
+      else if (now <= arrSec) status = t('status.running');
+      else status = t('status.arrived');
+      infoEl.textContent = `${routeName} ${depTime}${t('trip.dep')} - ${status}`;
     } else {
-      infoEl.textContent = '便を選択してください';
+      infoEl.textContent = t('map.selectTrip');
     }
   } else {
-    infoEl.textContent = '便を選択してください';
+    infoEl.textContent = t('map.selectTrip');
   }
 
   let mH, mM;

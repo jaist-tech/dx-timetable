@@ -50,7 +50,7 @@ def extract_tsurugi_data(pdf_path):
     routes = [
         {
             "id": "tsurugi_outbound",
-            "name": "鶴来線（大学 → 鶴来駅）",
+            "name": "JAISTシャトル 鶴来線（大学 → 鶴来駅）",
             "short_name": "鶴来線 下り",
             "color": "#4CAF50",
             "stops": ["JAIST", "ハイテクセンター前", "宮竹ヘルスロード", "灯台笹", "岩本", "本鶴来", "鶴来本町", "鶴来駅"],
@@ -58,7 +58,7 @@ def extract_tsurugi_data(pdf_path):
         },
         {
             "id": "tsurugi_inbound",
-            "name": "鶴来線（鶴来駅 → 大学）",
+            "name": "JAISTシャトル 鶴来線（鶴来駅 → 大学）",
             "short_name": "鶴来線 上り",
             "color": "#2196F3",
             "stops": ["鶴来駅", "鶴来本町", "本鶴来", "岩本", "灯台笹", "宮竹ヘルスロード", "ハイテクセンター前", "JAIST"],

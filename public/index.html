@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>JAISTバス案内</title>
+<title>JAISTのりかえ</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
@@ -19,18 +19,51 @@
 <div id="app">
   <!-- Header -->
   <header>
-    <div class="header-left">
-      <button class="theme-toggle-btn" id="theme-toggle" aria-label="テーマ切替" onclick="toggleTheme()">
-        <svg class="icon-sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-        <svg class="icon-moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      </button>
-    </div>
-    <div class="header-right">
-      <span class="day-badge" id="day-badge">平日</span>
-      <span class="current-time" id="header-time">--:--:--</span>
-      <a href="about.html" class="about-link" aria-label="このアプリについて">
+    <div class="header-side header-left">
+      <a href="about.html" class="about-link" data-i18n-aria="header.about" aria-label="このアプリについて">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><circle cx="12" cy="8" r="0.5" fill="currentColor"/></svg>
       </a>
+    </div>
+    <div class="header-center">
+      <span id="header-date">--/--</span>
+      <span id="header-dow">(-)</span>
+      <span class="header-time" id="header-time">--:--</span>
+    </div>
+    <div class="header-side header-right">
+      <div class="settings-dropdown" id="settings-dropdown">
+        <div class="settings-backdrop" id="settings-backdrop"></div>
+        <button class="settings-dropdown-btn" id="settings-dropdown-btn" aria-label="設定">
+          <svg class="settings-icon-lang" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+          <span class="settings-sep"></span>
+          <svg class="settings-icon-sun" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg class="settings-icon-moon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <div class="settings-dropdown-menu" id="settings-dropdown-menu">
+          <div class="settings-group">
+            <div class="settings-group-label" data-i18n="settings.language">言語</div>
+            <button class="settings-option" data-setting="lang" data-value="ja"><span class="settings-check">✓</span>JA <span class="settings-option-sub">日本語</span></button>
+            <button class="settings-option" data-setting="lang" data-value="en"><span class="settings-check">✓</span>EN <span class="settings-option-sub">English</span></button>
+          </div>
+          <div class="settings-group">
+            <div class="settings-group-label" data-i18n="settings.theme">テーマ</div>
+            <button class="settings-option" data-setting="theme" data-value="light"><span class="settings-check">✓</span><span data-i18n="settings.light">ライト</span></button>
+            <button class="settings-option" data-setting="theme" data-value="dark"><span class="settings-check">✓</span><span data-i18n="settings.dark">ダーク</span></button>
+          </div>
+        </div>
+      </div>
+      <div class="fav-dropdown" id="fav-dropdown">
+        <div class="fav-dropdown-backdrop" id="fav-dropdown-backdrop"></div>
+        <button class="fav-dropdown-btn" id="fav-dropdown-btn" aria-label="お気に入り">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </button>
+        <div class="fav-dropdown-menu" id="fav-dropdown-menu">
+          <button class="fav-dropdown-save" id="fav-dropdown-save">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            <span data-i18n="fav.save">現在のルートを保存</span>
+          </button>
+          <div class="fav-dropdown-list" id="fav-dropdown-list"></div>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -40,31 +73,30 @@
     <div class="tab-content active" id="tab-search">
       <div class="search-controls card">
         <div class="search-field">
-          <label>ルート</label>
           <select class="route-select"></select>
         </div>
         <div class="search-stops-row">
           <div class="search-field-half">
-            <label>出発</label>
+            <label data-i18n="search.from">出発</label>
             <select class="from-select"></select>
           </div>
-          <button class="swap-btn" aria-label="入れ替え">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 12l-3-3m3 3l3-3M17 8v12m0-12l-3 3m3-3l3 3"/></svg>
+          <button class="swap-btn" data-i18n-aria="search.swap" aria-label="入れ替え">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16m-16 0l3-3m-3 3l3 3M20 17H4m16 0l-3-3m3 3l-3 3"/></svg>
           </button>
           <div class="search-field-half">
-            <label>到着</label>
+            <label data-i18n="search.to">到着</label>
             <select class="to-select"></select>
           </div>
         </div>
       </div>
       <div class="countdown-hero" id="countdown-hero">
-        <div class="label" id="countdown-label">出発まで</div>
-        <div class="time-big" id="countdown-time">--:--</div>
-        <div class="route-name" id="countdown-route">読み込み中...</div>
+        <div class="countdown-row">
+          <div class="label" id="countdown-label" data-i18n="countdown.until">出発まで</div>
+          <div class="time-big" id="countdown-time">--:--</div>
+        </div>
         <div class="depart-info" id="countdown-depart"></div>
       </div>
       <div class="card trip-list-card">
-        <div class="card-title">時刻候補</div>
         <div class="trip-list" id="trip-list"></div>
       </div>
     </div>
@@ -73,19 +105,18 @@
     <div class="tab-content" id="tab-status">
       <div class="search-controls card">
         <div class="search-field">
-          <label>ルート</label>
           <select class="route-select"></select>
         </div>
         <div class="search-stops-row">
           <div class="search-field-half">
-            <label>出発</label>
+            <label data-i18n="search.from">出発</label>
             <select class="from-select"></select>
           </div>
-          <button class="swap-btn" aria-label="入れ替え">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 12l-3-3m3 3l3-3M17 8v12m0-12l-3 3m3-3l3 3"/></svg>
+          <button class="swap-btn" data-i18n-aria="search.swap" aria-label="入れ替え">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16m-16 0l3-3m-3 3l3 3M20 17H4m16 0l-3-3m3 3l-3 3"/></svg>
           </button>
           <div class="search-field-half">
-            <label>到着</label>
+            <label data-i18n="search.to">到着</label>
             <select class="to-select"></select>
           </div>
         </div>
@@ -93,7 +124,7 @@
       <div class="card status-header-card" id="status-header"></div>
       <div class="card status-timeline-card">
         <div id="status-timeline">
-          <div class="no-results">便検索タブで便を選択してください</div>
+          <div class="no-results" data-i18n="status.selectTrip">便検索タブで便を選択してください</div>
         </div>
       </div>
     </div>
@@ -102,13 +133,13 @@
     <div class="tab-content" id="tab-map">
       <div class="map-wrapper">
         <div class="map-info-bar">
-          <span id="map-bus-info">便を選択してください</span>
+          <span id="map-bus-info" data-i18n="map.selectTrip">便を選択してください</span>
           <span id="map-time">--:--</span>
         </div>
         <div id="leaflet-map"></div>
         <div class="map-legend">
-          <div class="legend-item"><div class="legend-dot" style="background:#43A047"></div>小松駅経由</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#1976D2"></div>鶴来駅経由</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#43A047"></div><span data-i18n="map.legendKomatsu">小松駅経由</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#1976D2"></div><span data-i18n="map.legendTsurugi">鶴来駅経由</span></div>
         </div>
       </div>
     </div>
@@ -118,35 +149,141 @@
   <nav id="bottom-nav">
     <button class="active" data-tab="search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-      便検索
+      <span data-i18n="nav.search">便検索</span>
     </button>
     <button data-tab="status">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-      詳細
+      <span data-i18n="nav.status">詳細</span>
     </button>
     <button data-tab="map">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
-      マップ
+      <span data-i18n="nav.map">マップ</span>
     </button>
   </nav>
 </div>
 
+<!-- Tutorial Overlay -->
+<div class="tutorial-overlay" id="tutorial-overlay">
+  <div class="tutorial-container">
+    <div class="tutorial-header">
+      <button class="tutorial-skip-btn" id="tutorial-skip" data-i18n="tutorial.skip">スキップ</button>
+    </div>
+    <div class="tutorial-body">
+
+      <!-- Page 1: Welcome -->
+      <div class="tutorial-page active" data-page="0">
+        <div class="tutorial-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <h2 data-i18n-html="tutorial.welcome.title">JAISTのりかえ へようこそ</h2>
+        <div class="tutorial-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+          <span data-i18n-html="tutorial.welcome.unofficial">本サービスは各交通機関の<strong>公式サービスではありません</strong>。</span>
+        </div>
+        <div class="tutorial-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <span data-i18n-html="tutorial.welcome.static">公式の時刻表データをもとに動作しており、<strong>リアルタイムの運行状況・遅延情報等は反映されません</strong>。</span>
+        </div>
+        <div class="tutorial-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          <span data-i18n-html="tutorial.welcome.official">正確な運行情報は各交通機関の公式サイトをご確認ください。</span>
+        </div>
+      </div>
+
+      <!-- Page 2: Tabs -->
+      <div class="tutorial-page" data-page="1">
+        <div class="tutorial-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        </div>
+        <h2 data-i18n-html="tutorial.tabs.title">各タブの役割</h2>
+        <div class="tutorial-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <span data-i18n-html="tutorial.tabs.search"><strong>便検索</strong>：ルート・出発/到着を選んで便の一覧を表示します。次の便までのカウントダウンも確認できます。</span>
+        </div>
+        <div class="tutorial-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span data-i18n-html="tutorial.tabs.status"><strong>詳細</strong>：選択した便のタイムラインを表示します。乗車・乗換・降車の流れと待ち時間がわかります。</span>
+        </div>
+        <div class="tutorial-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+          <span data-i18n-html="tutorial.tabs.map"><strong>マップ</strong>：経路とバスの推定位置を地図上に表示します。位置は時刻表ベースの概算です。</span>
+        </div>
+      </div>
+
+      <!-- Page 3: Header -->
+      <div class="tutorial-page" data-page="2">
+        <div class="tutorial-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        </div>
+        <h2 data-i18n-html="tutorial.header.title">ヘッダーの機能</h2>
+        <div class="tutorial-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><circle cx="12" cy="8" r="0.5" fill="currentColor"/></svg>
+          <span data-i18n-html="tutorial.header.about"><strong>情報</strong>：免責事項やデータ出典などの詳細情報を確認できます。</span>
+        </div>
+        <div class="tutorial-item">
+          <span class="tutorial-settings-icon">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+            <span class="tutorial-settings-sep"></span>
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          </span>
+          <span data-i18n-html="tutorial.header.settings"><strong>表示設定</strong>：言語（日/英）とテーマ（ライト/ダーク）を切り替えられます。</span>
+        </div>
+        <div class="tutorial-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <span data-i18n-html="tutorial.header.fav"><strong>ルート保存</strong>：よく使うルートを保存して、ワンタップで切り替えられます。</span>
+        </div>
+      </div>
+
+      <!-- Page 4: Done -->
+      <div class="tutorial-page" data-page="3">
+        <div class="tutorial-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <h2 data-i18n-html="tutorial.done.title">準備完了！</h2>
+        <div class="tutorial-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          <span data-i18n-html="tutorial.done.pwa">ホーム画面に追加すると、アプリのように使えます（PWA対応）。</span>
+        </div>
+        <div class="tutorial-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+          <span data-i18n-html="tutorial.done.reshow">このチュートリアルは「このアプリについて」ページからいつでも再表示できます。</span>
+        </div>
+      </div>
+
+    </div>
+    <div class="tutorial-footer">
+      <button class="tutorial-nav-btn tutorial-prev-btn hidden" id="tutorial-prev" data-i18n="tutorial.prev">戻る</button>
+      <div class="tutorial-dots" id="tutorial-dots"></div>
+      <button class="tutorial-nav-btn tutorial-next-btn" id="tutorial-next" data-i18n="tutorial.next">次へ</button>
+    </div>
+  </div>
+</div>
+
 <script>
-// Theme: load saved preference or follow OS
+// Theme: load saved preference
 (function(){
   const saved = localStorage.getItem('theme');
   if (saved) {
     document.documentElement.setAttribute('data-theme', saved);
   }
 })();
-function toggleTheme() {
-  const current = document.documentElement.getAttribute('data-theme');
-  const next = current === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('theme', next);
-}
+// Language: load saved preference
+(function(){
+  const saved = localStorage.getItem('lang');
+  if (saved) {
+    document.documentElement.setAttribute('lang', saved);
+  }
+})();
+// Fix PWA standalone viewport after page navigation (bfcache restore)
+window.addEventListener('pageshow', function(e) {
+  if (e.persisted) {
+    document.body.style.height = 'auto';
+    requestAnimationFrame(function() { document.body.style.height = ''; });
+  }
+});
 </script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="js/i18n.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/search.js"></script>
 <script src="js/status.js"></script>

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-i18n-title="about.title">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>このアプリについて - JAISTバス案内</title>
+<title>このアプリについて - JAISTのりかえ</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -28,109 +28,98 @@ body{
   line-height:1.7;
   min-height:100dvh;
 }
+button{font-family:inherit;border:none;cursor:pointer;background:none}
 header{
   height:var(--header-height);
   background:var(--primary);
   color:#fff;
   display:flex;
   align-items:center;
-  padding:0 16px;
-  gap:12px;
+  padding:0 12px;
   position:sticky;
   top:0;
   z-index:10;
 }
-header a{
-  color:#fff;
-  text-decoration:none;
-  display:flex;
-  align-items:center;
+.header-side{display:flex;align-items:center;gap:6px;flex:1}
+.header-right{justify-content:flex-end}
+.header-center{
+  display:flex;align-items:baseline;gap:4px;
+  font-size:0.9rem;font-weight:600;
+  font-variant-numeric:tabular-nums;
+  flex-shrink:0;white-space:nowrap;
 }
-header h1{font-size:1.1rem;font-weight:700}
+.header-center .header-time{font-size:1.25rem;font-weight:700;margin-left:4px}
+.header-center #header-dow{display:inline-block;width:3em;text-align:center}
 .back-btn{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  width:32px;
-  height:32px;
-  border-radius:50%;
-  transition:background 0.2s;
+  display:flex;align-items:center;justify-content:center;
+  width:32px;height:32px;border-radius:50%;transition:background 0.2s;
+  color:#fff;text-decoration:none;
 }
 .back-btn:hover{background:rgba(255,255,255,0.15)}
 .back-btn svg{width:20px;height:20px}
-.content{
-  max-width:540px;
-  margin:0 auto;
-  padding:16px;
+.settings-dropdown{position:relative;flex-shrink:0}
+.settings-dropdown-btn{
+  color:#fff;opacity:0.8;background:rgba(255,255,255,0.15);
+  padding:4px 8px;border-radius:14px;display:flex;align-items:center;gap:4px;
+  height:28px;transition:opacity 0.2s,background 0.2s;cursor:pointer;
 }
+.settings-dropdown-btn:hover{opacity:1;background:rgba(255,255,255,0.3)}
+.settings-dropdown.open .settings-dropdown-btn{opacity:1;background:rgba(255,255,255,0.3)}
+.settings-sep{width:1px;height:14px;background:rgba(255,255,255,0.4);flex-shrink:0}
+.settings-icon-moon{display:none}
+[data-theme="dark"] .settings-icon-sun{display:none}
+[data-theme="dark"] .settings-icon-moon{display:block}
+.settings-backdrop{display:none;position:fixed;inset:0;z-index:1050}
+.settings-dropdown.open .settings-backdrop{display:block}
+.settings-dropdown-menu{
+  display:none;position:absolute;top:calc(100% + 8px);right:0;
+  background:var(--card);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.18);
+  min-width:160px;z-index:1100;padding:6px 0;animation:settingsDropIn 0.15s ease;
+}
+.settings-dropdown.open .settings-dropdown-menu{display:block}
+@keyframes settingsDropIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.settings-group{padding:4px 0}
+.settings-group+.settings-group{border-top:1px solid var(--border)}
+.settings-group-label{padding:6px 14px 2px;font-size:0.7rem;font-weight:700;color:var(--text-light,#9AA0A6);text-transform:uppercase;letter-spacing:0.5px}
+.settings-option{display:flex;align-items:center;gap:8px;width:100%;padding:9px 14px;font-size:0.82rem;font-weight:500;color:var(--text);background:none;cursor:pointer;transition:background 0.12s}
+.settings-option:hover{background:var(--bg)}
+.settings-check{width:18px;font-size:0.85rem;font-weight:700;color:var(--primary);visibility:hidden;flex-shrink:0}
+.settings-option.active .settings-check{visibility:visible}
+.settings-option-sub{font-weight:400;color:var(--text-secondary);font-size:0.75rem;margin-left:2px}
+.content{max-width:540px;margin:0 auto;padding:16px}
 .card{
-  background:var(--card);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  padding:20px;
-  margin-bottom:16px;
+  background:var(--card);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:20px;margin-bottom:16px;
 }
 .card h2{
-  font-size:0.95rem;
-  font-weight:700;
-  color:var(--primary);
-  margin-bottom:10px;
-  padding-bottom:8px;
-  border-bottom:2px solid var(--bg);
+  font-size:0.95rem;font-weight:700;color:var(--primary);
+  margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid var(--bg);
 }
-.card p, .card li{
-  font-size:0.82rem;
-  color:var(--text-secondary);
-  line-height:1.8;
-}
-.card ul{
-  list-style:none;
-  padding:0;
-}
-.card li{
-  padding:4px 0;
-  padding-left:1em;
-  text-indent:-1em;
-}
-.card li::before{
-  content:"\00B7\0020";
-  font-weight:700;
-}
-.card a{
-  color:var(--primary);
-  text-decoration:none;
-}
+.card p,.card li{font-size:0.82rem;color:var(--text-secondary);line-height:1.8}
+.card ul{list-style:none;padding:0}
+.card li{padding:4px 0;padding-left:1em;text-indent:-1em}
+.card li::before{content:"\00B7\0020";font-weight:700}
+.card a{color:var(--primary);text-decoration:none}
 .card a:hover{text-decoration:underline}
-.app-name{
-  text-align:center;
-  padding:24px 0 8px;
-  font-size:1.2rem;
-  font-weight:700;
-  color:var(--text);
-}
-.app-version{
-  text-align:center;
-  font-size:0.75rem;
-  color:var(--text-secondary);
-  margin-bottom:20px;
-}
+.app-name{text-align:center;padding:24px 0 8px;font-size:1.2rem;font-weight:700;color:var(--text)}
+.app-version{text-align:center;font-size:0.75rem;color:var(--text-secondary);margin-bottom:20px}
 .warn{
-  background:#FFF8E1;
-  border-left:3px solid #FFB300;
-  padding:12px 16px;
-  border-radius:0 var(--radius) var(--radius) 0;
-  margin-bottom:16px;
+  background:#FFF8E1;border-left:3px solid #FFB300;
+  padding:12px 16px;border-radius:0 var(--radius) var(--radius) 0;margin-bottom:16px;
 }
-.warn p{
-  font-size:0.82rem;
-  color:#5D4037;
-  line-height:1.8;
-}
+.warn p{font-size:0.82rem;color:#5D4037;line-height:1.8}
 .warn strong{color:#E65100}
+.static-notice{
+  margin-top:12px;padding:10px 14px;
+  background:#FFF3E0;border-left:3px solid #FF9800;
+  border-radius:0 8px 8px 0;
+  font-size:0.82rem;font-weight:600;color:#E65100;line-height:1.7;
+}
+[data-theme="dark"] .static-notice{background:#332B00;color:#FFB300;border-left-color:#FFB300}
 
 /* Dark theme */
 [data-theme="dark"]{
-  --primary:#1976D2;--bg:#121212;--card:#1E1E1E;
+  --primary:#64B5F6;--bg:#121212;--card:#1E1E1E;
   --text:#E0E0E0;--text-secondary:#9E9E9E;--border:#333;
   --shadow:0 2px 8px rgba(0,0,0,0.3);
 }
@@ -139,105 +128,148 @@ header h1{font-size:1.1rem;font-weight:700}
 [data-theme="dark"] .warn p{color:#FFD54F}
 [data-theme="dark"] .warn strong{color:#FFB300}
 [data-theme="dark"] details summary h2{color:var(--primary-light,#42A5F5)}
-.icon-moon{display:none}
-[data-theme="dark"] .icon-sun{display:none}
-[data-theme="dark"] .icon-moon{display:block}
-.theme-btn{
-  color:#fff;opacity:0.7;display:flex;align-items:center;justify-content:center;
-  width:32px;height:32px;border-radius:50%;transition:opacity 0.2s,background 0.2s;
-  margin-left:auto;background:none;border:none;cursor:pointer;
-}
-.theme-btn:hover{opacity:1;background:rgba(255,255,255,0.15)}
 </style>
 <script>
 (function(){
-  const saved = localStorage.getItem('theme');
-  if (saved) {
-    document.documentElement.setAttribute('data-theme', saved);
-  }
+  var s = localStorage.getItem('theme');
+  if (s) document.documentElement.setAttribute('data-theme', s);
+  var l = localStorage.getItem('lang');
+  if (l) document.documentElement.setAttribute('lang', l);
 })();
 </script>
 </head>
 <body>
 <header>
-  <a href="index.html" class="back-btn" aria-label="戻る">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-  </a>
-  <h1>このアプリについて</h1>
-  <button class="theme-btn" onclick="toggleTheme()" aria-label="テーマ切替">
-    <svg class="icon-sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-    <svg class="icon-moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-  </button>
+  <div class="header-side header-left">
+    <a href="index.html" class="back-btn" data-i18n-aria="header.back" aria-label="戻る">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
+  </div>
+  <div class="header-center">
+    <span id="header-date">--/--</span>
+    <span id="header-dow">(-)</span>
+    <span class="header-time" id="header-time">--:--</span>
+  </div>
+  <div class="header-side header-right">
+    <div class="settings-dropdown" id="settings-dropdown">
+      <div class="settings-backdrop" id="settings-backdrop"></div>
+      <button class="settings-dropdown-btn" id="settings-dropdown-btn" aria-label="設定">
+        <svg class="settings-icon-lang" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        <span class="settings-sep"></span>
+        <svg class="settings-icon-sun" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg class="settings-icon-moon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <div class="settings-dropdown-menu" id="settings-dropdown-menu">
+        <div class="settings-group">
+          <div class="settings-group-label" data-i18n="settings.language">言語</div>
+          <button class="settings-option" data-setting="lang" data-value="ja"><span class="settings-check">✓</span>JA <span class="settings-option-sub">日本語</span></button>
+          <button class="settings-option" data-setting="lang" data-value="en"><span class="settings-check">✓</span>EN <span class="settings-option-sub">English</span></button>
+        </div>
+        <div class="settings-group">
+          <div class="settings-group-label" data-i18n="settings.theme">テーマ</div>
+          <button class="settings-option" data-setting="theme" data-value="light"><span class="settings-check">✓</span><span data-i18n="settings.light">ライト</span></button>
+          <button class="settings-option" data-setting="theme" data-value="dark"><span class="settings-check">✓</span><span data-i18n="settings.dark">ダーク</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
 </header>
-<script>
-function toggleTheme() {
-  const current = document.documentElement.getAttribute('data-theme');
-  const next = current === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('theme', next);
-}
-</script>
 
 <div class="content">
-  <div class="app-name">JAISTバス案内 (BusDX)</div>
-  <div class="app-version">2026年4月版ダイヤ準拠</div>
+  <div class="app-name" data-i18n="about.appName">JAISTのりかえ</div>
+  <div class="app-version" data-i18n="about.appVersion">2026年4月版ダイヤ準拠</div>
 
   <div class="card">
-    <h2>このアプリについて</h2>
-    <p>JAISTと周辺地域を結ぶ交通手段の時刻表・乗換案内アプリです。以下の路線に対応しています。</p>
+    <h2 data-i18n="about.aboutHeading">このアプリについて</h2>
+    <p data-i18n="about.aboutText">JAISTと周辺地域を結ぶ交通手段の時刻表・乗換案内アプリです。以下の路線に対応しています。</p>
     <ul>
-      <li><strong>JAISTシャトルバス</strong> — 鶴来線（JAIST↔鶴来駅）・小松線（JAIST↔小松駅）</li>
-      <li><strong>北陸鉄道 石川線</strong> — 鶴来駅↔野町駅</li>
-      <li><strong>IRいしかわ鉄道</strong> — 小松駅↔金沢駅</li>
-      <li><strong>小松空港連絡バス</strong> — 小松駅↔小松空港</li>
+      <li><strong data-i18n="about.route.shuttle">JAISTシャトルバス</strong> — <span data-i18n="about.route.shuttleDesc">鶴来線（JAIST↔鶴来駅）・小松線（JAIST↔小松駅）</span></li>
+      <li><strong data-i18n="about.route.ishikawa">北陸鉄道 石川線</strong> — <span data-i18n="about.route.ishikawaDesc">鶴来駅↔野町駅</span></li>
+      <li><strong data-i18n="about.route.ir">IRいしかわ鉄道</strong> — <span data-i18n="about.route.irDesc">小松駅↔金沢駅</span></li>
+      <li><strong data-i18n="about.route.limo">小松空港連絡バス</strong> — <span data-i18n="about.route.limoDesc">小松駅↔小松空港</span></li>
     </ul>
-    <p>JAISTから金沢駅・小松空港などへの乗換ルートを検索し、次の便や所要時間をリアルタイムで確認できます。</p>
+    <p data-i18n="about.aboutFooter">JAISTから金沢駅・小松空港などへの乗換ルートを検索し、次の便や所要時間を確認できます。</p>
+    <p class="static-notice" data-i18n="about.staticNotice">本アプリは公式時刻表のデータに基づく静的な情報提供ツールです。リアルタイムの運行状況・位置情報・遅延情報等は反映されません。</p>
   </div>
 
   <details class="card">
-    <summary><h2 style="display:inline;cursor:pointer">免責事項</h2></summary>
+    <summary><h2 style="display:inline;cursor:pointer" data-i18n="about.disclaimerHeading">免責事項</h2></summary>
     <ul>
-      <li>本アプリはJAISTの公式サービスではありません。学生サークルが独自に開発した非公式の情報提供ツールです。</li>
-      <li>本アプリに掲載されている時刻表は、各交通機関の公式時刻表PDFから自動抽出したデータに基づいています。抽出処理の都合上、誤りが含まれる可能性があります。内容の正確性・最新性を保証するものではありません。</li>
-      <li>小松空港→小松駅の発車時刻は、航空便到着の約15分後・所要約12分として算出した推定値です。実際の発車時刻は航空便の到着状況により変動します。</li>
-      <li>マップ上に表示される運行ルート（経路線）およびバス停・駅の位置情報は、実際の位置を推測して作成したものであり、正確な位置を保証するものではありません。</li>
-      <li>ダイヤ改正・臨時運休・遅延・天候等により、実際の運行状況と異なる場合があります。</li>
-      <li>本アプリの利用により生じたいかなる損害（乗り遅れ等を含む）についても、開発者は責任を負いかねます。</li>
-      <li>正確な運行情報については、各交通機関の公式サイトにてご確認ください。</li>
+      <li data-i18n="about.disclaimer.1">本アプリはJAISTおよび各交通機関（IRいしかわ鉄道・北陸鉄道等）の公式サービスではありません。学生サークルが独自に開発した非公式の情報提供ツールです。</li>
+      <li data-i18n="about.disclaimer.2">時刻表データや経路情報には誤りが含まれる可能性があります。内容の正確性・最新性を保証するものではありません。</li>
+      <li data-i18n="about.disclaimer.3">本アプリの利用により生じたいかなる損害（乗り遅れ等を含む）についても、開発者は責任を負いかねます。</li>
+      <li data-i18n="about.disclaimer.4">正確な運行情報については、各交通機関の公式サイトにてご確認ください。</li>
+    </ul>
+  </details>
+
+  <details class="card">
+    <summary><h2 style="display:inline;cursor:pointer" data-i18n="about.techHeading">データと仕組みについて</h2></summary>
+    <ul>
+      <li data-i18n="about.tech.static">本アプリは独自のサーバーを持たず、ユーザーデータの収集や送信は行っていません（フォント・地図等の外部サービスとの最低限の通信を除く）。</li>
+      <li data-i18n="about.tech.timetable">時刻表データは各交通機関の公式時刻表PDFからプログラムで自動抽出して生成しています。リアルタイムの運行状況・遅延情報等は反映されません。</li>
+      <li data-i18n="about.tech.validity">時刻表データには有効期間があり、ダイヤ改正により内容が変わる場合があります。最新のダイヤは各交通機関の公式サイトをご確認ください。</li>
+      <li data-i18n="about.tech.airport">小松空港→小松駅の発車時刻は、航空便到着の約15分後・所要約12分として算出した推定値です。</li>
+      <li data-i18n="about.tech.transfer">乗換検索では乗換駅ごとに設定された乗換時間（1〜5分）を用いて計算しています。実際の乗換には余裕をもって移動することをお勧めします。</li>
+      <li data-i18n="about.tech.latestConn">乗換がある経路では、乗換駅での待ち時間が最も短くなるよう、できるだけ遅い便を選んで表示しています。余裕をもって早めの便に乗ることもご検討ください。</li>
+      <li data-i18n="about.tech.map">マップ上の経路やバス停・駅の位置は推測に基づいており、正確な位置を保証するものではありません。</li>
+      <li data-i18n="about.tech.storage">お気に入りルートや表示設定（テーマ・言語）はお使いのブラウザに保存されます。ブラウザのサイトデータを削除した場合やプライベートモードでは保存されません。</li>
     </ul>
   </details>
 
   <div class="card">
-    <h2>時刻表を確認する</h2>
-    <p>本アプリで使用している全路線の時刻表データを一覧で確認できます。</p>
-    <p style="margin-top:8px"><a href="timetable.html">時刻表一覧ページを開く</a></p>
+    <h2 data-i18n="about.timetableHeading">時刻表を確認する</h2>
+    <p data-i18n="about.timetableText">本アプリで使用している全路線の時刻表データを一覧で確認できます。</p>
+    <p style="margin-top:8px"><a href="timetable.html" data-i18n="about.timetableLink">時刻表一覧ページを開く</a></p>
   </div>
 
   <div class="card">
-    <h2>時刻表データの出典</h2>
-    <p>本アプリの時刻表データは、以下の公式情報に基づいています。最新のダイヤは各公式ページをご確認ください。</p>
+    <h2 data-i18n="about.sourceHeading">時刻表データの出典</h2>
+    <p data-i18n="about.sourceText">本アプリの時刻表データは、以下の公式情報に基づいています。最新のダイヤは各公式ページをご確認ください。</p>
     <ul>
-      <li><a href="https://www.jaist.ac.jp/top/access/" target="_blank" rel="noopener">JAIST アクセス情報</a> — シャトルバス時刻表（鶴来線・小松線）</li>
-      <li><a href="https://www.ishikawa-railway.jp/timetable/" target="_blank" rel="noopener">IRいしかわ鉄道 時刻表</a></li>
-      <li><a href="https://www.hokutetsu.co.jp/railway/ishikawasen/" target="_blank" rel="noopener">北陸鉄道 石川線</a></li>
-    </ul>
-  </div>
-
-  <!-- ライセンス・帰属表示 -->
-  <div class="card">
-    <h2>ライセンス・帰属表示</h2>
-    <ul>
-      <li><strong>Noto Sans JP</strong> — Google Fonts より提供。<a href="https://scripts.sil.org/OFL" target="_blank" rel="noopener">SIL Open Font License 1.1</a> に基づき使用しています。</li>
-      <li><strong>Leaflet</strong> — <a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a> (BSD 2-Clause License) を使用しています。</li>
-      <li><strong>OpenStreetMap</strong> — 地図データは <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">&copy; OpenStreetMap contributors</a> より提供されています。</li>
-      <li><strong>バスアイコン画像</strong> — 本アプリで使用しているバスアイコン画像の著作権は、それぞれの作成者に帰属します。</li>
+      <li><a href="https://www.jaist.ac.jp/top/access/" target="_blank" rel="noopener" data-i18n="about.source.jaist">JAIST アクセス情報</a> — <span data-i18n="about.source.jaistDesc">シャトルバス時刻表（鶴来線・小松線）</span></li>
+      <li><a href="https://www.ishikawa-railway.jp/timetable/" target="_blank" rel="noopener" data-i18n="about.source.ir">IRいしかわ鉄道 時刻表</a></li>
+      <li><a href="https://www.hokutetsu.co.jp/railway/ishikawasen/" target="_blank" rel="noopener" data-i18n="about.source.hokutetsu">北陸鉄道 石川線</a></li>
+      <li><a href="https://www.hokutetsu.co.jp/airport-bus#station_airport" target="_blank" rel="noopener" data-i18n="about.source.limo">北陸鉄道 空港連絡バス</a></li>
     </ul>
   </div>
 
   <div class="card">
-    <h2>開発</h2>
-    <p><a href="https://www.jaist.ac.jp/misc/circles/tech/" target="_blank" rel="noopener">JAIST Techサークル</a></p>
+    <h2 data-i18n="about.licenseHeading">ライセンス・帰属表示</h2>
+    <ul>
+      <li><strong>Noto Sans JP</strong> — <span data-i18n="about.license.noto">Google Fonts より提供。SIL Open Font License 1.1 に基づき使用しています。</span></li>
+      <li><strong><a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a></strong> (BSD 2-Clause License) <span data-i18n="about.license.leaflet">を使用しています。</span></li>
+      <li><strong>OpenStreetMap</strong> — <span data-i18n="about.license.osm">地図データは OpenStreetMap contributors より提供されています。</span></li>
+      <li><span data-i18n="about.license.busIcon">本アプリで使用しているバスアイコン画像の著作権は、それぞれの作成者に帰属します。</span></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2 data-i18n="about.tutorialHeading">チュートリアル</h2>
+    <p data-i18n="about.tutorialText">初回起動時に表示されるアプリの使い方ガイドを再表示できます。</p>
+    <p style="margin-top:8px"><a href="index.html?tutorial=1" data-i18n="about.tutorialLink">チュートリアルを表示する</a></p>
+  </div>
+
+  <div class="card">
+    <h2 data-i18n="about.devHeading">開発</h2>
+    <p><a href="https://www.jaist.ac.jp/misc/circles/tech/" target="_blank" rel="noopener">JAIST Tech Circle</a></p>
   </div>
 </div>
+
+<script src="js/i18n.js"></script>
+<script>
+function updateClock() {
+  var n = new Date();
+  var h = String(n.getHours()).padStart(2,'0');
+  var m = String(n.getMinutes()).padStart(2,'0');
+  document.getElementById('header-time').textContent = h + ':' + m;
+}
+function refreshUI() {
+  applyStaticTranslations();
+}
+initSettingsDropdown();
+applyStaticTranslations();
+updateClock();
+setInterval(updateClock, 10000);
+</script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-# BusDX — JAISTバス案内
+# JAISTのりかえ
 
 JAISTと周辺地域を結ぶ交通手段の時刻表・乗換案内Webアプリです。
 
@@ -18,9 +18,11 @@ JAISTと周辺地域を結ぶ交通手段の時刻表・乗換案内Webアプリ
 
 - **検索**: ルート・出発/到着駅を選択して便一覧を表示。次の便までのカウントダウン表示
 - **詳細**: 選択した便のタイムライン表示（乗車駅・乗換駅・降車駅、待ち時間）
-- **マップ**: Leafletによる経路表示、バス位置のリアルタイム表示（シミュレーション）
+- **マップ**: Leafletによる経路表示、バス位置の表示（時刻表ベースのシミュレーション）
 - **時刻表一覧**: 全路線の全便時刻表をテーブル形式で閲覧（`timetable.html`）
-- **ダークテーマ**: ライト/ダーク切替対応。設定はlocalStorageに保存
+- **お気に入り**: ヘッダーの★ボタンからよく使うルートを保存・ワンタップ切替。localStorageに保存
+- **表示設定**: ヘッダーの🌍|☀ボタンから言語（日本語/英語）とテーマ（ライト/ダーク）を切替。駅名・路線名・免責事項等を含む全テキストが切り替わる
+- **チュートリアル**: 初回起動時にアプリの使い方を案内する4ページのガイドを表示。「このアプリについて」ページから再表示可能
 - **PWA対応**: ホーム画面への追加に対応
 
 ## ページ構成
@@ -28,13 +30,13 @@ JAISTと周辺地域を結ぶ交通手段の時刻表・乗換案内Webアプリ
 | ページ | パス | 内容 |
 |---|---|---|
 | メイン画面 | `index.html` | 検索・詳細・マップの3タブ構成 |
-| このアプリについて | `about.html` | アプリ説明・免責事項・出典・ライセンス |
+| このアプリについて | `about.html` | アプリ説明・免責事項・出典・ライセンス・チュートリアル再表示 |
 | 時刻表一覧 | `timetable.html` | 路線別の全便時刻表テーブル |
 
 ## ディレクトリ構成
 
 ```
-bus_dx/
+dx-timetable/
 ├── public/                  # Webアプリ本体（GitHub Pagesで配信）
 │   ├── index.html           # メイン画面
 │   ├── about.html           # アプリ情報・免責事項
@@ -45,6 +47,7 @@ bus_dx/
 │   │   ├── status.css       # 詳細タブ
 │   │   └── map.css          # マップタブ
 │   ├── js/                  # JavaScript
+│   │   ├── i18n.js          # 多言語対応（翻訳辞書・駅名翻訳・言語切替）
 │   │   ├── app.js           # データ読込・初期化
 │   │   ├── utils.js         # グローバル状態・時刻計算・乗換検索
 │   │   ├── search.js        # 検索画面・便一覧
@@ -103,7 +106,7 @@ node server.js
 | `ishikawa-line_timetable_weekday*.pdf` | [北陸鉄道 石川線](https://www.hokutetsu.co.jp/railway/ishikawasen/) |
 | `ishikawa-line_timetable_weekend*.pdf` | 同上 |
 | `IR_ishikawa*.pdf` | [IRいしかわ鉄道](https://www.ishikawa-railway.jp/timetable/) |
-| `limo_komatsu*.pdf` | [小松空港リムジンバス](https://www.komatsu-airport.jp/) |
+| `limo_komatsu*.pdf` | [北陸鉄道 空港連絡バス](https://www.hokutetsu.co.jp/airport-bus#station_airport) |
 
 ### 2. JSONを生成
 
@@ -127,7 +130,11 @@ pip install pdfplumber pandas
 cp tools/output/<最新フォルダ>/*.json public/data/segments/
 ```
 
-### 4. デプロイ
+### 4. 祝日リストを更新
+
+`public/data/holidays.json` に、対象年の祝日を `YYYY-MM-DD` 形式で記載します。祝日は休日ダイヤ（weekend）として扱われます。振替休日・国民の休日も含めてください。
+
+### 5. デプロイ
 
 `main` ブランチにpush → GitHub Actionsが自動デプロイ。
 
@@ -164,7 +171,7 @@ python3 -m http.server 8080
   "routes": [
     {
       "id": "komatsu_outbound",
-      "name": "小松線（大学 → 小松駅）",
+      "name": "JAISTシャトル 小松線（大学 → 小松駅）",
       "stops": ["JAIST", "小松駅"],
       "schedules": {
         "weekday": [["6:45", "7:20"], ...],
@@ -182,15 +189,14 @@ python3 -m http.server 8080
 - `segment_files`: セグメント定義（JSONファイル、GeoJSONファイル、交通種別、方向マッピング）
 - `direct_routes`: 単一セグメントの直通ルート
 - `multi_routes`: 複数セグメントの乗換ルート（`from_stop`/`to_stop` で部分区間を指定可能）
-- `walk_transfers`: 徒歩乗換の定義（例: 新西金沢駅 ↔ 西金沢駅）
+- `transfers`: 乗換時間の定義（同一駅・徒歩乗換の両方を含む）
 - `geo_mappings`: GeoJSONのクリッピング設定
 
 ## 免責事項
 
-- 本アプリはJAISTの公式サービスではありません
-- 時刻表は公式PDFから自動抽出しており、誤りが含まれる可能性があります
-- 小松空港→小松駅の時刻は推定値です
-- マップ上の経路・停車位置は推測に基づきます
+- 本アプリはJAISTおよび各交通機関（IRいしかわ鉄道・北陸鉄道等）の公式サービスではありません
+- 時刻表データや経路情報には誤りが含まれる可能性があります。内容の正確性・最新性を保証するものではありません
+- 本アプリの利用により生じたいかなる損害（乗り遅れ等を含む）についても、開発者は責任を負いかねます
 - 正確な運行情報は各交通機関の公式サイトをご確認ください
 
 ## 開発

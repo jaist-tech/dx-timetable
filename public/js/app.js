@@ -1,7 +1,7 @@
 // ===== Data Loading =====
 async function loadData() {
-  // Load routes config and all segment data
-  await loadRoutesConfig();
+  // Load holidays and routes config
+  await Promise.all([loadHolidays(), loadRoutesConfig()]);
 
   // Build DATA.routes and REVERSE_ROUTES from direct_routes + segments
   DATA = { routes: [] };
@@ -25,7 +25,6 @@ async function loadData() {
   }
 
   dayType = getDayType();
-  document.getElementById('day-badge').textContent = dayType === 'weekday' ? '平日' : '土日祝';
 
   await loadGeoData();
   initApp();
@@ -71,6 +70,16 @@ async function loadRoutesConfig() {
   }
 }
 
+async function loadHolidays() {
+  try {
+    const res = await fetch('data/holidays.json');
+    const list = await res.json();
+    _holidaySet = new Set(list);
+  } catch (e) {
+    console.warn('Failed to load holidays:', e);
+  }
+}
+
 // ===== Tab Navigation =====
 function initTabs() {
   document.querySelectorAll('#bottom-nav button').forEach(btn => {
@@ -93,27 +102,134 @@ function switchTab(tab) {
 
 // ===== Clock =====
 function updateClock() {
-  let h, m, s;
+  let h, m;
   if (DEBUG_FORCE_RUNNING) {
     const sec = nowSec();
     h = Math.floor(sec / 3600);
     m = Math.floor((sec % 3600) / 60);
-    s = sec % 60;
   } else {
     const n = new Date();
     h = n.getHours();
     m = n.getMinutes();
-    s = n.getSeconds();
   }
   document.getElementById('header-time').textContent =
-    `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+}
+
+function checkHolidayData() {
+  const year = new Date().getFullYear();
+  const prefix = year + '-';
+  const hasCurrentYear = [..._holidaySet].some(d => d.startsWith(prefix));
+  if (!hasCurrentYear) {
+    const msg = t('holiday.missing', { year: year });
+    // Show as a dismissible banner at the top
+    const banner = document.createElement('div');
+    banner.className = 'holiday-warning';
+    banner.innerHTML = `<span>${msg}</span><button onclick="this.parentElement.remove()">&times;</button>`;
+    document.querySelector('main').prepend(banner);
+  }
+}
+
+// ===== Tutorial =====
+const TUTORIAL_TOTAL_PAGES = 4;
+let _tutorialPage = 0;
+
+function shouldShowTutorial() {
+  return !localStorage.getItem('tutorialDone');
+}
+
+function openTutorial() {
+  _tutorialPage = 0;
+  const overlay = document.getElementById('tutorial-overlay');
+  overlay.classList.add('open');
+  renderTutorialPage();
+}
+
+function closeTutorial() {
+  document.getElementById('tutorial-overlay').classList.remove('open');
+  localStorage.setItem('tutorialDone', '1');
+}
+
+function renderTutorialPage() {
+  // Update pages
+  document.querySelectorAll('.tutorial-page').forEach(p => {
+    p.classList.toggle('active', parseInt(p.dataset.page) === _tutorialPage);
+  });
+
+  // Update dots
+  const dotsContainer = document.getElementById('tutorial-dots');
+  dotsContainer.innerHTML = Array.from({ length: TUTORIAL_TOTAL_PAGES }, (_, i) =>
+    `<div class="tutorial-dot${i === _tutorialPage ? ' active' : ''}"></div>`
+  ).join('');
+
+  // Update buttons
+  const prevBtn = document.getElementById('tutorial-prev');
+  const nextBtn = document.getElementById('tutorial-next');
+  const skipBtn = document.getElementById('tutorial-skip');
+
+  prevBtn.classList.toggle('hidden', _tutorialPage === 0);
+
+  const isLast = _tutorialPage === TUTORIAL_TOTAL_PAGES - 1;
+  nextBtn.textContent = isLast ? t('tutorial.done') : t('tutorial.next');
+  skipBtn.style.display = isLast ? 'none' : '';
+}
+
+function initTutorial() {
+  document.getElementById('tutorial-skip').addEventListener('click', closeTutorial);
+  document.getElementById('tutorial-next').addEventListener('click', () => {
+    if (_tutorialPage < TUTORIAL_TOTAL_PAGES - 1) {
+      _tutorialPage++;
+      renderTutorialPage();
+    } else {
+      closeTutorial();
+    }
+  });
+  document.getElementById('tutorial-prev').addEventListener('click', () => {
+    if (_tutorialPage > 0) {
+      _tutorialPage--;
+      renderTutorialPage();
+    }
+  });
+
+  // Swipe support
+  let touchStartX = 0;
+  const container = document.querySelector('.tutorial-container');
+  container.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+  }, { passive: true });
+  container.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 50) {
+      if (dx < 0 && _tutorialPage < TUTORIAL_TOTAL_PAGES - 1) {
+        _tutorialPage++;
+        renderTutorialPage();
+      } else if (dx > 0 && _tutorialPage > 0) {
+        _tutorialPage--;
+        renderTutorialPage();
+      }
+    }
+  });
+
+  // Show tutorial on first visit or when ?tutorial=1 is in URL
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('tutorial') === '1') {
+    // Remove the query param so refreshing won't re-show
+    history.replaceState(null, '', window.location.pathname);
+    openTutorial();
+  } else if (shouldShowTutorial()) {
+    openTutorial();
+  }
 }
 
 // ===== Initialization =====
 function initApp() {
   initTabs();
   initSearch();
+  initSettingsDropdown();
+  applyStaticTranslations();
   updateClock();
+  checkHolidayData();
+  initTutorial();
 
   // Real-time updates (every second)
   setInterval(() => {

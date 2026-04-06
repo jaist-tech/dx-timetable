@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-i18n-title="timetable.title">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>時刻表一覧 - JAISTバス案内</title>
+<title>時刻表一覧 - JAISTのりかえ</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -49,26 +49,64 @@ body{
   line-height:1.6;
   min-height:100dvh;
 }
+button{font-family:inherit;border:none;cursor:pointer;background:none}
 header{
   height:var(--header-height);
   background:var(--primary);
   color:#fff;
   display:flex;
   align-items:center;
-  padding:0 16px;
-  gap:12px;
+  padding:0 12px;
   position:sticky;
   top:0;
   z-index:10;
 }
-header a{color:#fff;text-decoration:none;display:flex;align-items:center}
-header h1{font-size:1.1rem;font-weight:700}
+.header-side{display:flex;align-items:center;gap:6px;flex:1}
+.header-right{justify-content:flex-end}
+.header-center{
+  display:flex;align-items:baseline;gap:4px;
+  font-size:0.9rem;font-weight:600;
+  font-variant-numeric:tabular-nums;
+  flex-shrink:0;white-space:nowrap;
+}
+.header-center .header-time{font-size:1.25rem;font-weight:700;margin-left:4px}
+.header-center #header-dow{display:inline-block;width:3em;text-align:center}
 .back-btn{
   display:flex;align-items:center;justify-content:center;
   width:32px;height:32px;border-radius:50%;transition:background 0.2s;
+  color:#fff;text-decoration:none;
 }
 .back-btn:hover{background:rgba(255,255,255,0.15)}
 .back-btn svg{width:20px;height:20px}
+.settings-dropdown{position:relative;flex-shrink:0}
+.settings-dropdown-btn{
+  color:#fff;opacity:0.8;background:rgba(255,255,255,0.15);
+  padding:4px 8px;border-radius:14px;display:flex;align-items:center;gap:4px;
+  height:28px;transition:opacity 0.2s,background 0.2s;cursor:pointer;
+}
+.settings-dropdown-btn:hover{opacity:1;background:rgba(255,255,255,0.3)}
+.settings-dropdown.open .settings-dropdown-btn{opacity:1;background:rgba(255,255,255,0.3)}
+.settings-sep{width:1px;height:14px;background:rgba(255,255,255,0.4);flex-shrink:0}
+.settings-icon-moon{display:none}
+[data-theme="dark"] .settings-icon-sun{display:none}
+[data-theme="dark"] .settings-icon-moon{display:block}
+.settings-backdrop{display:none;position:fixed;inset:0;z-index:1050}
+.settings-dropdown.open .settings-backdrop{display:block}
+.settings-dropdown-menu{
+  display:none;position:absolute;top:calc(100% + 8px);right:0;
+  background:var(--card);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.18);
+  min-width:160px;z-index:1100;padding:6px 0;animation:settingsDropIn 0.15s ease;
+}
+.settings-dropdown.open .settings-dropdown-menu{display:block}
+@keyframes settingsDropIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.settings-group{padding:4px 0}
+.settings-group+.settings-group{border-top:1px solid var(--border)}
+.settings-group-label{padding:6px 14px 2px;font-size:0.7rem;font-weight:700;color:var(--text-light,#9AA0A6);text-transform:uppercase;letter-spacing:0.5px}
+.settings-option{display:flex;align-items:center;gap:8px;width:100%;padding:9px 14px;font-size:0.82rem;font-weight:500;color:var(--text);background:none;cursor:pointer;transition:background 0.12s}
+.settings-option:hover{background:var(--bg)}
+.settings-check{width:18px;font-size:0.85rem;font-weight:700;color:var(--primary);visibility:hidden;flex-shrink:0}
+.settings-option.active .settings-check{visibility:visible}
+.settings-option-sub{font-weight:400;color:var(--text-secondary);font-size:0.75rem;margin-left:2px}
 .content{max-width:900px;margin:0 auto;padding:16px}
 .controls{
   display:flex;justify-content:center;gap:12px;margin-bottom:16px;
@@ -77,7 +115,7 @@ header h1{font-size:1.1rem;font-weight:700}
 .controls select{
   padding:10px 12px;border:1px solid var(--border);border-radius:8px;
   font-size:0.9rem;background:var(--card);color:var(--text);
-  cursor:pointer;max-width:400px;width:100%;
+  cursor:pointer;max-width:400px;width:100%;font-family:inherit;
 }
 .tabs{display:flex;justify-content:center;gap:8px;margin-bottom:16px}
 .tabs button{
@@ -107,21 +145,20 @@ td{
   padding:5px 8px;text-align:center;font-size:0.8rem;
   border:1px solid var(--border);white-space:nowrap;
 }
+td:first-child,th:first-child{
+  position:sticky;left:0;z-index:1;
+  background:var(--card);
+}
+th:first-child{background:#f0f0f0}
+[data-theme="dark"] th:first-child{background:#2A2A2A}
 td:first-child{font-weight:600;text-align:left;white-space:normal}
 tr:nth-child(even){background:#fafafa}
 tr:hover{background:#e3f2fd}
 .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .loading{text-align:center;padding:32px;color:var(--text-secondary);font-size:0.85rem}
 .meta-text{text-align:center;color:var(--text-secondary);font-size:0.8rem;margin-bottom:16px}
-.icon-moon{display:none}
-[data-theme="dark"] .icon-sun{display:none}
-[data-theme="dark"] .icon-moon{display:block}
-.theme-btn{
-  color:#fff;opacity:0.7;display:flex;align-items:center;justify-content:center;
-  width:32px;height:32px;border-radius:50%;transition:opacity 0.2s,background 0.2s;
-  margin-left:auto;background:none;border:none;cursor:pointer;
-}
-.theme-btn:hover{opacity:1;background:rgba(255,255,255,0.15)}
+.meta-text a{color:var(--primary);text-decoration:none;margin-left:8px}
+.meta-text a:hover{text-decoration:underline}
 
 /* PC: full width */
 @media(min-width:768px){
@@ -130,151 +167,189 @@ tr:hover{background:#e3f2fd}
 </style>
 <script>
 (function(){
-  const saved = localStorage.getItem('theme');
-  if (saved) document.documentElement.setAttribute('data-theme', saved);
+  var s = localStorage.getItem('theme');
+  if (s) document.documentElement.setAttribute('data-theme', s);
+  var l = localStorage.getItem('lang');
+  if (l) document.documentElement.setAttribute('lang', l);
 })();
 </script>
 </head>
 <body>
 <header>
-  <a href="about.html" class="back-btn" aria-label="戻る">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-  </a>
-  <h1>時刻表一覧</h1>
-  <button class="theme-btn" onclick="toggleTheme()" aria-label="テーマ切替">
-    <svg class="icon-sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-    <svg class="icon-moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-  </button>
+  <div class="header-side header-left">
+    <a href="about.html" class="back-btn" data-i18n-aria="header.back" aria-label="戻る">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
+  </div>
+  <div class="header-center">
+    <span id="header-date">--/--</span>
+    <span id="header-dow">(-)</span>
+    <span class="header-time" id="header-time">--:--</span>
+  </div>
+  <div class="header-side header-right">
+    <div class="settings-dropdown" id="settings-dropdown">
+      <div class="settings-backdrop" id="settings-backdrop"></div>
+      <button class="settings-dropdown-btn" id="settings-dropdown-btn" aria-label="設定">
+        <svg class="settings-icon-lang" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        <span class="settings-sep"></span>
+        <svg class="settings-icon-sun" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg class="settings-icon-moon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <div class="settings-dropdown-menu" id="settings-dropdown-menu">
+        <div class="settings-group">
+          <div class="settings-group-label" data-i18n="settings.language">言語</div>
+          <button class="settings-option" data-setting="lang" data-value="ja"><span class="settings-check">✓</span>JA <span class="settings-option-sub">日本語</span></button>
+          <button class="settings-option" data-setting="lang" data-value="en"><span class="settings-check">✓</span>EN <span class="settings-option-sub">English</span></button>
+        </div>
+        <div class="settings-group">
+          <div class="settings-group-label" data-i18n="settings.theme">テーマ</div>
+          <button class="settings-option" data-setting="theme" data-value="light"><span class="settings-check">✓</span><span data-i18n="settings.light">ライト</span></button>
+          <button class="settings-option" data-setting="theme" data-value="dark"><span class="settings-check">✓</span><span data-i18n="settings.dark">ダーク</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
 </header>
-<script>
-function toggleTheme() {
-  const current = document.documentElement.getAttribute('data-theme');
-  const next = current === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('theme', next);
-}
-</script>
 
 <div class="content">
   <div class="controls">
     <select id="jsonSelect" onchange="loadSelected()">
-      <option value="">-- 路線を選択 --</option>
+      <option value="" data-i18n="timetable.selectRoute">-- 路線を選択 --</option>
     </select>
   </div>
 
   <div class="tabs">
-    <button class="active" onclick="switchDay('weekday')">平日</button>
-    <button onclick="switchDay('weekend')">土日祝</button>
+    <button class="active" onclick="switchDay('weekday', this)" data-i18n="timetable.weekday">平日</button>
+    <button onclick="switchDay('weekend', this)" data-i18n="timetable.weekend">土日祝</button>
   </div>
 
   <div class="meta-text" id="meta"></div>
-  <div id="content"><div class="loading">路線を選択してください</div></div>
+  <div id="content"><div class="loading" data-i18n="timetable.selectPrompt">路線を選択してください</div></div>
 </div>
 
+<script src="js/i18n.js"></script>
 <script>
+function updateClock() {
+  var n = new Date();
+  var h = String(n.getHours()).padStart(2,'0');
+  var m = String(n.getMinutes()).padStart(2,'0');
+  document.getElementById('header-time').textContent = h + ':' + m;
+}
+
 const JSON_FILES = [
-  { file: 'data/segments/shuttle_tsurugi.json', label: 'JAISTシャトル 鶴来線', color: '#1976D2' },
-  { file: 'data/segments/shuttle_komatsu.json', label: 'JAISTシャトル 小松線', color: '#43A047' },
-  { file: 'data/segments/ishikawa_line.json', label: '北陸鉄道 石川線', color: '#6A1B9A' },
-  { file: 'data/segments/ir_ishikawa.json', label: 'IRいしかわ鉄道', color: '#E65100' },
-  { file: 'data/segments/limo_komatsu.json', label: '小松空港連絡バス', color: '#00838F' },
+  { file: 'data/segments/shuttle_tsurugi.json', i18nKey: 'timetable.route.shuttle_tsurugi', color: '#1976D2', sourceUrl: 'https://www.jaist.ac.jp/top/access/' },
+  { file: 'data/segments/shuttle_komatsu.json', i18nKey: 'timetable.route.shuttle_komatsu', color: '#43A047', sourceUrl: 'https://www.jaist.ac.jp/top/access/' },
+  { file: 'data/segments/ishikawa_line.json', i18nKey: 'timetable.route.ishikawa_line', color: '#6A1B9A', sourceUrl: 'https://www.hokutetsu.co.jp/railway/ishikawasen/' },
+  { file: 'data/segments/ir_ishikawa.json', i18nKey: 'timetable.route.ir_ishikawa', color: '#E65100', sourceUrl: 'https://www.ishikawa-railway.jp/timetable/' },
+  { file: 'data/segments/limo_komatsu.json', i18nKey: 'timetable.route.limo_komatsu', color: '#00838F', sourceUrl: 'https://www.hokutetsu.co.jp/airport-bus#station_airport' },
 ];
 let currentColor = '#666';
-
 let data = null;
 let currentDay = 'weekday';
 
 const select = document.getElementById('jsonSelect');
-JSON_FILES.forEach(entry => {
-  const opt = document.createElement('option');
+JSON_FILES.forEach(function(entry) {
+  var opt = document.createElement('option');
   opt.value = entry.file;
-  opt.textContent = entry.label;
+  opt.textContent = t(entry.i18nKey);
+  opt.dataset.i18nKey = entry.i18nKey;
   select.appendChild(opt);
 });
 
 async function loadSelected() {
-  const file = select.value;
+  var file = select.value;
   if (!file) return;
-  document.getElementById('content').innerHTML = '<div class="loading">読み込み中...</div>';
+  document.getElementById('content').innerHTML = '<div class="loading">' + t('timetable.loading') + '</div>';
   try {
-    const res = await fetch(file);
+    var res = await fetch(file);
     if (!res.ok) throw new Error(res.status);
     data = await res.json();
-    const entry = JSON_FILES.find(e => e.file === file);
+    var entry = JSON_FILES.find(function(e) { return e.file === file; });
     currentColor = entry ? entry.color : '#666';
-    const vf = data.meta.valid_from;
-    const vu = data.meta.valid_until;
-    let metaText = data.meta.operator || '';
-    if (vf && vu) metaText += '　有効期間: ' + vf + ' ～ ' + vu;
-    else if (vf) metaText += '　' + vf + ' 改正～';
-    document.getElementById('meta').textContent = metaText;
+    updateMeta();
     render();
   } catch (e) {
     document.getElementById('content').innerHTML =
-      '<div class="loading">読み込みに失敗しました: ' + e.message + '</div>';
+      '<div class="loading">' + t('timetable.loadError') + e.message + '</div>';
   }
 }
 
-function switchDay(day) {
+function updateMeta() {
+  if (!data) return;
+  var vf = data.meta.valid_from;
+  var vu = data.meta.valid_until;
+  var metaHtml = '';
+  if (vf && vu) metaHtml = vf + ' ~ ' + vu;
+  else if (vf) metaHtml = vf + ' ~';
+
+  var entry = JSON_FILES.find(function(e) { return e.file === select.value; });
+  if (entry && entry.sourceUrl) {
+    if (metaHtml) metaHtml += ' ';
+    metaHtml += '<a href="' + entry.sourceUrl + '" target="_blank" rel="noopener">' + t('timetable.sourceLink') + '</a>';
+  }
+  document.getElementById('meta').innerHTML = metaHtml;
+}
+
+function switchDay(day, btn) {
   currentDay = day;
-  document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
+  document.querySelectorAll('.tabs button').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
   if (data) render();
 }
 
 function render() {
-  const container = document.getElementById('content');
+  var container = document.getElementById('content');
   container.innerHTML = '';
 
-  data.routes.forEach(route => {
-    const trips = route.schedules[currentDay];
-    const stops = route.stops;
+  data.routes.forEach(function(route) {
+    var trips = route.schedules[currentDay];
+    var stops = route.stops;
 
-    const wrapper = document.createElement('div');
+    var wrapper = document.createElement('div');
     wrapper.className = 'shadow';
 
-    const header = document.createElement('div');
+    var header = document.createElement('div');
     header.className = 'route-header';
     header.style.background = currentColor;
-    header.textContent = route.name + '（' + trips.length + '便）';
+    header.textContent = tSegRouteName(route.name);
     wrapper.appendChild(header);
 
     if (route.note) {
-      const note = document.createElement('div');
+      var note = document.createElement('div');
       note.className = 'route-note';
-      note.textContent = route.note;
+      note.textContent = tNote(route.note);
       wrapper.appendChild(note);
     }
 
-    const scroll = document.createElement('div');
+    var scroll = document.createElement('div');
     scroll.className = 'table-scroll';
 
-    const table = document.createElement('table');
-    const thead = document.createElement('thead');
-    const headerRow = document.createElement('tr');
-    const thStop = document.createElement('th');
-    thStop.textContent = 'バス停/駅';
+    var table = document.createElement('table');
+    var thead = document.createElement('thead');
+    var headerRow = document.createElement('tr');
+    var thStop = document.createElement('th');
+    thStop.textContent = t('timetable.stopHeader');
     thStop.style.minWidth = '80px';
     headerRow.appendChild(thStop);
 
-    trips.forEach((_, i) => {
-      const th = document.createElement('th');
-      th.textContent = (i + 1) + '便';
+    trips.forEach(function(_, i) {
+      var th = document.createElement('th');
+      th.textContent = t('timetable.tripNum', { n: i + 1 });
       headerRow.appendChild(th);
     });
     thead.appendChild(headerRow);
     table.appendChild(thead);
 
-    const tbody = document.createElement('tbody');
-    stops.forEach((stop, si) => {
-      const tr = document.createElement('tr');
-      const tdStop = document.createElement('td');
-      tdStop.textContent = stop;
+    var tbody = document.createElement('tbody');
+    stops.forEach(function(stop, si) {
+      var tr = document.createElement('tr');
+      var tdStop = document.createElement('td');
+      tdStop.textContent = tStop(stop);
       tr.appendChild(tdStop);
 
-      trips.forEach(trip => {
-        const td = document.createElement('td');
-        td.textContent = trip[si] || '―';
+      trips.forEach(function(trip) {
+        var td = document.createElement('td');
+        td.textContent = trip[si] || '\u2015';
         tr.appendChild(td);
       });
       tbody.appendChild(tr);
@@ -285,6 +360,28 @@ function render() {
     container.appendChild(wrapper);
   });
 }
+
+// Override refreshUI for timetable page
+function refreshUI() {
+  // Re-translate route select options
+  select.querySelectorAll('option').forEach(function(opt) {
+    if (opt.dataset.i18nKey) opt.textContent = t(opt.dataset.i18nKey);
+    else if (opt.dataset.i18n) opt.textContent = t(opt.dataset.i18n);
+  });
+  // Re-render table if data loaded
+  if (data) {
+    updateMeta();
+    render();
+  } else {
+    var contentEl = document.getElementById('content');
+    if (contentEl) contentEl.innerHTML = '<div class="loading">' + t('timetable.selectPrompt') + '</div>';
+  }
+}
+
+initSettingsDropdown();
+applyStaticTranslations();
+updateClock();
+setInterval(updateClock, 10000);
 
 // Auto-load first option
 select.selectedIndex = 1;

@@ -10,7 +10,8 @@ let selectedRouteId = 'komatsu_outbound';
 let selectedFromStop = '';
 let selectedToStop = '';
 let selectedTripIdx = -1;
-let _initialLoad = true;
+let _scrollToSelected = false;
+let _expandedSegs = new Set();
 
 // ===== Debug =====
 // true: 選択中ルートの1/3付近の便が走行中（出発2分後）になる
@@ -42,41 +43,41 @@ function realNowSec() {
   return n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds();
 }
 
+let _holidaySet = new Set();
+
 function getDayType() {
-  const d = new Date().getDay();
-  return (d === 0 || d === 6) ? 'weekend' : 'weekday';
+  const now = new Date();
+  const d = now.getDay();
+  if (d === 0 || d === 6) return 'weekend';
+  const dateStr = now.getFullYear() + '-' +
+    String(now.getMonth() + 1).padStart(2, '0') + '-' +
+    String(now.getDate()).padStart(2, '0');
+  if (_holidaySet.has(dateStr)) return 'weekend';
+  return 'weekday';
 }
 
-function formatCountdown(diffMin) {
-  if (diffMin < 0) return '--:--';
-  const h = Math.floor(diffMin / 60);
-  const m = diffMin % 60;
-  return h > 0 ? `${h}時間${m}分` : `${m}分`;
-}
-
-function formatCountdownSec(diffSec) {
+function formatCountdownSecHtml(diffSec) {
   if (diffSec < 0) return '--:--';
   const h = Math.floor(diffSec / 3600);
   const m = Math.floor((diffSec % 3600) / 60);
   const s = diffSec % 60;
-  if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  return `${m}:${String(s).padStart(2,'0')}`;
+  const u = '<span class="countdown-unit">';
+  const ue = '</span>';
+  if (h > 0) return `${h}${u}${t('time.h')}${ue}${m}${u}${t('time.m')}${ue}${s}${u}${t('time.s')}${ue}`;
+  return `${m}${u}${t('time.m')}${ue}${s}${u}${t('time.s')}${ue}`;
 }
 
 // ===== Debug Time Simulation =====
 
-let _debugState = { startReal: null, baseTimeSec: null, routeId: null, runningTripIdx: -1 };
+let _debugState = { startReal: null, baseTimeSec: null, routeId: null };
 
 function debugNowSec() {
   if (_debugState.routeId !== selectedRouteId) {
-    _debugState = { startReal: null, baseTimeSec: null, routeId: selectedRouteId, runningTripIdx: -1 };
+    _debugState = { startReal: null, baseTimeSec: null, routeId: selectedRouteId };
   }
   if (_debugState.baseTimeSec === null) {
     _debugState.baseTimeSec = calcDebugBaseTime();
     _debugState.startReal = Date.now() / 1000;
-    if (_debugState.runningTripIdx >= 0) {
-      selectedTripIdx = _debugState.runningTripIdx;
-    }
   }
   const elapsed = Date.now() / 1000 - _debugState.startReal;
   return Math.floor(_debugState.baseTimeSec + elapsed);
@@ -87,7 +88,6 @@ function calcDebugBaseTime() {
   if (trips.length === 0 || !trips[0][0]) return 0;
 
   const runIdx = Math.max(0, Math.floor(trips.length / 3));
-  _debugState.runningTripIdx = runIdx;
   return timeToMin(trips[runIdx][0]) * 60 + 120; // 出発2分後
 }
 
@@ -111,12 +111,6 @@ function getRoute(id) {
   return DATA.routes.find(r => r.id === id);
 }
 
-function getAllStops() {
-  const s = new Set();
-  DATA.routes.forEach(r => r.stops.forEach(st => s.add(st)));
-  return [...s];
-}
-
 function isMultiRoute(routeId) {
   return ROUTES_CONFIG && ROUTES_CONFIG.multi_routes.some(r => r.id === routeId);
 }
@@ -135,14 +129,14 @@ function getSegmentData(segmentId, direction) {
 
 function getTransferTime(fromStop, toStop) {
   if (!ROUTES_CONFIG) return 5;
-  if (fromStop === toStop) return ROUTES_CONFIG.default_transfer_min;
-  const walk = ROUTES_CONFIG.walk_transfers.find(w => w.from === fromStop && w.to === toStop);
-  return walk ? walk.walk_min : ROUTES_CONFIG.default_transfer_min;
+  const entry = ROUTES_CONFIG.transfers && ROUTES_CONFIG.transfers.find(e => e.from === fromStop && e.to === toStop);
+  return entry ? entry.min : ROUTES_CONFIG.default_transfer_min;
 }
 
 function isWalkTransfer(fromStop, toStop) {
   if (!ROUTES_CONFIG) return false;
-  return ROUTES_CONFIG.walk_transfers.some(w => w.from === fromStop && w.to === toStop);
+  const entry = ROUTES_CONFIG.transfers && ROUTES_CONFIG.transfers.find(e => e.from === fromStop && e.to === toStop);
+  return entry ? !!entry.walk : false;
 }
 
 // ===== Sub-segment Helpers =====
@@ -173,9 +167,16 @@ function getSegRefLastStop(segRef) {
   return dirData.stops[dirData.stops.length - 1];
 }
 
+function getSegRefFirstStop(segRef) {
+  const dirData = getSegmentData(segRef.segment, segRef.direction);
+  if (!dirData) return null;
+  if (segRef.from_stop) return segRef.from_stop;
+  return dirData.stops[0];
+}
+
 // ===== Multi-route Connection Finder =====
 
-function findConnections(multiRouteId, dt) {
+function findConnections(multiRouteId, dt, fromStop, toStop) {
   const mr = getMultiRoute(multiRouteId);
   if (!mr) return [];
 
@@ -196,69 +197,231 @@ function findConnections(multiRouteId, dt) {
 
   if (segInfos.some(s => !s)) return [];
 
-  const connections = [];
-  for (let t = 0; t < segInfos[0].trips.length; t++) {
-    const firstTrip = segInfos[0].trips[t];
-    if (!firstTrip[0]) continue;
+  let startSegIdx = 0;
 
-    const journey = buildJourneyFromFirstTrip(segInfos, firstTrip);
+  // Check if from/to are within a single segment
+  if (fromStop && toStop) {
+    const multiStops = getMultiRouteStops(multiRouteId);
+    const fromEntry = multiStops.find(s => s.name === fromStop);
+    const toEntry = multiStops.find(s => s.name === toStop);
+    if (fromEntry && toEntry) {
+      // Resolve boundary stops: if fromStop is at the end of its segment
+      // and the next segment starts with the same stop, treat as next segment
+      let fromSegIdx = fromEntry.segIdx;
+      let fromStopIdx = fromEntry.stopIdx;
+      const fromSeg = segInfos[fromSegIdx];
+      if (fromSeg && fromStopIdx === fromSeg.stops.length - 1 && fromSegIdx + 1 < segInfos.length) {
+        const nextSeg = segInfos[fromSegIdx + 1];
+        if (nextSeg && nextSeg.firstStop === fromStop) {
+          fromSegIdx = fromSegIdx + 1;
+          fromStopIdx = 0;
+        }
+      }
+      if (fromSegIdx === toEntry.segIdx) {
+        return findSingleSegConnections(segInfos, fromSegIdx, fromStopIdx, toEntry.stopIdx);
+      }
+      startSegIdx = fromSegIdx;
+    }
+  }
+
+  // Iterate from the last segment backwards to find the latest possible connections
+  // (minimizes wait time at transfer stations)
+  const endSegIdx = segInfos.length - 1;
+  const connections = [];
+  for (let t = 0; t < segInfos[endSegIdx].trips.length; t++) {
+    const lastTrip = segInfos[endSegIdx].trips[t];
+    if (!lastTrip[0]) continue;
+
+    const journey = buildJourneyFromLastTrip(segInfos, lastTrip, startSegIdx, endSegIdx);
     if (journey) connections.push(journey);
   }
 
   return deduplicateConnections(connections);
 }
 
-function buildJourneyFromFirstTrip(segInfos, firstTrip) {
-  const journey = {
-    depTime: firstTrip[0],
-    arrTime: firstTrip[firstTrip.length - 1],
-    segments: [{
-      segmentId: segInfos[0].segmentId,
-      type: segInfos[0].type,
-      stops: segInfos[0].stops,
-      trip: firstTrip,
-      depTime: firstTrip[0],
-      arrTime: firstTrip[firstTrip.length - 1]
-    }],
-    transfers: []
-  };
+/** Build connections from a single segment's trips (no cross-segment connection required) */
+function findSingleSegConnections(segInfos, segIdx, fromStopIdx, toStopIdx) {
+  const segInfo = segInfos[segIdx];
+  const connections = [];
 
-  for (let i = 1; i < segInfos.length; i++) {
-    const prevSeg = journey.segments[journey.segments.length - 1];
-    const arrMin = timeToMin(prevSeg.arrTime);
-    const transferMin = getTransferTime(segInfos[i - 1].lastStop, segInfos[i].firstStop);
-    const earliestDep = arrMin + transferMin;
+  for (let t = 0; t < segInfo.trips.length; t++) {
+    const trip = segInfo.trips[t];
+    const depTime = trip[fromStopIdx];
+    const arrTime = trip[toStopIdx];
+    if (!depTime || !arrTime) continue;
 
-    const nextTrip = segInfos[i].trips.find(trip => trip[0] && timeToMin(trip[0]) >= earliestDep);
-    if (!nextTrip) return null; // no connection possible
+    // Build a connection with all segments but using this specific trip for the target segment
+    const journey = {
+      depTime: trip[0],
+      arrTime: trip[trip.length - 1],
+      segments: segInfos.map((si, idx) => {
+        if (idx === segIdx) {
+          return {
+            segmentId: si.segmentId,
+            type: si.type,
+            stops: si.stops,
+            trip: trip,
+            depTime: trip[0],
+            arrTime: trip[trip.length - 1]
+          };
+        }
+        // For other segments, use a placeholder empty trip
+        const emptyTrip = si.stops.map(() => null);
+        return {
+          segmentId: si.segmentId,
+          type: si.type,
+          stops: si.stops,
+          trip: emptyTrip,
+          depTime: null,
+          arrTime: null
+        };
+      }),
+      transfers: []
+    };
 
-    journey.transfers.push({
-      fromStation: segInfos[i - 1].lastStop,
-      toStation: segInfos[i].firstStop,
-      isWalk: isWalkTransfer(segInfos[i - 1].lastStop, segInfos[i].firstStop),
-      waitMin: timeToMin(nextTrip[0]) - arrMin
+    // Build transfer placeholders
+    for (let i = 0; i < segInfos.length - 1; i++) {
+      journey.transfers.push({
+        fromStation: segInfos[i].lastStop,
+        toStation: segInfos[i + 1].firstStop,
+        isWalk: isWalkTransfer(segInfos[i].lastStop, segInfos[i + 1].firstStop),
+        waitMin: 0
+      });
+    }
+
+    connections.push(journey);
+  }
+
+  return deduplicateConnections(connections);
+}
+
+function buildJourneyFromLastTrip(segInfos, lastTrip, startIdx, endIdx) {
+  // Build segments from endIdx backward to startIdx, finding the latest possible trip for each
+  const builtSegments = [];
+  const builtTransfers = [];
+
+  // End segment
+  builtSegments.push({
+    segmentId: segInfos[endIdx].segmentId,
+    type: segInfos[endIdx].type,
+    stops: segInfos[endIdx].stops,
+    trip: lastTrip,
+    depTime: lastTrip[0],
+    arrTime: lastTrip[lastTrip.length - 1]
+  });
+
+  // Work backwards from endIdx-1 to startIdx
+  for (let i = endIdx - 1; i >= startIdx; i--) {
+    const nextSeg = builtSegments[0];
+    const nextDepMin = timeToMin(nextSeg.depTime);
+    const transferMin = getTransferTime(segInfos[i].lastStop, segInfos[i + 1].firstStop);
+    const latestArr = nextDepMin - transferMin;
+
+    // Find the latest trip that arrives by latestArr with reasonable wait
+    let bestTrip = null;
+    for (let t = segInfos[i].trips.length - 1; t >= 0; t--) {
+      const trip = segInfos[i].trips[t];
+      const arrTime = trip[trip.length - 1];
+      if (!arrTime) continue;
+      const arrM = timeToMin(arrTime);
+      if (arrM <= latestArr && (nextDepMin - arrM) <= 180) {
+        bestTrip = trip;
+        break;
+      }
+    }
+    if (!bestTrip) return null;
+
+    const arrMin = timeToMin(bestTrip[bestTrip.length - 1]);
+    const waitMin = nextDepMin - arrMin;
+
+    builtTransfers.unshift({
+      fromStation: segInfos[i].lastStop,
+      toStation: segInfos[i + 1].firstStop,
+      isWalk: isWalkTransfer(segInfos[i].lastStop, segInfos[i + 1].firstStop),
+      waitMin: waitMin
     });
 
-    journey.segments.push({
+    builtSegments.unshift({
       segmentId: segInfos[i].segmentId,
       type: segInfos[i].type,
       stops: segInfos[i].stops,
-      trip: nextTrip,
-      depTime: nextTrip[0],
-      arrTime: nextTrip[nextTrip.length - 1]
+      trip: bestTrip,
+      depTime: bestTrip[0],
+      arrTime: bestTrip[bestTrip.length - 1]
     });
   }
 
-  journey.arrTime = journey.segments[journey.segments.length - 1].arrTime;
-  return journey;
+  // Fill placeholder segments before startIdx
+  for (let i = startIdx - 1; i >= 0; i--) {
+    builtTransfers.unshift({
+      fromStation: segInfos[i].lastStop,
+      toStation: segInfos[i + 1].firstStop,
+      isWalk: isWalkTransfer(segInfos[i].lastStop, segInfos[i + 1].firstStop),
+      waitMin: 0
+    });
+    builtSegments.unshift({
+      segmentId: segInfos[i].segmentId,
+      type: segInfos[i].type,
+      stops: segInfos[i].stops,
+      trip: segInfos[i].stops.map(() => null),
+      depTime: null,
+      arrTime: null
+    });
+  }
+
+  // Fill placeholder segments after endIdx
+  for (let i = endIdx + 1; i < segInfos.length; i++) {
+    builtTransfers.push({
+      fromStation: segInfos[i - 1].lastStop,
+      toStation: segInfos[i].firstStop,
+      isWalk: isWalkTransfer(segInfos[i - 1].lastStop, segInfos[i].firstStop),
+      waitMin: 0
+    });
+    builtSegments.push({
+      segmentId: segInfos[i].segmentId,
+      type: segInfos[i].type,
+      stops: segInfos[i].stops,
+      trip: segInfos[i].stops.map(() => null),
+      depTime: null,
+      arrTime: null
+    });
+  }
+
+  return {
+    depTime: builtSegments[startIdx].depTime,
+    arrTime: builtSegments[endIdx].arrTime,
+    segments: builtSegments,
+    transfers: builtTransfers
+  };
 }
 
 function deduplicateConnections(connections) {
   const seen = new Set();
   return connections.filter(c => {
-    const key = c.segments.map(s => s.depTime + '-' + s.arrTime).join('|');
-    if (seen.has(key)) return false;
-    seen.add(key);
+    // Only use active segments (non-placeholder) for deduplication keys
+    const activeKeys = c.segments
+      .filter(s => s.depTime != null)
+      .map(s => s.depTime + '-' + s.arrTime);
+
+    if (activeKeys.length === 0) return true;
+
+    const fullKey = activeKeys.join('|');
+    if (seen.has(fullKey)) return false;
+
+    // If any prefix or suffix of active segments already seen,
+    // this connection only differs in the remaining segment(s) — redundant
+    if (activeKeys.length > 1) {
+      for (let n = 1; n < activeKeys.length; n++) {
+        if (seen.has('pfx' + n + ':' + activeKeys.slice(0, n).join('|'))) return false;
+        if (seen.has('sfx' + n + ':' + activeKeys.slice(-n).join('|'))) return false;
+      }
+      for (let n = 1; n < activeKeys.length; n++) {
+        seen.add('pfx' + n + ':' + activeKeys.slice(0, n).join('|'));
+        seen.add('sfx' + n + ':' + activeKeys.slice(-n).join('|'));
+      }
+    }
+
+    seen.add(fullKey);
     return true;
   });
 }
@@ -297,6 +460,7 @@ function getMultiRouteStops(multiRouteId) {
 
 /** Get time for a specific stop within a connection */
 function getConnectionStopTime(conn, stopEntry) {
+  if (!stopEntry) return null;
   const seg = conn.segments[stopEntry.segIdx];
   if (!seg) return null;
   return seg.trip[stopEntry.stopIdx] || null;

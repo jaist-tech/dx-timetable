@@ -1,8 +1,10 @@
 {
   "default_transfer_min": 5,
-  "walk_transfers": [
-    { "from": "新西金沢駅", "to": "西金沢駅", "walk_min": 10 },
-    { "from": "西金沢駅", "to": "新西金沢駅", "walk_min": 10 }
+  "transfers": [
+    { "from": "小松駅", "to": "小松駅", "min": 3 },
+    { "from": "鶴来駅", "to": "鶴来駅", "min": 1 },
+    { "from": "新西金沢駅", "to": "西金沢駅", "min": 3, "walk": true },
+    { "from": "西金沢駅", "to": "新西金沢駅", "min": 3, "walk": true }
   ],
   "geo_mappings": {
     "ishikawa_line": {
@@ -69,7 +71,7 @@
   "direct_routes": [
     {
       "id": "tsurugi_outbound",
-      "name": "鶴来線（大学 → 鶴来駅）",
+      "name": "JAISTシャトル 鶴来線（大学 → 鶴来駅）",
       "short_name": "鶴来線 下り",
       "color": "#4CAF50",
       "segment": "shuttle_tsurugi",
@@ -78,7 +80,7 @@
     },
     {
       "id": "tsurugi_inbound",
-      "name": "鶴来線（鶴来駅 → 大学）",
+      "name": "JAISTシャトル 鶴来線（鶴来駅 → 大学）",
       "short_name": "鶴来線 上り",
       "color": "#2196F3",
       "segment": "shuttle_tsurugi",
@@ -87,7 +89,7 @@
     },
     {
       "id": "komatsu_outbound",
-      "name": "小松線（大学 → 小松駅）",
+      "name": "JAISTシャトル 小松線（大学 → 小松駅）",
       "short_name": "小松線 下り",
       "color": "#FF9800",
       "segment": "shuttle_komatsu",
@@ -96,7 +98,7 @@
     },
     {
       "id": "komatsu_inbound",
-      "name": "小松線（小松駅 → 大学）",
+      "name": "JAISTシャトル 小松線（小松駅 → 大学）",
       "short_name": "小松線 上り",
       "color": "#E91E63",
       "segment": "shuttle_komatsu",
@@ -144,6 +146,26 @@
       "segments": [
         { "segment": "ir_ishikawa_south", "direction": "inbound", "from_stop": "金沢駅", "to_stop": "西金沢駅" },
         { "segment": "ishikawa_line", "direction": "inbound", "from_stop": "新西金沢駅", "to_stop": "鶴来駅" },
+        { "segment": "shuttle_tsurugi", "direction": "inbound" }
+      ]
+    },
+    {
+      "id": "jaist_tsurugi_nomachi",
+      "name": "JAIST → 鶴来駅 → 野町駅",
+      "short_name": "JAIST → 鶴来 → 野町",
+      "reverse_id": "nomachi_tsurugi_jaist",
+      "segments": [
+        { "segment": "shuttle_tsurugi", "direction": "outbound" },
+        { "segment": "ishikawa_line", "direction": "outbound" }
+      ]
+    },
+    {
+      "id": "nomachi_tsurugi_jaist",
+      "name": "野町駅 → 鶴来駅 → JAIST",
+      "short_name": "野町 → 鶴来 → JAIST",
+      "reverse_id": "jaist_tsurugi_nomachi",
+      "segments": [
+        { "segment": "ishikawa_line", "direction": "inbound" },
         { "segment": "shuttle_tsurugi", "direction": "inbound" }
       ]
     },
