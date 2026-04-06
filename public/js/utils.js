@@ -60,7 +60,7 @@ function nowSec() {
 let _holidaySet = new Set();
 
 function getDayType() {
-  const now = new Date();
+  const now = _getDebugDatetimeNow() || new Date();
   const d = now.getDay();
   if (d === 0 || d === 6) return 'weekend';
   const dateStr = now.getFullYear() + '-' +
