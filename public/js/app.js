@@ -102,9 +102,16 @@ function switchTab(tab) {
 
 // ===== Clock =====
 function updateClock() {
-  const sec = nowSec();
-  const h = Math.floor(sec / 3600);
-  const m = Math.floor((sec % 3600) / 60);
+  let h, m;
+  if (DEBUG_FORCE_RUNNING) {
+    const sec = nowSec();
+    h = Math.floor(sec / 3600);
+    m = Math.floor((sec % 3600) / 60);
+  } else {
+    const n = new Date();
+    h = n.getHours();
+    m = n.getMinutes();
+  }
   document.getElementById('header-time').textContent =
     `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
 }

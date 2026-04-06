@@ -100,7 +100,6 @@ function initSearch() {
     updateTripList();
   }
 
-  updateKomatsuNotice();
   initFavorites();
 }
 
@@ -393,7 +392,7 @@ function updateTripList() {
   if (selectedTripIdx < 0) {
     for (let i = 0; i < sched.length; i++) {
       const depTime = sched[i][fromIdx];
-      if (depTime && timeToMin(depTime) >= now && isValidTrip(sched[i])) {
+      if (depTime && timeToMin(depTime) >= now) {
         selectedTripIdx = i;
         break;
       }
@@ -403,7 +402,7 @@ function updateTripList() {
   let nextDepIdx = -1;
   for (let i = 0; i < sched.length; i++) {
     const depTime = sched[i][fromIdx];
-    if (depTime && timeToMin(depTime) >= now && isValidTrip(sched[i])) {
+    if (depTime && timeToMin(depTime) >= now) {
       nextDepIdx = i;
       break;
     }
@@ -481,14 +480,6 @@ function updateMultiTripList() {
   }
 
   currentConnections = findConnections(selectedRouteId, dayType, selectedFromStop, selectedToStop);
-
-  // Filter out connections with invalid times for the selected from/to stops
-  // (e.g., midnight-crossing trips where arrTime < depTime)
-  currentConnections = currentConnections.filter(conn => {
-    const dep = getConnDepTime(conn, selectedFromStop);
-    const arr = getConnArrTime(conn, selectedToStop);
-    return dep && arr && timeToMin(arr) > timeToMin(dep);
-  });
 
   // Sort by user's from-stop departure time (schedule order may differ at intermediate stops)
   currentConnections.sort((a, b) => {

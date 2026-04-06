@@ -89,19 +89,13 @@ function updateStatus() {
 
     const isFirst = i === 0;
     const isLast = i === route.stops.length - 1;
-
-    if (isFirst && segLabel) {
-      timelineHtml += `
-        <div class="timeline-stop ${stopClass}">
-          <div class="timeline-dot"></div>
-          <div class="timeline-line"></div>
-          <div class="timeline-stop-body">
-            <div class="timeline-info">
-              <span class="timeline-stop-name">${tStop(route.stops[i])}${marker}</span>
-              <span class="timeline-stop-time">${stopTime || '-'}</span>
-            </div>
-            <span class="timeline-seg-type">${segLabel}${segReserveLink}</span>
-          </div>
+    timelineHtml += `
+      <div class="timeline-stop ${stopClass}">
+        <div class="timeline-dot"></div>
+        ${!isLast ? '<div class="timeline-line"></div>' : ''}
+        <div class="timeline-info">
+          <span class="timeline-stop-name">${tStop(route.stops[i])}${marker}</span>
+          <span class="timeline-stop-time">${stopTime || '-'}</span>
         </div>
       `;
     } else {
@@ -195,8 +189,8 @@ function updateMultiStatus(header, timeline) {
   let timelineHtml = '';
   for (let si = visSeg0; si <= visSeg1; si++) {
     const seg = conn.segments[si];
-    const segLabel = tSegLabel(seg.segmentId);
-    const segReserveLink = (seg.segmentId === 'shuttle_komatsu') ? ` ${t('status.reserveLink')}` : '';
+    const segMeta = SEGMENTS[seg.segmentId] && SEGMENTS[seg.segmentId].meta;
+    const segLabel = segMeta ? tOperator(segMeta.operator) : (seg.type === 'train' ? t('status.train') : t('status.bus'));
     const isLastVisibleSeg = si === visSeg1;
 
     // Visible stop range within this segment
