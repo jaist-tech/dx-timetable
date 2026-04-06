@@ -4,7 +4,7 @@ const TRANSLATIONS = {
   ja: {
     // Header
     'app.title': 'JAISTのりかえ',
-    'header.about': 'このアプリについて',
+    'header.about': 'このサービスについて',
     'header.themeToggle': 'テーマ切替',
     'header.back': '戻る',
     'settings.language': '言語',
@@ -25,6 +25,8 @@ const TRANSLATIONS = {
     'search.from': '出発',
     'search.to': '到着',
     'search.swap': '入れ替え',
+    'search.reservationNotice': 'JAIST Shuttle 小松線は2時間前までに<a href="https://www.jaist.ac.jp/jaist_sds/reserve/" target="_blank" rel="noopener">予約</a>が必要',
+    'status.reserveLink': '<a href="https://www.jaist.ac.jp/jaist_sds/reserve/" target="_blank" rel="noopener">予約する</a>',
 
     // Countdown
     'countdown.until': '出発まで',
@@ -107,7 +109,7 @@ const TRANSLATIONS = {
     // Page 4 - Done
     'tutorial.done.title': '準備完了！',
     'tutorial.done.pwa': 'ホーム画面に追加すると、アプリのように使えます（PWA対応）。',
-    'tutorial.done.reshow': 'このチュートリアルは「このアプリについて」ページからいつでも再表示できます。',
+    'tutorial.done.reshow': 'この使い方ガイドは「このサービスについて」ページからいつでも再表示できます。',
 
     // Route presets
     'route.jaist_komatsu': 'JAIST↔小松駅',
@@ -118,11 +120,11 @@ const TRANSLATIONS = {
     'route.jaist_komatsu_airport': 'JAIST↔小松駅↔小松空港',
 
     // About page
-    'about.title': 'このアプリについて - JAISTのりかえ',
+    'about.title': 'このサービスについて - JAISTのりかえ',
     'about.appName': 'JAISTのりかえ',
     'about.appVersion': '2026年4月版ダイヤ準拠',
-    'about.aboutHeading': 'このアプリについて',
-    'about.aboutText': 'JAISTと周辺地域を結ぶ交通手段の時刻表・乗換案内アプリです。以下の路線に対応しています。',
+    'about.aboutHeading': 'このサービスについて',
+    'about.aboutText': 'JAISTと周辺地域を結ぶ交通手段の時刻表・乗換案内サービスです。以下の路線に対応しています。',
     'about.route.shuttle': 'JAISTシャトルバス',
     'about.route.shuttleDesc': '鶴来線（JAIST↔鶴来駅）・小松線（JAIST↔小松駅）',
     'about.route.ishikawa': '北陸鉄道 石川線',
@@ -132,14 +134,14 @@ const TRANSLATIONS = {
     'about.route.limo': '小松空港連絡バス',
     'about.route.limoDesc': '小松駅↔小松空港',
     'about.aboutFooter': 'JAISTから金沢駅・小松空港などへの乗換ルートを検索し、次の便や所要時間を確認できます。',
-    'about.staticNotice': '本アプリは公式時刻表のデータに基づく静的な情報提供ツールです。リアルタイムの運行状況・位置情報・遅延情報等は反映されません。',
+    'about.staticNotice': '本サービスは公式時刻表のデータに基づく静的な情報提供ツールです。リアルタイムの運行状況・位置情報・遅延情報等は反映されません。',
     'about.disclaimerHeading': '免責事項',
-    'about.disclaimer.1': '本アプリはJAISTおよび各交通機関（IRいしかわ鉄道・北陸鉄道等）の公式サービスではありません。学生サークルが独自に開発した非公式の情報提供ツールです。',
+    'about.disclaimer.1': '本サービスはJAISTおよび各交通機関（IRいしかわ鉄道・北陸鉄道等）の公式サービスではありません。学生サークルが独自に開発した非公式の情報提供ツールです。',
     'about.disclaimer.2': '時刻表データや経路情報には誤りが含まれる可能性があります。内容の正確性・最新性を保証するものではありません。',
-    'about.disclaimer.3': '本アプリの利用により生じたいかなる損害（乗り遅れ等を含む）についても、開発者は責任を負いかねます。',
+    'about.disclaimer.3': '本サービスの利用により生じたいかなる損害（乗り遅れ等を含む）についても、開発者は責任を負いかねます。',
     'about.disclaimer.4': '正確な運行情報については、各交通機関の公式サイトにてご確認ください。',
     'about.techHeading': 'データと仕組みについて',
-    'about.tech.static': '本アプリは独自のサーバーを持たず、ユーザーデータの収集や送信は行っていません（フォント・地図等の外部サービスとの最低限の通信を除く）。',
+    'about.tech.static': '本サービスは独自のサーバーを持たず、ユーザーデータの収集や送信は行っていません（フォント・地図等の外部サービスとの最低限の通信を除く）。',
     'about.tech.timetable': '時刻表データは各交通機関の公式時刻表PDFからプログラムで自動抽出して生成しています。リアルタイムの運行状況・遅延情報等は反映されません。',
     'about.tech.validity': '時刻表データには有効期間があり、ダイヤ改正により内容が変わる場合があります。最新のダイヤは各交通機関の公式サイトをご確認ください。',
     'about.tech.airport': '小松空港→小松駅の発車時刻は、航空便到着の約15分後・所要約12分として算出した推定値です。',
@@ -148,10 +150,10 @@ const TRANSLATIONS = {
     'about.tech.map': 'マップ上の経路やバス停・駅の位置は推測に基づいており、正確な位置を保証するものではありません。',
     'about.tech.storage': 'お気に入りルートや表示設定（テーマ・言語）はお使いのブラウザに保存されます。ブラウザのサイトデータを削除した場合やプライベートモードでは保存されません。',
     'about.timetableHeading': '時刻表を確認する',
-    'about.timetableText': '本アプリで使用している全路線の時刻表データを一覧で確認できます。',
+    'about.timetableText': '本サービスで使用している全路線の時刻表データを一覧で確認できます。',
     'about.timetableLink': '時刻表一覧ページを開く',
     'about.sourceHeading': '時刻表データの出典',
-    'about.sourceText': '本アプリの時刻表データは、以下の公式情報に基づいています。最新のダイヤは各公式ページをご確認ください。',
+    'about.sourceText': '本サービスの時刻表データは、以下の公式情報に基づいています。最新のダイヤは各公式ページをご確認ください。',
     'about.source.jaist': 'JAIST アクセス情報',
     'about.source.jaistDesc': 'シャトルバス時刻表（鶴来線・小松線）',
     'about.source.ir': 'IRいしかわ鉄道 時刻表',
@@ -161,11 +163,11 @@ const TRANSLATIONS = {
     'about.license.noto': 'Google Fonts より提供。SIL Open Font License 1.1 に基づき使用しています。',
     'about.license.leaflet': 'を使用しています。',
     'about.license.osm': '地図データは OpenStreetMap contributors より提供されています。',
-    'about.license.busIcon': '本アプリで使用しているバスアイコン画像の著作権は、それぞれの作成者に帰属します。',
+    'about.license.busIcon': '本サービスで使用しているバスアイコン画像の著作権は、それぞれの作成者に帰属します。',
     'about.devHeading': '開発',
-    'about.tutorialHeading': 'チュートリアル',
-    'about.tutorialText': '初回起動時に表示されるアプリの使い方ガイドを再表示できます。',
-    'about.tutorialLink': 'チュートリアルを表示する',
+    'about.tutorialHeading': '使い方ガイド',
+    'about.tutorialText': '初回起動時に表示されるサービスの使い方ガイドを再表示できます。',
+    'about.tutorialLink': '使い方ガイドを表示する',
 
     // Timetable page
     'timetable.title': '時刻表一覧 - JAISTのりかえ',
@@ -178,8 +180,8 @@ const TRANSLATIONS = {
     'timetable.sourceLink': '公式時刻表を確認',
     'timetable.stopHeader': 'バス停/駅',
     'timetable.tripNum': '${n}便',
-    'timetable.route.shuttle_tsurugi': 'JAISTシャトル 鶴来線',
-    'timetable.route.shuttle_komatsu': 'JAISTシャトル 小松線',
+    'timetable.route.shuttle_tsurugi': 'JAIST Shuttle 鶴来線',
+    'timetable.route.shuttle_komatsu': 'JAIST Shuttle 小松線',
     'timetable.route.ishikawa_line': '北陸鉄道 石川線',
     'timetable.route.ir_ishikawa': 'IRいしかわ鉄道',
     'timetable.route.limo_komatsu': '小松空港連絡バス',
@@ -188,7 +190,7 @@ const TRANSLATIONS = {
   en: {
     // Header
     'app.title': 'JAIST Norikae',
-    'header.about': 'About this app',
+    'header.about': 'About this service',
     'header.themeToggle': 'Toggle theme',
     'header.back': 'Back',
     'settings.language': 'Language',
@@ -209,6 +211,8 @@ const TRANSLATIONS = {
     'search.from': 'From',
     'search.to': 'To',
     'search.swap': 'Swap',
+    'search.reservationNotice': 'JAIST Shuttle Komatsu Line requires <a href="https://www.jaist.ac.jp/jaist_sds/reserve/" target="_blank" rel="noopener">reservation</a> at least 2 hours in advance',
+    'status.reserveLink': '<a href="https://www.jaist.ac.jp/jaist_sds/reserve/" target="_blank" rel="noopener">Reserve</a>',
     // Countdown
     'countdown.until': 'Departs in',
     'countdown.departed': 'Departed',
@@ -290,7 +294,7 @@ const TRANSLATIONS = {
     // Page 4 - Done
     'tutorial.done.title': 'You\'re All Set!',
     'tutorial.done.pwa': 'Add to your home screen to use it like a native app (PWA).',
-    'tutorial.done.reshow': 'You can view this tutorial again from the About page.',
+    'tutorial.done.reshow': 'You can view this guide again from the About page.',
 
     // Route presets
     'route.jaist_komatsu': 'JAIST↔Komatsu Sta.',
@@ -304,7 +308,7 @@ const TRANSLATIONS = {
     'about.title': 'About - JAIST Norikae',
     'about.appName': 'JAIST Norikae',
     'about.appVersion': 'Based on April 2026 timetable',
-    'about.aboutHeading': 'About This App',
+    'about.aboutHeading': 'About This Service',
     'about.aboutText': 'A timetable and transfer guide app for transportation connecting JAIST and surrounding areas. The following lines are supported:',
     'about.route.shuttle': 'JAIST Shuttle Bus',
     'about.route.shuttleDesc': 'Tsurugi Line (JAIST↔Tsurugi Sta.) / Komatsu Line (JAIST↔Komatsu Sta.)',
@@ -346,9 +350,9 @@ const TRANSLATIONS = {
     'about.license.osm': 'Map data provided by OpenStreetMap contributors.',
     'about.license.busIcon': 'Bus icon images used in this app are copyrighted by their respective creators.',
     'about.devHeading': 'Development',
-    'about.tutorialHeading': 'Tutorial',
+    'about.tutorialHeading': 'User Guide',
     'about.tutorialText': 'You can view the app guide that is shown on first launch.',
-    'about.tutorialLink': 'Show tutorial',
+    'about.tutorialLink': 'Show guide',
 
     // Timetable page
     'timetable.title': 'Timetable - JAIST Norikae',
@@ -466,23 +470,17 @@ const ROUTE_NOTES_EN = {
 };
 
 // Operator name translations
-const OPERATOR_NAMES_EN = {
-  'JAISTシャトルバス': 'JAIST Shuttle Bus',
-  '北陸鉄道 石川線': 'Hokuriku Railway Ishikawa Line',
-  'IRいしかわ鉄道': 'IR Ishikawa Railway',
-  '小松空港連絡バス': 'Komatsu Airport Shuttle',
-};
-
-/** Translate an operator name */
-function tOperator(jaName) {
-  if (currentLang === 'ja') return jaName;
-  return OPERATOR_NAMES_EN[jaName] || jaName;
-}
 
 /** Translate a route/meta note */
 function tNote(jaText) {
   if (currentLang === 'ja') return jaText;
   return ROUTE_NOTES_EN[jaText] || jaText;
+}
+
+/** Get display label for a segment by its name (e.g., 'shuttle_komatsu' → 'JAIST Shuttle 小松線') */
+function tSegLabel(segmentName) {
+  const key = 'timetable.route.' + segmentName;
+  return t(key);
 }
 
 /** Translate a segment route name (from JSON data) */
@@ -641,7 +639,7 @@ function applyStaticTranslations() {
 
 /** Update header date and day-of-week display */
 function updateHeaderDate() {
-  const now = new Date();
+  const now = (typeof _getDebugDatetimeNow === 'function' && _getDebugDatetimeNow()) || new Date();
   const m = now.getMonth() + 1;
   const d = now.getDate();
   const dow = now.getDay();

@@ -317,8 +317,17 @@ function buildRouteLayersForRoute(routeId, userFrom, userTo) {
         if (si === visSeg0 && visStop0 > 0) {
           clipFrom = clippedStops[visStop0] || clipFrom;
         }
-        if (si === visSeg1 && visStop1 != null) {
+        if (si === visSeg1 && visStop1 != null && visStop1 < clippedStops.length - 1) {
           clipTo = clippedStops[visStop1] || clipTo;
+        }
+
+        // When one end is clipped by user selection, anchor the other end
+        // to the segment's entry/exit point to avoid defaulting to the wrong end
+        if (!clipFrom && clipTo) {
+          clipFrom = clippedStops[0];
+        }
+        if (!clipTo && clipFrom) {
+          clipTo = clippedStops[clippedStops.length - 1];
         }
 
         visibleSegInfos.push({ segId: segDef.segment, fromStop: clipFrom, toStop: clipTo });
@@ -347,25 +356,21 @@ function buildRouteLayersForRoute(routeId, userFrom, userTo) {
     let line = ROUTE_LINES[segId];
     let stops = STOP_POINTS[segId] || [];
 
-    // Clip to from/to stops
-    if (info.fromStop && info.toStop && stops.length > 0) {
-      const fromIdx = info.fromStop ? stops.findIndex(s => s.name === info.fromStop) : 0;
-      const toIdx = info.toStop ? stops.findIndex(s => s.name === info.toStop) : stops.length - 1;
-      if (fromIdx >= 0 && toIdx >= 0) {
-        const startIdx = Math.min(fromIdx, toIdx);
-        const endIdx = Math.max(fromIdx, toIdx);
-        stops = stops.slice(startIdx, endIdx + 1);
-        if (STOP_FRACTIONS[segId]) {
-          const fracs = STOP_FRACTIONS[segId];
-          const startFrac = fracs[stops[0].name];
-          const endFrac = fracs[stops[stops.length - 1].name];
-          if (startFrac != null && endFrac != null) {
-            const f0 = Math.min(startFrac, endFrac);
-            const f1 = Math.max(startFrac, endFrac);
-            line = clipLine(line, f0, f1);
-          }
-        }
-      }
+    // Clip to from/to stops using fractions (route position along the line)
+    if ((info.fromStop || info.toStop) && stops.length > 0 && STOP_FRACTIONS[segId]) {
+      const fracs = STOP_FRACTIONS[segId];
+      const fromFrac = info.fromStop && fracs[info.fromStop] != null ? fracs[info.fromStop] : 0;
+      const toFrac = info.toStop && fracs[info.toStop] != null ? fracs[info.toStop] : 1;
+      const f0 = Math.min(fromFrac, toFrac);
+      const f1 = Math.max(fromFrac, toFrac);
+
+      // Filter stops to those within the fraction range
+      stops = stops.filter(s => {
+        const f = fracs[s.name];
+        return f != null && f >= f0 - 1e-6 && f <= f1 + 1e-6;
+      });
+
+      line = clipLine(line, f0, f1);
     }
 
     L.polyline(line, {
@@ -665,19 +670,21 @@ function updateMapInfoBar(now) {
     let depTime, arrTime;
     if (isMultiRoute(selectedRouteId)) {
       const conn = currentConnections[selectedTripIdx];
-      if (mr && conn) {
-        routeName = tRouteDisplay(selectedRouteId, mr.short_name, mr.name);
-        depTime = conn.depTime;
-        arrTime = conn.arrTime;
+      if (conn) {
+        depTime = getConnDepTime(conn, selectedFromStop);
+        arrTime = getConnArrTime(conn, selectedToStop);
       }
     } else {
       const route = getRoute(selectedRouteId);
       if (route) {
         const trip = route.schedules[dayType][selectedTripIdx];
         if (trip) {
-          routeName = tRouteDisplay(selectedRouteId, route.short_name, route.name);
-          depTime = trip[0];
-          arrTime = trip[trip.length - 1];
+          const fromIdx = route.stops.indexOf(selectedFromStop);
+          const toIdx = route.stops.indexOf(selectedToStop);
+          if (fromIdx >= 0 && toIdx >= 0) {
+            depTime = trip[fromIdx];
+            arrTime = trip[toIdx];
+          }
         }
       }
     }
@@ -689,7 +696,8 @@ function updateMapInfoBar(now) {
       if (now < depSec) status = t('status.before');
       else if (now <= arrSec) status = t('status.running');
       else status = t('status.arrived');
-      infoEl.textContent = `${routeName} ${depTime}${t('trip.dep')} - ${status}`;
+      const label = `${tStop(selectedFromStop)} → ${tStop(selectedToStop)} ${depTime}${t('trip.dep')} - ${status}`;
+      infoEl.textContent = label;
     } else {
       infoEl.textContent = t('map.selectTrip');
     }
