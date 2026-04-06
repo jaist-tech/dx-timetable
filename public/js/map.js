@@ -635,11 +635,16 @@ function showStaticBusMarker(now) {
     label = now < depSec ? `${trip[0]}${t('trip.dep')} ${t('map.waiting')}` : t('status.arrived');
   }
 
-  const segId = now < depSec ? segIds[0] : segIds[segIds.length - 1];
-  const stops = STOP_POINTS[segId];
-  if (!stops || stops.length === 0) return;
-
-  const pos = now < depSec ? stops[0].latlng : stops[stops.length - 1].latlng;
+  // Find position of the user's from/to stop across all segments
+  const targetStop = now < depSec ? selectedFromStop : selectedToStop;
+  let pos = null;
+  for (const sid of segIds) {
+    const sp = STOP_POINTS[sid];
+    if (!sp) continue;
+    const found = sp.find(s => s.name === targetStop);
+    if (found) { pos = found.latlng; break; }
+  }
+  if (!pos) return;
   const staticIcon = L.icon({
     iconUrl: getBusIconUrl(selectedRouteId),
     iconSize: [33, 33],
@@ -657,9 +662,8 @@ function updateMapInfoBar(now) {
   const infoEl = document.getElementById('map-bus-info');
 
   if (selectedTripIdx >= 0) {
-    let routeName, depTime, arrTime;
+    let depTime, arrTime;
     if (isMultiRoute(selectedRouteId)) {
-      const mr = getMultiRoute(selectedRouteId);
       const conn = currentConnections[selectedTripIdx];
       if (mr && conn) {
         routeName = tRouteDisplay(selectedRouteId, mr.short_name, mr.name);
@@ -678,7 +682,7 @@ function updateMapInfoBar(now) {
       }
     }
 
-    if (routeName && depTime) {
+    if (depTime) {
       const depSec = timeToMin(depTime) * 60;
       const arrSec = timeToMin(arrTime) * 60;
       let status = '';
@@ -693,16 +697,9 @@ function updateMapInfoBar(now) {
     infoEl.textContent = t('map.selectTrip');
   }
 
-  let mH, mM;
-  if (DEBUG_FORCE_RUNNING) {
-    const sec = nowSec();
-    mH = Math.floor(sec / 3600);
-    mM = Math.floor((sec % 3600) / 60);
-  } else {
-    const n = new Date();
-    mH = n.getHours();
-    mM = n.getMinutes();
-  }
+  const sec = nowSec();
+  const mH = Math.floor(sec / 3600);
+  const mM = Math.floor((sec % 3600) / 60);
   document.getElementById('map-time').textContent =
     `${String(mH).padStart(2,'0')}:${String(mM).padStart(2,'0')}`;
 }

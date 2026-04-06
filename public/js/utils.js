@@ -17,6 +17,11 @@ let _expandedSegs = new Set();
 // true: 選択中ルートの1/3付近の便が走行中（出発2分後）になる
 const DEBUG_FORCE_RUNNING = false;
 
+// 任意の日時を指定してデバッグ（DEBUG_FORCE_RUNNING より優先）
+// 例: DEBUG_DATETIME = '2026-04-07 23:30';
+// null の場合は無効
+const DEBUG_DATETIME = null;
+
 // ===== Time Utilities =====
 
 function timeToMin(t) {
@@ -25,20 +30,29 @@ function timeToMin(t) {
   return h * 60 + m;
 }
 
+let _debugDatetime = null; // { date: Date, startReal: number }
+
+function _getDebugDatetimeNow() {
+  if (!DEBUG_DATETIME) return null;
+  if (!_debugDatetime) {
+    _debugDatetime = { date: new Date(DEBUG_DATETIME), startReal: Date.now() };
+  }
+  const elapsed = Date.now() - _debugDatetime.startReal;
+  return new Date(_debugDatetime.date.getTime() + elapsed);
+}
+
 function nowMin() {
-  return DEBUG_FORCE_RUNNING ? Math.floor(debugNowSec() / 60) : realNowMin();
-}
-
-function nowSec() {
-  return DEBUG_FORCE_RUNNING ? debugNowSec() : realNowSec();
-}
-
-function realNowMin() {
+  const dt = _getDebugDatetimeNow();
+  if (dt) return dt.getHours() * 60 + dt.getMinutes();
+  if (DEBUG_FORCE_RUNNING) return Math.floor(debugNowSec() / 60);
   const n = new Date();
   return n.getHours() * 60 + n.getMinutes();
 }
 
-function realNowSec() {
+function nowSec() {
+  const dt = _getDebugDatetimeNow();
+  if (dt) return dt.getHours() * 3600 + dt.getMinutes() * 60 + dt.getSeconds();
+  if (DEBUG_FORCE_RUNNING) return debugNowSec();
   const n = new Date();
   return n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds();
 }

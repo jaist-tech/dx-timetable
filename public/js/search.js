@@ -33,6 +33,8 @@ function initSearch() {
     sel.value = getPresetValue(selectedRouteId);
     sel.addEventListener('change', () => {
       selectedRouteId = sel.value;
+      selectedFromStop = '';
+      selectedToStop = '';
       selectedTripIdx = -1;
       _scrollToSelected = true;
       _expandedTrips.clear();
@@ -153,7 +155,9 @@ function rebuildToSelects() {
   const toOpts = toOptions.map(s =>
     buildStopOption(s, keyStops)
   ).join('');
-  selectedToStop = toOptions[toOptions.length - 1];
+  if (!toOptions.includes(selectedToStop)) {
+    selectedToStop = toOptions[toOptions.length - 1];
+  }
 
   document.querySelectorAll('.to-select').forEach(sel => {
     sel.innerHTML = toOpts;
@@ -190,7 +194,9 @@ function rebuildMultiToSelects() {
   const toOpts = toOptions.map(s =>
     buildStopOption(s, keyStops)
   ).join('');
-  selectedToStop = toOptions[toOptions.length - 1];
+  if (!toOptions.includes(selectedToStop)) {
+    selectedToStop = toOptions[toOptions.length - 1];
+  }
 
   document.querySelectorAll('.to-select').forEach(sel => {
     sel.innerHTML = toOpts;
@@ -209,6 +215,55 @@ function syncControls() {
   });
   document.querySelectorAll('.to-select').forEach(sel => {
     sel.value = selectedToStop;
+  });
+  updateKomatsuNotice();
+}
+
+function selectionUsesKomatsuShuttle() {
+  if (!ROUTES_CONFIG) return false;
+
+  // Direct route
+  const direct = ROUTES_CONFIG.direct_routes.find(r => r.id === selectedRouteId);
+  if (direct) return direct.segment === 'shuttle_komatsu';
+
+  // Multi-route: check if shuttle_komatsu segment is within the selected from/to range
+  const mr = ROUTES_CONFIG.multi_routes.find(r => r.id === selectedRouteId);
+  if (!mr) return false;
+
+  const komatsuIdx = mr.segments.findIndex(s => s.segment === 'shuttle_komatsu');
+  if (komatsuIdx < 0) return false;
+
+  // If no from/to selected, the full route is used
+  if (!selectedFromStop || !selectedToStop) return true;
+
+  const stops = _multiStops.length > 0 ? _multiStops : getMultiRouteStops(selectedRouteId);
+  const fromEntry = stops.find(s => s.name === selectedFromStop);
+  const toEntry = stops.find(s => s.name === selectedToStop);
+  if (!fromEntry || !toEntry) return true;
+
+  // Resolve boundary: if fromStop is the last stop of its segment
+  // and the next segment starts with the same stop, treat it as next segment
+  let fromSegIdx = fromEntry.segIdx;
+  const fromSeg = mr.segments[fromSegIdx];
+  if (fromSeg) {
+    const dirData = getSegmentData(fromSeg.segment, fromSeg.direction);
+    if (dirData) {
+      const { stops: segStops } = clipSegment(dirData, fromSeg, dayType);
+      if (fromEntry.stopIdx === segStops.length - 1 && fromSegIdx + 1 < mr.segments.length) {
+        fromSegIdx = fromSegIdx + 1;
+      }
+    }
+  }
+
+  const minSeg = Math.min(fromSegIdx, toEntry.segIdx);
+  const maxSeg = Math.max(fromSegIdx, toEntry.segIdx);
+  return komatsuIdx >= minSeg && komatsuIdx <= maxSeg;
+}
+
+function updateKomatsuNotice() {
+  const show = selectionUsesKomatsuShuttle();
+  document.querySelectorAll('.komatsu-reservation-notice').forEach(el => {
+    el.style.display = show ? '' : 'none';
   });
 }
 
@@ -327,6 +382,12 @@ function updateTripList() {
 
   const sched = route.schedules[dayType];
   const now = nowMin();
+
+  // Helper: check if a trip is valid (has dep/arr times and doesn't cross midnight)
+  const isValidTrip = (trip) => {
+    const d = trip[fromIdx], a = trip[toIdx];
+    return d && a && timeToMin(a) > timeToMin(d);
+  };
 
   if (selectedTripIdx < 0) {
     for (let i = 0; i < sched.length; i++) {

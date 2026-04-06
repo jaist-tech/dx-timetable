@@ -56,6 +56,21 @@ option.minor-stop{color:var(--text-secondary)}
 .swap-btn:active{transform:rotate(180deg)}
 .swap-btn svg{width:20px;height:20px}
 
+/* Komatsu reservation notice */
+.komatsu-reservation-notice{
+  margin-top:6px;
+  font-size:0.82rem;
+  color:#C62828;
+  text-align:center;
+}
+[data-theme="dark"] .komatsu-reservation-notice{
+  color:#EF9A9A;
+}
+.komatsu-reservation-notice a{
+  color:inherit;
+  text-decoration:underline;
+}
+
 /* Countdown Hero */
 .countdown-hero{
   background:linear-gradient(135deg,var(--primary),var(--primary-light));

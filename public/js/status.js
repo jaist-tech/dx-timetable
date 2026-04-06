@@ -58,6 +58,11 @@ function updateStatus() {
     }
   }
 
+  // Segment label for direct routes
+  const directRoute = ROUTES_CONFIG && ROUTES_CONFIG.direct_routes.find(r => r.id === selectedRouteId);
+  const segLabel = directRoute ? tSegLabel(directRoute.segment) : '';
+  const segReserveLink = (directRoute && directRoute.segment === 'shuttle_komatsu') ? ` ${t('status.reserveLink')}` : '';
+
   // Build timeline
   let timelineHtml = '';
   for (let i = 0; i < route.stops.length; i++) {
@@ -82,6 +87,7 @@ function updateStatus() {
     if (route.stops[i] === selectedFromStop) marker = `<span class="timeline-stop-marker">${t('status.boarding')}</span>`;
     if (route.stops[i] === selectedToStop) marker = `<span class="timeline-stop-marker">${t('status.alighting')}</span>`;
 
+    const isFirst = i === 0;
     const isLast = i === route.stops.length - 1;
     timelineHtml += `
       <div class="timeline-stop ${stopClass}">
@@ -91,8 +97,19 @@ function updateStatus() {
           <span class="timeline-stop-name">${tStop(route.stops[i])}${marker}</span>
           <span class="timeline-stop-time">${stopTime || '-'}</span>
         </div>
-      </div>
-    `;
+      `;
+    } else {
+      timelineHtml += `
+        <div class="timeline-stop ${stopClass}">
+          <div class="timeline-dot"></div>
+          ${!isLast ? '<div class="timeline-line"></div>' : ''}
+          <div class="timeline-info">
+            <span class="timeline-stop-name">${tStop(route.stops[i])}${marker}</span>
+            <span class="timeline-stop-time">${stopTime || '-'}</span>
+          </div>
+        </div>
+      `;
+    }
   }
 
   timeline.innerHTML = timelineHtml;
@@ -267,7 +284,7 @@ function updateMultiStatus(header, timeline) {
             <span class="timeline-stop-name">${tStop(depStopName)}${stopMarker(depStopName)}</span>
             <span class="timeline-stop-time">${depTime} <small class="time-label">${t('trip.dep')}</small></span>
           </div>
-          <span class="timeline-seg-type">${segLabel}</span>
+          <span class="timeline-seg-type">${segLabel}${segReserveLink}</span>
         </div>
       </div>
     `;
