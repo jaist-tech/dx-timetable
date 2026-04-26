@@ -19,7 +19,7 @@ function updateStatus() {
   }
 
   const route = getRoute(selectedRouteId);
-  const sched = route.schedules[dayType];
+  const sched = route.schedules[getDayType(route.segmentId)] || route.schedules[dayType] || [];
   const trip = sched[selectedTripIdx];
   if (!trip) return;
 

@@ -7,6 +7,12 @@ let activeSegKeys = []; // currently visible segment keys
 let prevRouteId = null;
 let prevFromStop = null;
 let prevToStop = null;
+// Bus marker reuse (prevents flicker/jitter on per-second updates)
+let _busMarker = null;
+let _busLabelMarker = null;
+let _busMarkerSig = null; // 'iconUrl|...' to detect when icon needs rebuild
+let _staticBusMarker = null;
+let _staticBusSig = null;
 
 // Extracted data from GeoJSON (keyed by segment_id)
 let ROUTE_LINES = {};   // segmentId -> [[lat,lng], ...]
@@ -275,7 +281,7 @@ function buildRouteLayersForRoute(routeId, userFrom, userTo) {
       if (visSeg0 < visSeg1) {
         const seg0Dir = getSegmentData(mr.segments[visSeg0].segment, mr.segments[visSeg0].direction);
         if (seg0Dir) {
-          const { stops: s0 } = clipSegment(seg0Dir, mr.segments[visSeg0], dayType);
+          const { stops: s0 } = clipSegment(seg0Dir, mr.segments[visSeg0], getDayType(mr.segments[visSeg0].segment));
           if (visStop0 === s0.length - 1) {
             const trDef = mr.segments[visSeg0];
             const nextDef = mr.segments[visSeg0 + 1];
@@ -307,7 +313,7 @@ function buildRouteLayersForRoute(routeId, userFrom, userTo) {
         if (!dirData) continue;
 
         // Get the clipped stops for this segment (same as getMultiRouteStops uses)
-        const { stops: clippedStops } = clipSegment(dirData, segDef, dayType);
+        const { stops: clippedStops } = clipSegment(dirData, segDef, getDayType(segDef.segment));
 
         // Determine clip range: start from segment config clip, then narrow by user selection
         let clipFrom = segDef.from_stop || null;
@@ -453,7 +459,7 @@ function getBusProgress(routeId, tripIdx) {
 
   const route = getRoute(routeId);
   if (!route) return null;
-  const sched = route.schedules[dayType];
+  const sched = route.schedules[getDayType(route.segmentId)] || route.schedules[dayType];
   if (!sched) return null;
   const trip = sched[tripIdx];
   if (!trip) return null;
@@ -569,9 +575,12 @@ function updateMap() {
     prevRouteId = selectedRouteId;
     prevFromStop = selectedFromStop;
     prevToStop = selectedToStop;
+    // 保持しているバスマーカーは古いルート用なのでリセット
+    if (_busMarker) { busLayer.removeLayer(_busMarker); _busMarker = null; _busMarkerSig = null; }
+    if (_busLabelMarker) { busLayer.removeLayer(_busLabelMarker); _busLabelMarker = null; }
+    if (_staticBusMarker) { busLayer.removeLayer(_staticBusMarker); _staticBusMarker = null; _staticBusSig = null; }
   }
 
-  busLayer.clearLayers();
   const now = nowSec();
 
   // Get bus position
@@ -581,13 +590,29 @@ function updateMap() {
     const line = ROUTE_LINES[progress.segId];
     if (line) {
       const pos = pointAlongLine(line, progress.fraction);
-      const busIcon = L.icon({
-        iconUrl: getBusIconUrl(selectedRouteId),
-        iconSize: [42, 42],
-        iconAnchor: [21, 21],
-        className: 'bus-icon-selected'
-      });
-      L.marker(pos, { icon: busIcon }).addTo(busLayer);
+      // 静的マーカーが残っていれば消す
+      if (_staticBusMarker) {
+        busLayer.removeLayer(_staticBusMarker);
+        _staticBusMarker = null;
+        _staticBusSig = null;
+      }
+
+      // 走行中バスアイコン: アイコンURL/サイズが変わったときだけ再生成
+      const iconUrl = getBusIconUrl(selectedRouteId);
+      const sig = `running|${iconUrl}`;
+      if (!_busMarker || _busMarkerSig !== sig) {
+        if (_busMarker) busLayer.removeLayer(_busMarker);
+        const busIcon = L.icon({
+          iconUrl: iconUrl,
+          iconSize: [42, 42],
+          iconAnchor: [21, 21],
+          className: 'bus-icon-selected'
+        });
+        _busMarker = L.marker(pos, { icon: busIcon }).addTo(busLayer);
+        _busMarkerSig = sig;
+      } else {
+        _busMarker.setLatLng(pos);
+      }
 
       // Dep time label
       let depLabel = '';
@@ -596,23 +621,55 @@ function updateMap() {
       } else {
         const route = getRoute(selectedRouteId);
         if (route) {
-          const trip = route.schedules[dayType][selectedTripIdx];
+          const sched = route.schedules[getDayType(route.segmentId)] || route.schedules[dayType] || [];
+          const trip = sched[selectedTripIdx];
           if (trip) depLabel = trip[0] + t('trip.dep');
         }
       }
       if (depLabel) {
-        const labelIcon = L.divIcon({
-          html: `<div class="bus-label">${depLabel}</div>`,
-          className: 'bus-label-container',
-          iconSize: [80, 20],
-          iconAnchor: [-16, 10]
-        });
-        L.marker(pos, { icon: labelIcon }).addTo(busLayer);
+        const labelHtml = `<div class="bus-label">${depLabel}</div>`;
+        if (!_busLabelMarker) {
+          const labelIcon = L.divIcon({
+            html: labelHtml,
+            className: 'bus-label-container',
+            iconSize: [80, 20],
+            iconAnchor: [-16, 10]
+          });
+          _busLabelMarker = L.marker(pos, { icon: labelIcon }).addTo(busLayer);
+          _busLabelMarker._lastLabel = depLabel;
+        } else {
+          _busLabelMarker.setLatLng(pos);
+          // ラベル文字列が変わったときだけ DOM 内容を差し替え
+          if (_busLabelMarker._lastLabel !== depLabel) {
+            const el = _busLabelMarker.getElement();
+            if (el) el.innerHTML = labelHtml;
+            _busLabelMarker._lastLabel = depLabel;
+          }
+        }
+      } else if (_busLabelMarker) {
+        busLayer.removeLayer(_busLabelMarker);
+        _busLabelMarker = null;
       }
     }
-  } else if (selectedTripIdx >= 0) {
-    // Not running - show static marker at first/last stop
-    showStaticBusMarker(now);
+  } else {
+    // 走行中でない: 走行中マーカー/ラベルがあれば消す
+    if (_busMarker) {
+      busLayer.removeLayer(_busMarker);
+      _busMarker = null;
+      _busMarkerSig = null;
+    }
+    if (_busLabelMarker) {
+      busLayer.removeLayer(_busLabelMarker);
+      _busLabelMarker = null;
+    }
+    if (selectedTripIdx >= 0) {
+      // 静的マーカーを始点/終点に表示
+      showStaticBusMarker(now);
+    } else if (_staticBusMarker) {
+      busLayer.removeLayer(_staticBusMarker);
+      _staticBusMarker = null;
+      _staticBusSig = null;
+    }
   }
 
   // Update info bar
@@ -624,43 +681,93 @@ function showStaticBusMarker(now) {
   const segIds = getRouteSegmentIds(selectedRouteId);
   if (segIds.length === 0) return;
 
-  let depSec, arrSec, label;
+  // 表示位置とラベルを決定する。multi-route の乗換待ち中は
+  // 「次に出発する区間の始点」にバスを置き、その出発時刻を表示する。
+  let pos = null;
+  let label = '';
+
   if (isMultiRoute(selectedRouteId) && currentConnections[selectedTripIdx]) {
     const conn = currentConnections[selectedTripIdx];
-    depSec = timeToMin(conn.depTime) * 60;
-    arrSec = timeToMin(conn.arrTime) * 60;
-    label = now < depSec ? `${conn.depTime}${t('trip.dep')} ${t('map.waiting')}` : t('status.arrived');
+    const overallDepSec = timeToMin(conn.depTime) * 60;
+    const overallArrSec = timeToMin(conn.arrTime) * 60;
+    const segs = conn.segments || [];
+
+    if (now < overallDepSec) {
+      // 全行程開始前: 最初の区間の始発駅で待機
+      label = `${conn.depTime}${t('trip.dep')} ${t('map.waiting')}`;
+      pos = _findStopLatLng(segs[0] && segs[0].stops[0], segIds);
+    } else if (now > overallArrSec) {
+      // 全行程終了後: 最後の区間の終着駅
+      label = t('status.arrived');
+      const lastSeg = segs[segs.length - 1];
+      pos = _findStopLatLng(lastSeg && lastSeg.stops[lastSeg.stops.length - 1], segIds);
+    } else {
+      // 乗換待ち: 直前に到着した区間の終着 = 次区間の始発で待機
+      for (let i = 0; i < segs.length - 1; i++) {
+        const segArrSec = timeToMin(segs[i].arrTime) * 60;
+        const nextDepSec = timeToMin(segs[i + 1].depTime) * 60;
+        if (now > segArrSec && now < nextDepSec) {
+          const nextDep = segs[i + 1].depTime;
+          label = `${nextDep}${t('trip.dep')} ${t('map.waiting')}`;
+          // 待機する地点は次区間の始発駅
+          pos = _findStopLatLng(segs[i + 1].stops[0], segIds);
+          break;
+        }
+      }
+      // 乗換区間に該当しないが running でもない (= データ穴) → そのまま return
+      if (!pos) return;
+    }
   } else {
     const route = getRoute(selectedRouteId);
     if (!route) return;
-    const trip = route.schedules[dayType][selectedTripIdx];
+    const sched = route.schedules[getDayType(route.segmentId)] || route.schedules[dayType] || [];
+    const trip = sched[selectedTripIdx];
     if (!trip) return;
-    depSec = timeToMin(trip[0]) * 60;
-    arrSec = timeToMin(trip[trip.length - 1]) * 60;
+    const depSec = timeToMin(trip[0]) * 60;
+    const arrSec = timeToMin(trip[trip.length - 1]) * 60;
     label = now < depSec ? `${trip[0]}${t('trip.dep')} ${t('map.waiting')}` : t('status.arrived');
+    const targetStop = now < depSec ? selectedFromStop : selectedToStop;
+    pos = _findStopLatLng(targetStop, segIds);
   }
 
-  // Find position of the user's from/to stop across all segments
-  const targetStop = now < depSec ? selectedFromStop : selectedToStop;
-  let pos = null;
+  if (!pos) return;
+
+  // 同じ署名なら何もしない（位置とラベルだけ追従）
+  const iconUrl = getBusIconUrl(selectedRouteId);
+  const sig = `static|${iconUrl}`;
+  if (!_staticBusMarker || _staticBusSig !== sig) {
+    if (_staticBusMarker) busLayer.removeLayer(_staticBusMarker);
+    const staticIcon = L.icon({
+      iconUrl: iconUrl,
+      iconSize: [33, 33],
+      iconAnchor: [16, 16],
+      className: 'bus-icon-static'
+    });
+    _staticBusMarker = L.marker(pos, { icon: staticIcon }).bindTooltip(label, {
+      permanent: true,
+      direction: 'right',
+      offset: [16, 0]
+    }).addTo(busLayer);
+    _staticBusMarker._lastLabel = label;
+    _staticBusSig = sig;
+  } else {
+    _staticBusMarker.setLatLng(pos);
+    if (_staticBusMarker._lastLabel !== label) {
+      _staticBusMarker.setTooltipContent(label);
+      _staticBusMarker._lastLabel = label;
+    }
+  }
+}
+
+function _findStopLatLng(stopName, segIds) {
+  if (!stopName) return null;
   for (const sid of segIds) {
     const sp = STOP_POINTS[sid];
     if (!sp) continue;
-    const found = sp.find(s => s.name === targetStop);
-    if (found) { pos = found.latlng; break; }
+    const found = sp.find(s => s.name === stopName);
+    if (found) return found.latlng;
   }
-  if (!pos) return;
-  const staticIcon = L.icon({
-    iconUrl: getBusIconUrl(selectedRouteId),
-    iconSize: [33, 33],
-    iconAnchor: [16, 16],
-    className: 'bus-icon-static'
-  });
-  L.marker(pos, { icon: staticIcon }).bindTooltip(label, {
-    permanent: true,
-    direction: 'right',
-    offset: [16, 0]
-  }).addTo(busLayer);
+  return null;
 }
 
 function updateMapInfoBar(now) {
@@ -677,7 +784,8 @@ function updateMapInfoBar(now) {
     } else {
       const route = getRoute(selectedRouteId);
       if (route) {
-        const trip = route.schedules[dayType][selectedTripIdx];
+        const sched = route.schedules[getDayType(route.segmentId)] || route.schedules[dayType] || [];
+        const trip = sched[selectedTripIdx];
         if (trip) {
           const fromIdx = route.stops.indexOf(selectedFromStop);
           const toIdx = route.stops.indexOf(selectedToStop);

@@ -249,7 +249,7 @@ function selectionUsesKomatsuShuttle() {
   if (fromSeg) {
     const dirData = getSegmentData(fromSeg.segment, fromSeg.direction);
     if (dirData) {
-      const { stops: segStops } = clipSegment(dirData, fromSeg, dayType);
+      const { stops: segStops } = clipSegment(dirData, fromSeg, getDayType(fromSeg.segment));
       if (fromEntry.stopIdx === segStops.length - 1 && fromSegIdx + 1 < mr.segments.length) {
         fromSegIdx = fromSegIdx + 1;
       }
@@ -381,7 +381,7 @@ function updateTripList() {
     return;
   }
 
-  const sched = route.schedules[dayType];
+  const sched = route.schedules[getDayType(route.segmentId)] || route.schedules[dayType] || [];
   const now = nowMin();
 
   // Helper: check if a trip is valid (has dep/arr times and doesn't cross midnight)
@@ -480,7 +480,7 @@ function updateMultiTripList() {
     _multiStops = getMultiRouteStops(selectedRouteId);
   }
 
-  currentConnections = findConnections(selectedRouteId, dayType, selectedFromStop, selectedToStop);
+  currentConnections = findConnections(selectedRouteId, selectedFromStop, selectedToStop);
 
   // Filter out connections with invalid times for the selected from/to stops
   // (e.g., midnight-crossing trips where arrTime < depTime)
@@ -759,7 +759,7 @@ function updateSearchCountdown() {
 
   const fromIdx = route.stops.indexOf(selectedFromStop);
   const toIdx = route.stops.indexOf(selectedToStop);
-  const sched = route.schedules[dayType];
+  const sched = route.schedules[getDayType(route.segmentId)] || route.schedules[dayType] || [];
 
   // Check if all buses are done (no future departure)
   let hasNextDep = false;

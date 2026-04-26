@@ -255,10 +255,11 @@ header{
   </div>
 </div>
 
+<script src="js/debug.js"></script>
 <script src="js/i18n.js"></script>
 <script>
 function updateClock() {
-  var n = new Date();
+  var n = (typeof _getDebugDatetimeNow === 'function' && _getDebugDatetimeNow()) || new Date();
   var h = String(n.getHours()).padStart(2,'0');
   var m = String(n.getMinutes()).padStart(2,'0');
   document.getElementById('header-time').textContent = h + ':' + m;

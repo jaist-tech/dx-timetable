@@ -218,34 +218,35 @@ tr:hover{background:#e3f2fd}
     </select>
   </div>
 
-  <div class="tabs">
-    <button class="active" onclick="switchDay('weekday', this)" data-i18n="timetable.weekday">平日</button>
-    <button onclick="switchDay('weekend', this)" data-i18n="timetable.weekend">土日祝</button>
-  </div>
+  <div class="tabs" id="dayTabs"></div>
 
   <div class="meta-text" id="meta"></div>
   <div id="content"><div class="loading" data-i18n="timetable.selectPrompt">路線を選択してください</div></div>
 </div>
 
+<script src="js/debug.js"></script>
 <script src="js/i18n.js"></script>
 <script>
 function updateClock() {
-  var n = new Date();
+  var n = (typeof _getDebugDatetimeNow === 'function' && _getDebugDatetimeNow()) || new Date();
   var h = String(n.getHours()).padStart(2,'0');
   var m = String(n.getMinutes()).padStart(2,'0');
   document.getElementById('header-time').textContent = h + ':' + m;
 }
 
+// JSON_FILES: dropdown entries. file = manifest base name (e.g. 'shuttle_komatsu')
 const JSON_FILES = [
-  { file: 'data/segments/shuttle_tsurugi.json', i18nKey: 'timetable.route.shuttle_tsurugi', color: '#1976D2', sourceUrl: 'https://www.jaist.ac.jp/top/access/' },
-  { file: 'data/segments/shuttle_komatsu.json', i18nKey: 'timetable.route.shuttle_komatsu', color: '#43A047', sourceUrl: 'https://www.jaist.ac.jp/top/access/' },
-  { file: 'data/segments/ishikawa_line.json', i18nKey: 'timetable.route.ishikawa_line', color: '#6A1B9A', sourceUrl: 'https://www.hokutetsu.co.jp/railway/ishikawasen/' },
-  { file: 'data/segments/ir_ishikawa.json', i18nKey: 'timetable.route.ir_ishikawa', color: '#E65100', sourceUrl: 'https://www.ishikawa-railway.jp/timetable/' },
-  { file: 'data/segments/limo_komatsu.json', i18nKey: 'timetable.route.limo_komatsu', color: '#00838F', sourceUrl: 'https://www.hokutetsu.co.jp/airport-bus#station_airport' },
+  { file: 'shuttle_tsurugi', i18nKey: 'timetable.route.shuttle_tsurugi', color: '#1976D2', sourceUrl: 'https://www.jaist.ac.jp/top/access/' },
+  { file: 'shuttle_komatsu', i18nKey: 'timetable.route.shuttle_komatsu', color: '#43A047', sourceUrl: 'https://www.jaist.ac.jp/top/access/' },
+  { file: 'ishikawa_line',   i18nKey: 'timetable.route.ishikawa_line',   color: '#6A1B9A', sourceUrl: 'https://www.hokutetsu.co.jp/railway/ishikawasen/' },
+  { file: 'ir_ishikawa',     i18nKey: 'timetable.route.ir_ishikawa',     color: '#E65100', sourceUrl: 'https://www.ishikawa-railway.jp/timetable/' },
+  { file: 'limo_komatsu',    i18nKey: 'timetable.route.limo_komatsu',    color: '#00838F', sourceUrl: 'https://www.hokutetsu.co.jp/airport-bus#station_airport' },
 ];
 let currentColor = '#666';
-let data = null;
+let data = null;          // currently loaded regular JSON (from data/regular/*)
 let currentDay = 'weekday';
+let _manifest = { regular: {}, special: {} };
+let _specialDataCache = {};  // schedule_key -> special JSON (per-base)
 
 const select = document.getElementById('jsonSelect');
 JSON_FILES.forEach(function(entry) {
@@ -256,16 +257,54 @@ JSON_FILES.forEach(function(entry) {
   select.appendChild(opt);
 });
 
+async function loadManifestForTimetable() {
+  try {
+    var res = await fetch('data/manifest.json');
+    _manifest = await res.json();
+  } catch (e) {
+    console.warn('Failed to load manifest:', e);
+  }
+}
+
+// Same fallback rule as app.js pickRegularEntry
+function pickRegularEntry(entries, todayStrVal) {
+  if (!entries || entries.length === 0) return undefined;
+  var covering = entries.filter(function(e) {
+    return e.valid_from <= todayStrVal && (e.valid_until === null || todayStrVal <= e.valid_until);
+  });
+  if (covering.length > 0) {
+    return covering.reduce(function(a, b) { return a.valid_from > b.valid_from ? a : b; });
+  }
+  var expired = entries.filter(function(e) {
+    return e.valid_from <= todayStrVal && e.valid_until !== null && e.valid_until < todayStrVal;
+  });
+  if (expired.length > 0) {
+    return expired.reduce(function(a, b) { return a.valid_from > b.valid_from ? a : b; });
+  }
+  return undefined;
+}
+
 async function loadSelected() {
-  var file = select.value;
-  if (!file) return;
+  var base = select.value;
+  if (!base) return;
   document.getElementById('content').innerHTML = '<div class="loading">' + t('timetable.loading') + '</div>';
   try {
-    var res = await fetch(file);
+    var entries = (_manifest.regular && _manifest.regular[base]) || [];
+    var picked = pickRegularEntry(entries, todayStr());
+    if (!picked) throw new Error('no regular file');
+    var res = await fetch('data/regular/' + picked.file);
     if (!res.ok) throw new Error(res.status);
     data = await res.json();
-    var entry = JSON_FILES.find(function(e) { return e.file === file; });
+    data._base = base;          // remember which segment_file base this is
+    _specialDataCache = {};     // reset; will lazy-load when special tab clicked
+    var entry = JSON_FILES.find(function(e) { return e.file === base; });
     currentColor = entry ? entry.color : '#666';
+    renderDayTabs();
+    // If currentDay is a special key (carried over from a previous segment),
+    // make sure that special's data is loaded for the new segment before rendering.
+    if (currentDay !== 'weekday' && currentDay !== 'weekend') {
+      await ensureSpecialLoaded(currentDay);
+    }
     updateMeta();
     render();
   } catch (e) {
@@ -274,10 +313,96 @@ async function loadSelected() {
   }
 }
 
+// Get manifest.special entries for the currently displayed base segment.
+// Skip fallback_to entries (they aren't tabbable; they reuse weekday/weekend).
+function getCurrentSpecialEntries() {
+  if (!data || !data._base) return [];
+  var entries = (_manifest.special && _manifest.special[data._base]) || [];
+  return entries.filter(function(e) { return e.schedule_key && e.file; });
+}
+
+// Determine visible tab keys.
+// Always: weekday, weekend.
+// Plus: any special whose [display_from, display_until] covers today.
+function getVisibleDayKeys() {
+  var keys = ['weekday', 'weekend'];
+  var today = todayStr();
+  getCurrentSpecialEntries().forEach(function(e) {
+    var df = e.display_from || (e.apply_periods && e.apply_periods[0] && e.apply_periods[0].from);
+    var du = e.display_until || (e.apply_periods && e.apply_periods[e.apply_periods.length - 1] && e.apply_periods[e.apply_periods.length - 1].until);
+    if (df && today < df) return;
+    if (du && today > du) return;
+    keys.push(e.schedule_key);
+  });
+  return keys;
+}
+
+function todayStr() {
+  if (typeof debugTodayStr === 'function') return debugTodayStr();
+  var n = new Date();
+  return n.getFullYear() + '-' +
+    String(n.getMonth() + 1).padStart(2, '0') + '-' +
+    String(n.getDate()).padStart(2, '0');
+}
+
+function dayLabel(key) {
+  if (key === 'weekday') return t('timetable.weekday');
+  if (key === 'weekend') return t('timetable.weekend');
+  var found = getCurrentSpecialEntries().find(function(e) { return e.schedule_key === key; });
+  if (!found) return key;
+  if (currentLang === 'en' && found.label_en) return found.label_en;
+  if (found.label_ja) return found.label_ja;
+  return key;
+}
+
+function renderDayTabs() {
+  var container = document.getElementById('dayTabs');
+  container.innerHTML = '';
+  var keys = getVisibleDayKeys();
+  if (keys.indexOf(currentDay) < 0) currentDay = 'weekday';
+  keys.forEach(function(k) {
+    var btn = document.createElement('button');
+    btn.textContent = dayLabel(k);
+    if (k === currentDay) btn.classList.add('active');
+    btn.addEventListener('click', function() { switchDay(k, btn); });
+    container.appendChild(btn);
+  });
+}
+
+// Lazy-load a special file into _specialDataCache for the current base.
+async function ensureSpecialLoaded(scheduleKey) {
+  if (_specialDataCache[scheduleKey]) return _specialDataCache[scheduleKey];
+  var entry = getCurrentSpecialEntries().find(function(e) { return e.schedule_key === scheduleKey; });
+  if (!entry) return null;
+  try {
+    var res = await fetch('data/special/' + entry.file);
+    if (!res.ok) throw new Error(res.status);
+    _specialDataCache[scheduleKey] = await res.json();
+    return _specialDataCache[scheduleKey];
+  } catch (e) {
+    console.warn('Failed to load special file', entry.file, e);
+    return null;
+  }
+}
+
 function updateMeta() {
   if (!data) return;
-  var vf = data.meta.valid_from;
-  var vu = data.meta.valid_until;
+  var vf = null;
+  var vu = null;
+  if (currentDay === 'weekday' || currentDay === 'weekend') {
+    vf = data.meta && data.meta.valid_from;
+    vu = data.meta && data.meta.valid_until;
+  } else {
+    var sp = _specialDataCache[currentDay];
+    if (sp && sp.meta) {
+      // for specials, show apply period rather than valid_from/until
+      var aps = sp.meta.apply_periods || [];
+      if (aps.length > 0) {
+        vf = aps[0].from;
+        vu = aps[aps.length - 1].until;
+      }
+    }
+  }
   var metaHtml = '';
   if (vf && vu) metaHtml = vf + ' ~ ' + vu;
   else if (vf) metaHtml = vf + ' ~';
@@ -290,19 +415,47 @@ function updateMeta() {
   document.getElementById('meta').innerHTML = metaHtml;
 }
 
-function switchDay(day, btn) {
+async function switchDay(day, btn) {
   currentDay = day;
   document.querySelectorAll('.tabs button').forEach(function(b) { b.classList.remove('active'); });
   if (btn) btn.classList.add('active');
-  if (data) render();
+  if (!data) return;
+  // For special tabs, lazy-load the special file before rendering
+  if (day !== 'weekday' && day !== 'weekend') {
+    await ensureSpecialLoaded(day);
+  }
+  updateMeta();
+  render();
+}
+
+// Returns the routes array to render, depending on currentDay.
+// - weekday/weekend: from regular `data` (the JSON loaded into `data`)
+// - special key: from the loaded special JSON in _specialDataCache, falling back
+//   to whatever 'default' schedules the special routes have
+function getRenderRoutes() {
+  if (currentDay === 'weekday' || currentDay === 'weekend') return data.routes;
+  var sp = _specialDataCache[currentDay];
+  if (!sp) return [];
+  return sp.routes;
+}
+
+// Get trips for a route under currentDay.
+// For special: route.schedules.default
+// For regular: route.schedules[currentDay]
+function getRouteTrips(route) {
+  if (currentDay === 'weekday' || currentDay === 'weekend') {
+    return route.schedules[currentDay] || [];
+  }
+  return (route.schedules && route.schedules.default) || [];
 }
 
 function render() {
   var container = document.getElementById('content');
   container.innerHTML = '';
+  var routes = getRenderRoutes();
 
-  data.routes.forEach(function(route) {
-    var trips = route.schedules[currentDay];
+  routes.forEach(function(route) {
+    var trips = getRouteTrips(route);
     var stops = route.stops;
 
     var wrapper = document.createElement('div');
@@ -370,6 +523,7 @@ function refreshUI() {
   });
   // Re-render table if data loaded
   if (data) {
+    renderDayTabs();
     updateMeta();
     render();
   } else {
@@ -383,9 +537,12 @@ applyStaticTranslations();
 updateClock();
 setInterval(updateClock, 10000);
 
-// Auto-load first option
-select.selectedIndex = 1;
-loadSelected();
+// Load manifest first, then auto-load first option
+(async function bootstrapTimetable() {
+  await loadManifestForTimetable();
+  select.selectedIndex = 1;
+  await loadSelected();
+})();
 </script>
 </body>
 </html>

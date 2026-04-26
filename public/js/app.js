@@ -1,7 +1,9 @@
 // ===== Data Loading =====
 async function loadData() {
-  // Load holidays and routes config
-  await Promise.all([loadHolidays(), loadRoutesConfig()]);
+  // Load holidays, manifest, and routes config in parallel
+  await Promise.all([loadHolidays(), loadManifest(), loadRoutesConfigOnly()]);
+  // Then fetch the actual segment data (depends on manifest + routes config)
+  await loadSegments();
 
   // Build DATA.routes and REVERSE_ROUTES from direct_routes + segments
   DATA = { routes: [] };
@@ -18,6 +20,7 @@ async function loadData() {
         name: dr.name,
         short_name: dr.short_name,
         color: dr.color,
+        segmentId: dr.segment,
         stops: dirData ? dirData.stops : [],
         schedules: dirData ? dirData.schedules : { weekday: [], weekend: [] }
       };
@@ -30,43 +33,164 @@ async function loadData() {
   initApp();
 }
 
-async function loadRoutesConfig() {
+let _manifest = { regular: {}, special: {} };
+
+async function loadManifest() {
+  try {
+    const res = await fetch('data/manifest.json');
+    _manifest = await res.json();
+  } catch (e) {
+    console.warn('Failed to load manifest:', e);
+    _manifest = { regular: {}, special: {} };
+  }
+}
+
+async function loadRoutesConfigOnly() {
   try {
     const res = await fetch('data/routes.json');
     ROUTES_CONFIG = await res.json();
-
-    const segDefs = ROUTES_CONFIG.segment_files || [];
-
-    // Deduplicate file fetches (e.g., ir_ishikawa.json used by multiple segments)
-    const uniqueFiles = [...new Set(segDefs.map(s => s.file))];
-    const fetched = {};
-    await Promise.all(
-      uniqueFiles.map(f =>
-        fetch(`data/segments/${f}.json`).then(r => r.json()).then(d => { fetched[f] = d; })
-      )
-    );
-
-    // Build SEGMENTS: segment_name -> { outbound/inbound -> route data }
-    segDefs.forEach(segDef => {
-      const segJson = fetched[segDef.file];
-      if (!segJson) return;
-      const segObj = {};
-      for (const [dirKey, routeId] of Object.entries(segDef.directions)) {
-        const route = segJson.routes.find(r => r.id === routeId);
-        if (route) {
-          segObj[dirKey] = {
-            stops: route.stops,
-            schedules: route.schedules
-          };
-        }
-      }
-      segObj.meta = segJson.meta;
-      segObj.type = segDef.type || 'bus';
-      SEGMENTS[segDef.name] = segObj;
-    });
   } catch (e) {
     console.warn('Failed to load routes config:', e);
     ROUTES_CONFIG = null;
+  }
+}
+
+// Pick the regular file for a segment based on today's date (with fallback for stale data).
+// Rule (確定済み):
+//   1. valid_from <= today <= valid_until を満たすファイル
+//      該当する null (=valid_until 無し) ファイルが複数なら valid_from が最新
+//   2. 上記に該当無しなら、valid_from <= today で valid_from が最新（過去に開始済みで期限切れ）
+//   3. それも無ければ undefined
+function pickRegularEntry(entries, todayStr) {
+  if (!entries || entries.length === 0) return undefined;
+
+  // 1. covering matches
+  const covering = entries.filter(e =>
+    e.valid_from <= todayStr && (e.valid_until === null || todayStr <= e.valid_until)
+  );
+  if (covering.length > 0) {
+    // pick the one with newest valid_from
+    return covering.reduce((a, b) => (a.valid_from > b.valid_from ? a : b));
+  }
+
+  // 2. stale fallback: started in the past, but expired (valid_until < today)
+  const expired = entries.filter(e =>
+    e.valid_from <= todayStr && e.valid_until !== null && e.valid_until < todayStr
+  );
+  if (expired.length > 0) {
+    return expired.reduce((a, b) => (a.valid_from > b.valid_from ? a : b));
+  }
+
+  return undefined;
+}
+
+function todayStrFromGetDayType() {
+  // Use _getDebugDatetimeNow() if defined, else real now
+  const now = (typeof _getDebugDatetimeNow === 'function' && _getDebugDatetimeNow()) || new Date();
+  return now.getFullYear() + '-' +
+    String(now.getMonth() + 1).padStart(2, '0') + '-' +
+    String(now.getDate()).padStart(2, '0');
+}
+
+async function loadSegments() {
+  if (!ROUTES_CONFIG) return;
+  const segDefs = ROUTES_CONFIG.segment_files || [];
+  const today = todayStrFromGetDayType();
+
+  // For each segment_file definition, pick the right regular file from manifest
+  // and fetch it. Multiple segDefs may share a base name (e.g., ir_ishikawa_south
+  // and ir_ishikawa_north both use 'ir_ishikawa'). Deduplicate by chosen file path.
+  const fileToFetch = {};  // fileName -> Promise
+  const segDefToFile = {}; // segDef.name -> fileName
+
+  segDefs.forEach(segDef => {
+    const baseName = segDef.file;
+    const entries = (_manifest.regular && _manifest.regular[baseName]) || [];
+    const picked = pickRegularEntry(entries, today);
+    if (!picked) {
+      console.warn(`No regular file for segment '${segDef.name}' (base '${baseName}')`);
+      return;
+    }
+    segDefToFile[segDef.name] = picked.file;
+    if (!fileToFetch[picked.file]) {
+      fileToFetch[picked.file] = fetch(`data/regular/${picked.file}`).then(r => r.json());
+    }
+  });
+
+  // Also fetch any special files that have a 'file' (skip fallback_to entries)
+  // for segments referenced in segDefs. We fetch all files referenced in
+  // _manifest.special, since special files are small and rarely numerous.
+  const specialFilesToFetch = new Set();
+  if (_manifest.special) {
+    Object.entries(_manifest.special).forEach(([baseName, entries]) => {
+      // Only fetch if there's a segDef using this baseName
+      const usedByAny = segDefs.some(sd => sd.file === baseName);
+      if (!usedByAny) return;
+      entries.forEach(e => {
+        if (e.file) specialFilesToFetch.add(e.file);
+      });
+    });
+  }
+
+  const fetched = {};        // regular fileName -> json
+  const specialFetched = {}; // special fileName -> json
+  await Promise.all([
+    ...Object.entries(fileToFetch).map(async ([file, p]) => { fetched[file] = await p; }),
+    ...[...specialFilesToFetch].map(async file => {
+      try {
+        const r = await fetch(`data/special/${file}`);
+        specialFetched[file] = await r.json();
+      } catch (e) {
+        console.warn(`Failed to load special file ${file}:`, e);
+      }
+    })
+  ]);
+
+  // Build SEGMENTS: same shape as before
+  segDefs.forEach(segDef => {
+    const fname = segDefToFile[segDef.name];
+    if (!fname) return;
+    const segJson = fetched[fname];
+    if (!segJson) return;
+    const segObj = {};
+    for (const [dirKey, routeId] of Object.entries(segDef.directions)) {
+      const route = segJson.routes.find(r => r.id === routeId);
+      if (route) {
+        segObj[dirKey] = {
+          stops: route.stops,
+          schedules: { ...route.schedules } // copy so we can extend
+        };
+      }
+    }
+    segObj.meta = segJson.meta;
+    segObj.type = segDef.type || 'bus';
+    SEGMENTS[segDef.name] = segObj;
+  });
+
+  // Merge special schedules into SEGMENTS[seg].<dir>.schedules under their schedule_key
+  if (_manifest.special) {
+    Object.entries(_manifest.special).forEach(([baseName, entries]) => {
+      entries.forEach(e => {
+        if (!e.file || !e.schedule_key) return;
+        const sjson = specialFetched[e.file];
+        if (!sjson) return;
+        // Find which segDefs use this baseName, and inject the schedule under schedule_key
+        segDefs.forEach(sd => {
+          if (sd.file !== baseName) return;
+          const segObj = SEGMENTS[sd.name];
+          if (!segObj) return;
+          for (const [dirKey, routeId] of Object.entries(sd.directions)) {
+            const route = sjson.routes.find(r => r.id === routeId);
+            if (!route) continue;
+            const trips = route.schedules && route.schedules.default;
+            if (!trips) continue;
+            if (segObj[dirKey] && segObj[dirKey].schedules) {
+              segObj[dirKey].schedules[e.schedule_key] = trips;
+            }
+          }
+        });
+      });
+    });
   }
 }
 

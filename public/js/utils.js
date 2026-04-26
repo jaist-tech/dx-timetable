@@ -14,13 +14,7 @@ let _scrollToSelected = false;
 let _expandedSegs = new Set();
 
 // ===== Debug =====
-// true: 選択中ルートの1/3付近の便が走行中（出発2分後）になる
-const DEBUG_FORCE_RUNNING = false;
-
-// 任意の日時を指定してデバッグ（DEBUG_FORCE_RUNNING より優先）
-// 例: DEBUG_DATETIME = '2026-04-07 23:30';
-// null の場合は無効
-const DEBUG_DATETIME = null;
+// デバッグ用フラグは public/js/debug.js に集約されている (DEBUG_DATETIME のみ)。
 
 // ===== Time Utilities =====
 
@@ -30,21 +24,9 @@ function timeToMin(t) {
   return h * 60 + m;
 }
 
-let _debugDatetime = null; // { date: Date, startReal: number }
-
-function _getDebugDatetimeNow() {
-  if (!DEBUG_DATETIME) return null;
-  if (!_debugDatetime) {
-    _debugDatetime = { date: new Date(DEBUG_DATETIME), startReal: Date.now() };
-  }
-  const elapsed = Date.now() - _debugDatetime.startReal;
-  return new Date(_debugDatetime.date.getTime() + elapsed);
-}
-
 function nowMin() {
   const dt = _getDebugDatetimeNow();
   if (dt) return dt.getHours() * 60 + dt.getMinutes();
-  if (DEBUG_FORCE_RUNNING) return Math.floor(debugNowSec() / 60);
   const n = new Date();
   return n.getHours() * 60 + n.getMinutes();
 }
@@ -52,20 +34,58 @@ function nowMin() {
 function nowSec() {
   const dt = _getDebugDatetimeNow();
   if (dt) return dt.getHours() * 3600 + dt.getMinutes() * 60 + dt.getSeconds();
-  if (DEBUG_FORCE_RUNNING) return debugNowSec();
   const n = new Date();
   return n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds();
 }
 
 let _holidaySet = new Set();
 
-function getDayType() {
+// Returns true if dateStr falls within any of the apply_periods entries.
+function _matchesApplyPeriods(dateStr, periods) {
+  if (!Array.isArray(periods)) return false;
+  for (const p of periods) {
+    if (p.from <= dateStr && dateStr <= p.until) return true;
+  }
+  return false;
+}
+
+// Resolve segmentId to manifest.special[base]. The manifest is keyed by
+// the segment_files.file basename (e.g. 'shuttle_komatsu'), but getDayType
+// receives the segment_files.name (which usually equals the basename, but
+// can differ for shared files like ir_ishikawa_south/north → 'ir_ishikawa').
+function _segmentSpecialEntries(segmentId) {
+  if (!segmentId || typeof _manifest === 'undefined' || !_manifest.special) return [];
+  // Direct match (most common)
+  if (_manifest.special[segmentId]) return _manifest.special[segmentId];
+  // Resolve via segment_files: name -> file
+  if (typeof ROUTES_CONFIG !== 'undefined' && ROUTES_CONFIG && ROUTES_CONFIG.segment_files) {
+    const def = ROUTES_CONFIG.segment_files.find(s => s.name === segmentId);
+    if (def && _manifest.special[def.file]) return _manifest.special[def.file];
+  }
+  return [];
+}
+
+function getDayType(segmentId) {
   const now = _getDebugDatetimeNow() || new Date();
-  const d = now.getDay();
-  if (d === 0 || d === 6) return 'weekend';
   const dateStr = now.getFullYear() + '-' +
     String(now.getMonth() + 1).padStart(2, '0') + '-' +
     String(now.getDate()).padStart(2, '0');
+
+  // 1) manifest.special: per-segment override
+  const specials = _segmentSpecialEntries(segmentId);
+  for (const e of specials) {
+    if (_matchesApplyPeriods(dateStr, e.apply_periods)) {
+      // fallback_to entries simply redirect to weekday/weekend
+      if (e.fallback_to) return e.fallback_to;
+      // schedule-key entries redirect to that key (which has been merged into SEGMENTS)
+      if (e.schedule_key) return e.schedule_key;
+    }
+  }
+
+  // 2) Sat/Sun
+  const d = now.getDay();
+  if (d === 0 || d === 6) return 'weekend';
+  // 3) National holidays
   if (_holidaySet.has(dateStr)) return 'weekend';
   return 'weekday';
 }
@@ -79,44 +99,6 @@ function formatCountdownSecHtml(diffSec) {
   const ue = '</span>';
   if (h > 0) return `${h}${u}${t('time.h')}${ue}${m}${u}${t('time.m')}${ue}${s}${u}${t('time.s')}${ue}`;
   return `${m}${u}${t('time.m')}${ue}${s}${u}${t('time.s')}${ue}`;
-}
-
-// ===== Debug Time Simulation =====
-
-let _debugState = { startReal: null, baseTimeSec: null, routeId: null };
-
-function debugNowSec() {
-  if (_debugState.routeId !== selectedRouteId) {
-    _debugState = { startReal: null, baseTimeSec: null, routeId: selectedRouteId };
-  }
-  if (_debugState.baseTimeSec === null) {
-    _debugState.baseTimeSec = calcDebugBaseTime();
-    _debugState.startReal = Date.now() / 1000;
-  }
-  const elapsed = Date.now() / 1000 - _debugState.startReal;
-  return Math.floor(_debugState.baseTimeSec + elapsed);
-}
-
-function calcDebugBaseTime() {
-  const trips = getTripsForSelectedRoute();
-  if (trips.length === 0 || !trips[0][0]) return 0;
-
-  const runIdx = Math.max(0, Math.floor(trips.length / 3));
-  return timeToMin(trips[runIdx][0]) * 60 + 120; // 出発2分後
-}
-
-function getTripsForSelectedRoute() {
-  if (isMultiRoute(selectedRouteId)) {
-    const mr = getMultiRoute(selectedRouteId);
-    if (mr && mr.segments.length > 0) {
-      const dirData = getSegmentData(mr.segments[0].segment, mr.segments[0].direction);
-      if (dirData) return dirData.schedules[dayType] || [];
-    }
-  } else {
-    const route = DATA ? getRoute(selectedRouteId) : null;
-    if (route) return route.schedules[dayType] || [];
-  }
-  return [];
 }
 
 // ===== Route Data Accessors =====
@@ -190,7 +172,7 @@ function getSegRefFirstStop(segRef) {
 
 // ===== Multi-route Connection Finder =====
 
-function findConnections(multiRouteId, dt, fromStop, toStop) {
+function findConnections(multiRouteId, fromStop, toStop) {
   const mr = getMultiRoute(multiRouteId);
   if (!mr) return [];
 
@@ -198,7 +180,9 @@ function findConnections(multiRouteId, dt, fromStop, toStop) {
     const dirData = getSegmentData(s.segment, s.direction);
     if (!dirData) return null;
     const seg = SEGMENTS[s.segment];
-    const { stops, trips } = clipSegment(dirData, s, dt);
+    // Resolve dayType per segment so that, e.g., shuttle uses gw_2026 while train uses weekend
+    const segDt = getDayType(s.segment);
+    const { stops, trips } = clipSegment(dirData, s, segDt);
     return {
       segmentId: s.segment,
       direction: s.direction,
@@ -458,7 +442,7 @@ function getMultiRouteStops(multiRouteId) {
     const dirData = getSegmentData(segRef.segment, segRef.direction);
     if (!dirData) continue;
 
-    const { stops } = clipSegment(dirData, segRef, dayType);
+    const { stops } = clipSegment(dirData, segRef, getDayType(segRef.segment));
 
     for (let j = 0; j < stops.length; j++) {
       // Skip first stop of non-first segment if same as prev segment's last stop
