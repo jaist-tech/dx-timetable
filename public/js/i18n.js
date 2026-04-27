@@ -184,6 +184,8 @@ const TRANSLATIONS = {
     'timetable.route.shuttle_komatsu': 'JAIST Shuttle 小松線',
     'timetable.route.ishikawa_line': '北陸鉄道 石川線',
     'timetable.route.ir_ishikawa': 'IRいしかわ鉄道',
+    'timetable.route.ir_ishikawa_south': 'IRいしかわ鉄道',
+    'timetable.route.ir_ishikawa_north': 'IRいしかわ鉄道',
     'timetable.route.limo_komatsu': '小松空港連絡バス',
   },
 
@@ -369,6 +371,8 @@ const TRANSLATIONS = {
     'timetable.route.shuttle_komatsu': 'JAIST Shuttle Komatsu Line',
     'timetable.route.ishikawa_line': 'Hokuriku Railway Ishikawa Line',
     'timetable.route.ir_ishikawa': 'IR Ishikawa Railway',
+    'timetable.route.ir_ishikawa_south': 'IR Ishikawa Railway',
+    'timetable.route.ir_ishikawa_north': 'IR Ishikawa Railway',
     'timetable.route.limo_komatsu': 'Komatsu Airport Shuttle',
   }
 };

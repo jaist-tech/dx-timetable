@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JAISTのりかえ - 管理者ツール</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>時刻表データ管理</h1>
+  <nav class="tabs-nav">
+    <button class="tab-btn active" data-tab="add">新規追加</button>
+    <button class="tab-btn" data-tab="list">登録一覧</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ===== Tab: 新規追加 ===== -->
+  <div class="tab-pane active" data-tab="add">
+    <section id="step-upload">
+      <h2>1. PDFアップロード</h2>
+      <div id="dropzone">
+        <p>PDFファイルをここにドロップ<br>または</p>
+        <input type="file" id="file-input" accept="application/pdf">
+      </div>
+      <div id="upload-status"></div>
+    </section>
+
+    <section id="step-preview" class="hidden">
+      <h2>2. メタデータ (編集可)</h2>
+      <div id="meta-form"></div>
+
+      <h3>時刻表プレビュー</h3>
+      <div id="schedule-preview"></div>
+    </section>
+
+    <section id="step-check" class="hidden">
+      <h2>3. 整合性チェック</h2>
+      <button id="btn-check">チェック実行</button>
+      <div id="check-result"></div>
+    </section>
+
+    <section id="step-commit" class="hidden">
+      <h2>4. 書き込み内容の確認</h2>
+      <div id="commit-preview"></div>
+      <button id="btn-commit" disabled>データを追加</button>
+      <div id="commit-result"></div>
+    </section>
+  </div>
+
+  <!-- ===== Tab: 登録一覧 ===== -->
+  <div class="tab-pane" data-tab="list">
+    <section id="list-section">
+      <h2>登録済みファイル一覧</h2>
+      <div class="list-layout">
+        <div class="list-sidebar">
+          <div class="list-filters">
+            <h3>フィルタ</h3>
+            <div class="filter-group">
+              <label>種別</label>
+              <label><input type="checkbox" class="filter-kind" value="regular" checked> 通常 (regular)</label>
+              <label><input type="checkbox" class="filter-kind" value="special" checked> 特別 (special)</label>
+            </div>
+            <div class="filter-group">
+              <label>区間</label>
+              <div id="filter-segments"></div>
+            </div>
+            <div class="filter-group">
+              <label>有効性</label>
+              <label><input type="radio" name="filter-validity" value="all" checked> すべて</label>
+              <label><input type="radio" name="filter-validity" value="active"> 現在有効</label>
+              <label><input type="radio" name="filter-validity" value="future"> 将来</label>
+              <label><input type="radio" name="filter-validity" value="expired"> 期限切れ</label>
+            </div>
+            <button id="btn-refresh-list" class="small-btn">再読込</button>
+          </div>
+          <div id="file-list"></div>
+        </div>
+        <div class="list-detail" id="file-detail">
+          <p class="placeholder">左のリストからファイルを選択してください</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

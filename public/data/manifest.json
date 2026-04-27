@@ -1,0 +1,82 @@
+{
+  "regular": {
+    "ir_ishikawa": [
+      {
+        "file": "ir_ishikawa_2026-03-14_null.json",
+        "valid_from": "2026-03-14",
+        "valid_until": null
+      }
+    ],
+    "ishikawa_line": [
+      {
+        "file": "ishikawa_line_2026-04-01_null.json",
+        "valid_from": "2026-04-01",
+        "valid_until": null
+      }
+    ],
+    "limo_komatsu": [
+      {
+        "file": "limo_komatsu_2026-03-29_2026-04-30.json",
+        "valid_from": "2026-03-29",
+        "valid_until": "2026-04-30"
+      }
+    ],
+    "shuttle_komatsu": [
+      {
+        "file": "shuttle_komatsu_2026-04-25_2026-05-31.json",
+        "valid_from": "2026-04-25",
+        "valid_until": "2026-05-31"
+      }
+    ],
+    "shuttle_tsurugi": [
+      {
+        "file": "shuttle_tsurugi_2026-04-01_null.json",
+        "valid_from": "2026-04-01",
+        "valid_until": null
+      }
+    ]
+  },
+  "special": {
+    "shuttle_komatsu": [
+      {
+        "file": "shuttle_komatsu_2026-05-02_2026-05-06.json",
+        "apply_periods": [
+          {
+            "from": "2026-05-02",
+            "until": "2026-05-06"
+          }
+        ],
+        "display_from": "2026-04-26",
+        "display_until": "2026-05-06",
+        "schedule_key": "gw_2026",
+        "label_ja": "GW特別ダイヤ",
+        "label_en": "Golden Week Special"
+      },
+      {
+        "fallback_to": "weekday",
+        "apply_periods": [
+          {
+            "from": "2026-04-29",
+            "until": "2026-04-29"
+          }
+        ]
+      }
+    ],
+    "shuttle_tsurugi": [
+      {
+        "file": "shuttle_tsurugi_2026-05-02_2026-05-06.json",
+        "apply_periods": [
+          {
+            "from": "2026-05-02",
+            "until": "2026-05-06"
+          }
+        ],
+        "display_from": "2026-04-26",
+        "display_until": "2026-05-06",
+        "schedule_key": "gw_2026",
+        "label_ja": "GW特別ダイヤ",
+        "label_en": "Golden Week Special"
+      }
+    ]
+  }
+}
