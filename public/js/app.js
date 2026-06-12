@@ -2,35 +2,42 @@
 async function loadData() {
   // Load holidays, manifest, and routes config in parallel
   await Promise.all([loadHolidays(), loadManifest(), loadRoutesConfigOnly()]);
-  // Then fetch the actual segment data (depends on manifest + routes config)
-  await loadSegments();
 
-  // Build DATA.routes and REVERSE_ROUTES from direct_routes + segments
   DATA = { routes: [] };
   REVERSE_ROUTES = {};
   if (ROUTES_CONFIG && ROUTES_CONFIG.direct_routes) {
     ROUTES_CONFIG.direct_routes.forEach(dr => {
       if (dr.reverse_id) REVERSE_ROUTES[dr.id] = dr.reverse_id;
     });
-    DATA.routes = ROUTES_CONFIG.direct_routes.map(dr => {
-      const seg = SEGMENTS[dr.segment];
-      const dirData = seg ? seg[dr.direction] : null;
-      return {
-        id: dr.id,
-        name: dr.name,
-        short_name: dr.short_name,
-        color: dr.color,
-        segmentId: dr.segment,
-        stops: dirData ? dirData.stops : [],
-        schedules: dirData ? dirData.schedules : { weekday: [], weekend: [] }
-      };
-    });
   }
+
+  // Fetch the actual segment data (depends on manifest + routes config).
+  // Builds SEGMENTS and DATA.routes for today.
+  await loadSegments();
 
   dayType = getDayType();
 
   await loadGeoData();
   initApp();
+}
+
+// Rebuild DATA.routes so direct routes point at the current SEGMENTS objects.
+// Must be called whenever SEGMENTS is rebuilt.
+function rebuildDataRoutes() {
+  if (!DATA || !ROUTES_CONFIG || !ROUTES_CONFIG.direct_routes) return;
+  DATA.routes = ROUTES_CONFIG.direct_routes.map(dr => {
+    const seg = SEGMENTS[dr.segment];
+    const dirData = seg ? seg[dr.direction] : null;
+    return {
+      id: dr.id,
+      name: dr.name,
+      short_name: dr.short_name,
+      color: dr.color,
+      segmentId: dr.segment,
+      stops: dirData ? dirData.stops : [],
+      schedules: dirData ? dirData.schedules : { weekday: [], weekend: [] }
+    };
+  });
 }
 
 let _manifest = { regular: {}, special: {} };
@@ -92,65 +99,67 @@ function todayStrFromGetDayType() {
     String(now.getDate()).padStart(2, '0');
 }
 
-async function loadSegments() {
-  if (!ROUTES_CONFIG) return;
-  const segDefs = ROUTES_CONFIG.segment_files || [];
-  const today = todayStrFromGetDayType();
+// Timetable JSON caches (fileName -> parsed json). Regular files are fetched
+// lazily per displayed date; special files are all fetched once at startup.
+let _regularCache = {};
+let _specialCache = {};
+let _currentSegFiles = null; // segName -> regular fileName currently built into SEGMENTS
 
-  // For each segment_file definition, pick the right regular file from manifest
-  // and fetch it. Multiple segDefs may share a base name (e.g., ir_ishikawa_south
-  // and ir_ishikawa_north both use 'ir_ishikawa'). Deduplicate by chosen file path.
-  const fileToFetch = {};  // fileName -> Promise
-  const segDefToFile = {}; // segDef.name -> fileName
-
+// Pick the regular file for every segment for the given date.
+function pickSegmentFilesForDate(dateStr) {
+  const map = {};
+  const segDefs = (ROUTES_CONFIG && ROUTES_CONFIG.segment_files) || [];
   segDefs.forEach(segDef => {
-    const baseName = segDef.file;
-    const entries = (_manifest.regular && _manifest.regular[baseName]) || [];
-    const picked = pickRegularEntry(entries, today);
-    if (!picked) {
-      console.warn(`No regular file for segment '${segDef.name}' (base '${baseName}')`);
-      return;
-    }
-    segDefToFile[segDef.name] = picked.file;
-    if (!fileToFetch[picked.file]) {
-      fileToFetch[picked.file] = fetch(`data/regular/${picked.file}`).then(r => r.json());
+    const entries = (_manifest.regular && _manifest.regular[segDef.file]) || [];
+    const picked = pickRegularEntry(entries, dateStr);
+    if (picked) {
+      map[segDef.name] = picked.file;
+    } else {
+      console.warn(`No regular file for segment '${segDef.name}' (base '${segDef.file}') on ${dateStr}`);
     }
   });
+  return map;
+}
 
-  // Also fetch any special files that have a 'file' (skip fallback_to entries)
-  // for segments referenced in segDefs. We fetch all files referenced in
-  // _manifest.special, since special files are small and rarely numerous.
-  const specialFilesToFetch = new Set();
-  if (_manifest.special) {
-    Object.entries(_manifest.special).forEach(([baseName, entries]) => {
-      // Only fetch if there's a segDef using this baseName
-      const usedByAny = segDefs.some(sd => sd.file === baseName);
-      if (!usedByAny) return;
-      entries.forEach(e => {
-        if (e.file) specialFilesToFetch.add(e.file);
-      });
-    });
+// Rebuild SEGMENTS and DATA.routes so they reflect the regular-file versions
+// valid on dateStr (the displayed date). Fetches not-yet-cached files.
+// Returns true if SEGMENTS was rebuilt. On fetch failure the previously
+// built SEGMENTS stay in place.
+async function ensureSegmentsForDate(dateStr) {
+  if (!ROUTES_CONFIG) return false;
+  const segDefToFile = pickSegmentFilesForDate(dateStr);
+  if (_currentSegFiles &&
+      JSON.stringify(segDefToFile) === JSON.stringify(_currentSegFiles)) {
+    return false; // same versions already loaded
   }
 
-  const fetched = {};        // regular fileName -> json
-  const specialFetched = {}; // special fileName -> json
-  await Promise.all([
-    ...Object.entries(fileToFetch).map(async ([file, p]) => { fetched[file] = await p; }),
-    ...[...specialFilesToFetch].map(async file => {
-      try {
-        const r = await fetch(`data/special/${file}`);
-        specialFetched[file] = await r.json();
-      } catch (e) {
-        console.warn(`Failed to load special file ${file}:`, e);
-      }
-    })
-  ]);
+  const missing = [...new Set(Object.values(segDefToFile))].filter(f => !_regularCache[f]);
+  try {
+    await Promise.all(missing.map(async file => {
+      const r = await fetch(`data/regular/${file}`);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      _regularCache[file] = await r.json();
+    }));
+  } catch (e) {
+    console.warn(`Failed to load timetable files for ${dateStr}:`, e);
+    return false;
+  }
 
-  // Build SEGMENTS: same shape as before
+  buildSegments(segDefToFile);
+  _currentSegFiles = segDefToFile;
+  rebuildDataRoutes();
+  return true;
+}
+
+// Build SEGMENTS from cached regular files + merge cached special schedules.
+function buildSegments(segDefToFile) {
+  const segDefs = ROUTES_CONFIG.segment_files || [];
+  SEGMENTS = {};
+
   segDefs.forEach(segDef => {
     const fname = segDefToFile[segDef.name];
     if (!fname) return;
-    const segJson = fetched[fname];
+    const segJson = _regularCache[fname];
     if (!segJson) return;
     const segObj = {};
     for (const [dirKey, routeId] of Object.entries(segDef.directions)) {
@@ -172,7 +181,7 @@ async function loadSegments() {
     Object.entries(_manifest.special).forEach(([baseName, entries]) => {
       entries.forEach(e => {
         if (!e.file || !e.schedule_key) return;
-        const sjson = specialFetched[e.file];
+        const sjson = _specialCache[e.file];
         if (!sjson) return;
         // Find which segDefs use this baseName, and inject the schedule under schedule_key
         segDefs.forEach(sd => {
@@ -192,6 +201,35 @@ async function loadSegments() {
       });
     });
   }
+}
+
+async function loadSegments() {
+  if (!ROUTES_CONFIG) return;
+  const segDefs = ROUTES_CONFIG.segment_files || [];
+
+  // Fetch all special files referenced by used segments (skip fallback_to
+  // entries). Special files are small and rarely numerous, so fetch them all
+  // once; buildSegments merges them on every rebuild.
+  const specialFilesToFetch = new Set();
+  if (_manifest.special) {
+    Object.entries(_manifest.special).forEach(([baseName, entries]) => {
+      const usedByAny = segDefs.some(sd => sd.file === baseName);
+      if (!usedByAny) return;
+      entries.forEach(e => {
+        if (e.file) specialFilesToFetch.add(e.file);
+      });
+    });
+  }
+  await Promise.all([...specialFilesToFetch].map(async file => {
+    try {
+      const r = await fetch(`data/special/${file}`);
+      _specialCache[file] = await r.json();
+    } catch (e) {
+      console.warn(`Failed to load special file ${file}:`, e);
+    }
+  }));
+
+  await ensureSegmentsForDate(todayStrFromGetDayType());
 }
 
 async function loadHolidays() {
@@ -351,6 +389,7 @@ function initApp() {
   // Real-time updates (every second)
   setInterval(() => {
     updateClock();
+    checkDateRollover();
     if (currentTab === 'search') updateSearchCountdown();
     if (currentTab === 'status') updateStatus();
     if (currentTab === 'map') updateMap();

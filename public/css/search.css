@@ -32,6 +32,19 @@
 }
 option.key-stop{font-weight:700}
 option.minor-stop{color:var(--text-secondary)}
+.search-route-row{display:flex;gap:4px}
+.search-route-row select{font-size:0.85rem}
+.search-route-row .route-select{flex:1 1 auto;min-width:0;padding-left:8px;padding-right:24px;background-position:right 7px center}
+.search-route-row .date-select{
+  flex:0 0 auto;width:auto;max-width:40%;
+  padding-left:6px;padding-right:20px;
+  background-position:right 4px center;
+}
+@media (max-width:349px){
+  .search-route-row{flex-wrap:wrap}
+  .search-route-row .route-select{flex:1 1 100%}
+  .search-route-row .date-select{margin-left:auto}
+}
 .search-stops-row{
   display:flex;
   align-items:flex-end;

@@ -7,18 +7,69 @@ let _expandedTrips = new Set(); // track which trip indices are expanded
 // Route presets: displayed in dropdown with ↔ notation.
 // Selecting a preset sets the forward (rightward) route ID.
 const ROUTE_PRESETS = [
-  { id: 'komatsu_outbound',        reverseId: 'komatsu_inbound',        i18nKey: 'route.jaist_komatsu' },
-  { id: 'tsurugi_outbound',        reverseId: 'tsurugi_inbound',        i18nKey: 'route.jaist_tsurugi' },
-  { id: 'jaist_tsurugi_kanazawa',  reverseId: 'kanazawa_tsurugi_jaist', i18nKey: 'route.jaist_tsurugi_kanazawa' },
-  { id: 'jaist_tsurugi_nomachi',   reverseId: 'nomachi_tsurugi_jaist',  i18nKey: 'route.jaist_tsurugi_nomachi' },
-  { id: 'jaist_komatsu_kanazawa',  reverseId: 'kanazawa_komatsu_jaist', i18nKey: 'route.jaist_komatsu_kanazawa' },
-  { id: 'jaist_komatsu_airport',   reverseId: 'airport_komatsu_jaist',  i18nKey: 'route.jaist_komatsu_airport' },
+  { id: 'komatsu_outbound',             reverseId: 'komatsu_inbound',             i18nKey: 'route.jaist_komatsu' },
+  { id: 'tsurugi_outbound',             reverseId: 'tsurugi_inbound',             i18nKey: 'route.jaist_tsurugi' },
+  { id: 'jaist_tsurugi_kanazawa',       reverseId: 'kanazawa_tsurugi_jaist',      i18nKey: 'route.jaist_tsurugi_kanazawa' },
+  { id: 'jaist_tsurugi_nomachi',        reverseId: 'nomachi_tsurugi_jaist',       i18nKey: 'route.jaist_tsurugi_nomachi' },
+  { id: 'jaist_komatsu_kanazawa',       reverseId: 'kanazawa_komatsu_jaist',      i18nKey: 'route.jaist_komatsu_kanazawa' },
+  { id: 'jaist_komatsu_airport',        reverseId: 'airport_komatsu_jaist',       i18nKey: 'route.jaist_komatsu_airport' },
 ];
 
 // Map any route ID (forward or reverse) back to the preset's forward ID
 function getPresetValue(routeId) {
   const preset = ROUTE_PRESETS.find(p => p.id === routeId || p.reverseId === routeId);
   return preset ? preset.id : routeId;
+}
+
+// ===== Date Select =====
+
+const DATE_SELECT_DAYS = 7;
+let _dateSelectBuiltFor = null; // today string the options were built for
+let _dateChangeToken = 0;       // guards async version reload against rapid re-selection
+
+function _formatDateLabel(ds) {
+  const [y, m, d] = ds.split('-').map(Number);
+  const dow = new Date(y, m - 1, d).getDay();
+  return `${m}/${d} (${t('header.dow.' + dow)})`;
+}
+
+function buildDateSelects() {
+  const base = _getDebugDatetimeNow() || new Date();
+  _dateSelectBuiltFor = debugTodayStr();
+  const values = [];
+  let opts = '';
+  for (let i = 0; i < DATE_SELECT_DAYS; i++) {
+    const d = new Date(base.getFullYear(), base.getMonth(), base.getDate() + i);
+    const ds = d.getFullYear() + '-' +
+      String(d.getMonth() + 1).padStart(2, '0') + '-' +
+      String(d.getDate()).padStart(2, '0');
+    values.push(ds);
+    opts += `<option value="${ds}">${_formatDateLabel(ds)}</option>`;
+  }
+  if (selectedDate && !values.includes(selectedDate)) selectedDate = null;
+  document.querySelectorAll('.date-select').forEach(sel => {
+    sel.innerHTML = opts;
+    sel.value = selectedDate || _dateSelectBuiltFor;
+  });
+}
+
+// Called every second from initApp: when the date rolls over (midnight),
+// rebuild the option list so "today" stays correct, and reload the regular
+// file versions in case the new date crosses a version boundary.
+function checkDateRollover() {
+  if (!_dateSelectBuiltFor || _dateSelectBuiltFor === debugTodayStr()) return;
+  buildDateSelects();
+  const token = ++_dateChangeToken;
+  ensureSegmentsForDate(selectedDate || debugTodayStr()).then(() => {
+    if (token !== _dateChangeToken) return;
+    syncControls();
+    if (isMultiRoute(selectedRouteId)) {
+      updateMultiTripList();
+    } else {
+      updateTripList();
+    }
+    if (currentTab === 'status') updateStatus();
+  });
 }
 
 function initSearch() {
@@ -47,6 +98,30 @@ function initSearch() {
       }
       syncControls();
       if (currentTab === 'status') updateStatus();
+    });
+  });
+
+  // Date selects
+  buildDateSelects();
+  document.querySelectorAll('.date-select').forEach(sel => {
+    sel.addEventListener('change', async () => {
+      selectedDate = (sel.value === debugTodayStr()) ? null : sel.value;
+      // Load the regular-file versions valid on the selected date
+      // (no-op when the versions are unchanged or already cached)
+      const token = ++_dateChangeToken;
+      await ensureSegmentsForDate(selectedDate || debugTodayStr());
+      if (token !== _dateChangeToken) return; // superseded by a newer selection
+      selectedTripIdx = -1;
+      _scrollToSelected = true;
+      _expandedTrips.clear();
+      if (isMultiRoute(selectedRouteId)) {
+        updateMultiTripList();
+      } else {
+        updateTripList();
+      }
+      syncControls();
+      if (currentTab === 'status') updateStatus();
+      if (currentTab === 'map') updateMap();
     });
   });
 
@@ -210,6 +285,9 @@ function rebuildMultiToSelects() {
 function syncControls() {
   document.querySelectorAll('.route-select').forEach(sel => {
     sel.value = getPresetValue(selectedRouteId);
+  });
+  document.querySelectorAll('.date-select').forEach(sel => {
+    sel.value = selectedDate || debugTodayStr();
   });
   document.querySelectorAll('.from-select').forEach(sel => {
     sel.value = selectedFromStop;
@@ -383,6 +461,8 @@ function updateTripList() {
 
   const sched = route.schedules[getDayType(route.segmentId)] || route.schedules[dayType] || [];
   const now = nowMin();
+  // Future-date view: no past graying, no next/running badges, no countdown
+  const live = isViewingToday();
 
   // Helper: check if a trip is valid (has dep/arr times and doesn't cross midnight)
   const isValidTrip = (trip) => {
@@ -393,7 +473,7 @@ function updateTripList() {
   if (selectedTripIdx < 0) {
     for (let i = 0; i < sched.length; i++) {
       const depTime = sched[i][fromIdx];
-      if (depTime && timeToMin(depTime) >= now && isValidTrip(sched[i])) {
+      if (depTime && (!live || timeToMin(depTime) >= now) && isValidTrip(sched[i])) {
         selectedTripIdx = i;
         break;
       }
@@ -401,11 +481,13 @@ function updateTripList() {
   }
 
   let nextDepIdx = -1;
-  for (let i = 0; i < sched.length; i++) {
-    const depTime = sched[i][fromIdx];
-    if (depTime && timeToMin(depTime) >= now && isValidTrip(sched[i])) {
-      nextDepIdx = i;
-      break;
+  if (live) {
+    for (let i = 0; i < sched.length; i++) {
+      const depTime = sched[i][fromIdx];
+      if (depTime && timeToMin(depTime) >= now && isValidTrip(sched[i])) {
+        nextDepIdx = i;
+        break;
+      }
     }
   }
 
@@ -418,7 +500,7 @@ function updateTripList() {
     const depMin = timeToMin(depTime);
     const arrMin = timeToMin(arrTime);
     const duration = arrMin - depMin;
-    const isPast = depMin < now;
+    const isPast = live && depMin < now;
     const isSelected = i === selectedTripIdx;
     const isNext = i === nextDepIdx;
 
@@ -428,11 +510,11 @@ function updateTripList() {
     if (isNext) cls += ' next-dep';
 
     let countdown = '';
-    if (!isPast) {
+    if (live && !isPast) {
       countdown = `<span class="trip-countdown" data-dep-min="${depMin}">${t('trip.remaining')}${formatCountdownI18n(depMin - now)}</span>`;
     }
 
-    const isRunning = depMin <= now && now < arrMin;
+    const isRunning = live && depMin <= now && now < arrMin;
     const nextBadge = isNext ? `<span class="next-dep-badge">${t('trip.nextDep')}</span>` : '';
     const runningBadge = isRunning ? `<span class="running-badge">${t('status.running')}</span>` : '';
 
@@ -450,7 +532,7 @@ function updateTripList() {
     </div>`;
   });
 
-  if (nextDepIdx < 0) {
+  if (live && nextDepIdx < 0) {
     html += `<div class="no-service-banner">${t('trip.serviceEnded')}</div>`;
   }
 
@@ -498,16 +580,18 @@ function updateMultiTripList() {
   });
 
   const now = nowMin();
+  // Future-date view: no past graying, no next/running badges, no countdown
+  const live = isViewingToday();
 
   // Use from/to stops for displayed times
   const useFromStop = selectedFromStop;
   const useToStop = selectedToStop;
 
-  // Auto-select next upcoming connection
+  // Auto-select next upcoming connection (first connection on future dates)
   if (selectedTripIdx < 0) {
     for (let i = 0; i < currentConnections.length; i++) {
       const depTime = getConnDepTime(currentConnections[i], useFromStop);
-      if (timeToMin(depTime) >= now) {
+      if (!live || timeToMin(depTime) >= now) {
         selectedTripIdx = i;
         break;
       }
@@ -520,11 +604,13 @@ function updateMultiTripList() {
 
   // Find next departure
   let nextDepIdx = -1;
-  for (let i = 0; i < currentConnections.length; i++) {
-    const depTime = getConnDepTime(currentConnections[i], useFromStop);
-    if (timeToMin(depTime) >= now) {
-      nextDepIdx = i;
-      break;
+  if (live) {
+    for (let i = 0; i < currentConnections.length; i++) {
+      const depTime = getConnDepTime(currentConnections[i], useFromStop);
+      if (timeToMin(depTime) >= now) {
+        nextDepIdx = i;
+        break;
+      }
     }
   }
 
@@ -535,7 +621,7 @@ function updateMultiTripList() {
     const depMin = timeToMin(depTime);
     const arrMin = timeToMin(arrTime);
     const totalDuration = arrMin - depMin;
-    const isPast = depMin < now;
+    const isPast = live && depMin < now;
     const isSelected = i === selectedTripIdx;
     const isNext = i === nextDepIdx;
     // Transfer count for selected from/to range
@@ -554,11 +640,11 @@ function updateMultiTripList() {
     if (isNext) cls += ' next-dep';
 
     let countdown = '';
-    if (!isPast) {
+    if (live && !isPast) {
       countdown = `<span class="trip-countdown" data-dep-min="${depMin}">${t('trip.remaining')}${formatCountdownI18n(depMin - now)}</span>`;
     }
 
-    const isRunning = depMin <= now && now < arrMin;
+    const isRunning = live && depMin <= now && now < arrMin;
     const nextBadge = isNext ? `<span class="next-dep-badge">${t('trip.nextDep')}</span>` : '';
     const runningBadge = isRunning ? `<span class="running-badge">${t('status.running')}</span>` : '';
 
@@ -693,7 +779,7 @@ function updateMultiTripList() {
     html = `<div class="no-results">${t('trip.noResults')}</div>`;
   }
 
-  if (nextDepIdx < 0 && currentConnections.length > 0) {
+  if (live && nextDepIdx < 0 && currentConnections.length > 0) {
     html += `<div class="no-service-banner">${t('trip.serviceEnded')}</div>`;
   }
 
@@ -748,6 +834,13 @@ function selectTrip(idx) {
 function updateSearchCountdown() {
   const hero = document.getElementById('countdown-hero');
   const labelEl = document.getElementById('countdown-label');
+
+  // Future-date view: a countdown against the real clock is meaningless
+  if (!isViewingToday()) {
+    hero.style.display = 'none';
+    return;
+  }
+  hero.style.display = '';
 
   if (isMultiRoute(selectedRouteId)) {
     updateMultiSearchCountdown();

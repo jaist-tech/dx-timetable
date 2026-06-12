@@ -11,15 +11,19 @@ JAISTと周辺地域を結ぶ交通手段の時刻表・乗換案内Webアプリ
 | 北陸鉄道 石川線 | 鶴来駅 ↔ 野町駅 |
 | IRいしかわ鉄道 | 大聖寺駅 ↔ 金沢駅（南側）/ 金沢駅 ↔ 倶利伽羅駅（北側） |
 | 小松空港連絡バス | 小松駅 ↔ 小松空港 |
+| のみバス（能美市コミュニティバス） | 連携・観光・循環 全12系統 ※時刻表一覧のみ |
 
 乗換ルート（JAIST → 小松駅 → 金沢駅、JAIST → 鶴来駅 → 金沢駅、JAIST → 小松空港 等）にも対応しています。
 
+のみバスは時刻表一覧ページ（`timetable.html`）での閲覧のみの対応で、検索・乗換ルートには組み込まない方針です。
+
 ## 機能
 
-- **検索**: ルート・出発/到着駅を選択して便一覧を表示。次の便までのカウントダウン表示
+- **検索**: ルート・出発/到着駅・日付（当日から7日先まで）を選択して便一覧を表示。次の便までのカウントダウン表示
+- **日付指定**: 今日以外の日付を選ぶと、その日の日種別（平日/休日/祝日/特別ダイヤ）と適用ダイヤ版で全便を表示。未来日ではグレーアウト・「次発」「運行中」バッジ・カウントダウン・マップのバス位置は表示しない
 - **詳細**: 選択した便のタイムライン表示（乗車駅・乗換駅・降車駅、待ち時間）
 - **マップ**: Leafletによる経路表示、バス位置の表示（時刻表ベースのシミュレーション）
-- **時刻表一覧**: 全路線の全便時刻表をテーブル形式で閲覧（`timetable.html`）
+- **時刻表一覧**: 全路線（のみバス含む）の全便時刻表をテーブル形式で閲覧（`timetable.html`）
 - **お気に入り**: ヘッダーの★ボタンからよく使うルートを保存・ワンタップ切替。localStorageに保存
 - **表示設定**: ヘッダーの🌍|☀ボタンから言語（日本語/英語）とテーマ（ライト/ダーク）を切替。駅名・路線名・免責事項等を含む全テキストが切り替わる
 - **チュートリアル**: 初回起動時にアプリの使い方を案内する4ページのガイドを表示。「このアプリについて」ページから再表示可能
@@ -47,10 +51,11 @@ dx-timetable/
 │   │   ├── status.css       # 詳細タブ
 │   │   └── map.css          # マップタブ
 │   ├── js/                  # JavaScript
+│   │   ├── debug.js         # デバッグ用の時刻固定スイッチ（全ページ共通）
 │   │   ├── i18n.js          # 多言語対応（翻訳辞書・駅名翻訳・言語切替）
-│   │   ├── app.js           # データ読込・初期化
+│   │   ├── app.js           # データ読込（表示日に応じたダイヤ版解決）・初期化
 │   │   ├── utils.js         # グローバル状態・時刻計算・乗換検索
-│   │   ├── search.js        # 検索画面・便一覧
+│   │   ├── search.js        # 検索画面・便一覧・日付選択
 │   │   ├── status.js        # 詳細画面・タイムライン
 │   │   └── map.js           # マップ画面（Leaflet）
 │   ├── data/
@@ -71,6 +76,7 @@ dx-timetable/
 │   │   ├── ir_ishikawa.py       # IRいしかわ鉄道
 │   │   ├── limo_komatsu.py      # 小松空港連絡バス
 │   │   └── special_jaist.py     # JAISTシャトル特別ダイヤ（GW等）
+│   ├── nomibus/             # のみバス時刻表更新ツール（能美市サイトから取得）
 │   ├── output/              # 生成済みJSON（タイムスタンプ付き）
 │   ├── run_all.py           # 全区間一括生成スクリプト（旧構造用）
 │   ├── timetable_viewer.html # デバッグ用時刻表ビューア
@@ -143,6 +149,18 @@ pip install pdfplumber pandas
 | `IR_ishikawa*.pdf` | [IRいしかわ鉄道](https://www.ishikawa-railway.jp/timetable/) |
 | `limo_komatsu*.pdf` | [北陸鉄道 空港連絡バス](https://www.hokutetsu.co.jp/airport-bus#station_airport) |
 
+### のみバス（Web取得）
+
+のみバスはPDFではなく能美市公式サイトから取得する。`tools/nomibus/` の更新ツールで `regular/nomi_*.json` と manifest の更新まで自動で行う:
+
+```bash
+cd tools/nomibus
+python3 run.py            # 変更があった場合のみ public/data/ を更新
+python3 run.py --fetch    # ダイヤ改正後はキャッシュを破棄して再取得
+```
+
+詳細は [tools/nomibus/README.md](tools/nomibus/README.md) を参照。公式案内ページ: https://www.city.nomi.ishikawa.jp/docs/1760.html
+
 ### 補助: コマンドラインから一括生成 (run_all.py)
 
 `ishikawa_line` のように2PDF必要な区間など、管理者ツール非対応のものはコマンドラインから:
@@ -197,7 +215,7 @@ python3 -m http.server 8080
 
 ### manifest.json (索引)
 
-`public/data/manifest.json` は「どの日付にどのファイルを使うか」を示すルーティングテーブル。ローダーはまずこれを読み、該当する `regular/`/`special/` ファイルだけを fetch する。
+`public/data/manifest.json` は「どの日付にどのファイルを使うか」を示すルーティングテーブル。ローダーはまずこれを読み、表示日（通常は今日。日付選択時は選択日）に該当する `regular/`/`special/` ファイルだけを fetch する。日付選択で版の有効期間をまたぐと、その日付の版を選び直して追加フェッチする（取得済みファイルはキャッシュされる）。
 
 ```json
 {
@@ -227,7 +245,7 @@ python3 -m http.server 8080
 - **regular**: 通常ダイヤ。`valid_from <= today <= valid_until` を満たすファイルが採用される。`valid_until: null` は終了未定。
 - **special**: 特別ダイヤ。`apply_periods` のいずれかに今日が含まれれば採用。`fallback_to` エントリは file ではなく `weekday`/`weekend` に強制リダイレクトする（祝日扱いを覆したい日などに使用）。
 
-ファイル選択ルール（regular）:
+ファイル選択ルール（regular。`today` は表示日）:
 1. `valid_from <= today <= valid_until` のうち、`valid_from` が最新のもの
 2. 該当が無ければ「`valid_from <= today` で `valid_until < today` のうち `valid_from` が最新のもの」（メンテ漏れ救済フォールバック）
 

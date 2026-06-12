@@ -583,8 +583,9 @@ function updateMap() {
 
   const now = nowSec();
 
-  // Get bus position
-  const progress = selectedTripIdx >= 0 ? getBusProgress(selectedRouteId, selectedTripIdx) : null;
+  // Get bus position (only meaningful when viewing today)
+  const progress = (selectedTripIdx >= 0 && isViewingToday())
+    ? getBusProgress(selectedRouteId, selectedTripIdx) : null;
 
   if (progress) {
     const line = ROUTE_LINES[progress.segId];
@@ -662,7 +663,7 @@ function updateMap() {
       busLayer.removeLayer(_busLabelMarker);
       _busLabelMarker = null;
     }
-    if (selectedTripIdx >= 0) {
+    if (selectedTripIdx >= 0 && isViewingToday()) {
       // 静的マーカーを始点/終点に表示
       showStaticBusMarker(now);
     } else if (_staticBusMarker) {
@@ -772,6 +773,8 @@ function _findStopLatLng(stopName, segIds) {
 
 function updateMapInfoBar(now) {
   const infoEl = document.getElementById('map-bus-info');
+  // Future-date view: now = -1 keeps the status at "運行前"
+  if (!isViewingToday()) now = -1;
 
   if (selectedTripIdx >= 0) {
     let depTime, arrTime;

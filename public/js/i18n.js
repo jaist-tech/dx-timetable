@@ -18,6 +18,7 @@ const TRANSLATIONS = {
     'header.dow.4': '木',
     'header.dow.5': '金',
     'header.dow.6': '土',
+    'search.dateAria': '日付選択',
     'header.holiday': '祝',
     'holiday.missing': '${year}年の祝日データが登録されていません。祝日が平日ダイヤで表示される場合があります。',
 
@@ -122,7 +123,7 @@ const TRANSLATIONS = {
     // About page
     'about.title': 'このサービスについて - JAISTのりかえ',
     'about.appName': 'JAISTのりかえ',
-    'about.appVersion': '2026年4月版ダイヤ準拠',
+    'about.appVersion': '2026年6月版ダイヤ準拠',
     'about.aboutHeading': 'このサービスについて',
     'about.aboutText': 'JAISTと周辺地域を結ぶ交通手段の時刻表・乗換案内サービスです。以下の路線に対応しています。',
     'about.route.shuttle': 'JAISTシャトルバス',
@@ -159,6 +160,7 @@ const TRANSLATIONS = {
     'about.source.ir': 'IRいしかわ鉄道 時刻表',
     'about.source.hokutetsu': '北陸鉄道 石川線',
     'about.source.limo': '北陸鉄道 空港連絡バス',
+    'about.source.nomi': 'のみバス（能美市）',
     'about.licenseHeading': 'ライセンス・帰属表示',
     'about.license.noto': 'Google Fonts より提供。SIL Open Font License 1.1 に基づき使用しています。',
     'about.license.leaflet': 'を使用しています。',
@@ -187,6 +189,18 @@ const TRANSLATIONS = {
     'timetable.route.ir_ishikawa_south': 'IRいしかわ鉄道',
     'timetable.route.ir_ishikawa_north': 'IRいしかわ鉄道',
     'timetable.route.limo_komatsu': '小松空港連絡バス',
+    'timetable.route.nomi_renkei_kitamawari':   'のみバス 連携（朝夕・北廻り）',
+    'timetable.route.nomi_renkei_minamimawari': 'のみバス 連携（朝夕・南廻り）',
+    'timetable.route.nomi_renkei_nichu':        'のみバス 連携（日中）',
+    'timetable.route.nomi_renkei_teraiko':      'のみバス 連携（朝・寺井高校）',
+    'timetable.route.nomi_kanko_matsui':        'のみバス 観光（松井ミュージアム行）',
+    'timetable.route.nomi_kanko_tojimura':      'のみバス 観光（陶芸村・辰口温泉行）',
+    'timetable.route.nomi_junkan_negami':       'のみバス 循環（根上地区）',
+    'timetable.route.nomi_junkan_terai':        'のみバス 循環（寺井地区）',
+    'timetable.route.nomi_junkan_iwamoto':      'のみバス 循環（岩本方面）',
+    'timetable.route.nomi_junkan_takaza':       'のみバス 循環（高座方面）',
+    'timetable.route.nomi_junkan_nagaya':       'のみバス 循環（鍋谷方面）',
+    'timetable.route.nomi_junkan_tsubono':      'のみバス 循環（坪野方面）',
   },
 
   en: {
@@ -206,6 +220,7 @@ const TRANSLATIONS = {
     'header.dow.4': 'Thu.',
     'header.dow.5': 'Fri.',
     'header.dow.6': 'Sat.',
+    'search.dateAria': 'Select date',
     'header.holiday': 'Hol.',
     'holiday.missing': 'Holiday data for ${year} is not registered. Holidays may show weekday timetables.',
 
@@ -309,7 +324,7 @@ const TRANSLATIONS = {
     // About page
     'about.title': 'About - JAIST Norikae',
     'about.appName': 'JAIST Norikae',
-    'about.appVersion': 'Based on April 2026 timetable',
+    'about.appVersion': 'Based on June 2026 timetable',
     'about.aboutHeading': 'About This Service',
     'about.aboutText': 'A timetable and transfer guide app for transportation connecting JAIST and surrounding areas. The following lines are supported:',
     'about.route.shuttle': 'JAIST Shuttle Bus',
@@ -346,6 +361,7 @@ const TRANSLATIONS = {
     'about.source.ir': 'IR Ishikawa Railway Timetable',
     'about.source.hokutetsu': 'Hokuriku Railway Ishikawa Line',
     'about.source.limo': 'Hokuriku Railway Airport Bus',
+    'about.source.nomi': 'Nomibus (Nomi City Community Bus)',
     'about.licenseHeading': 'Licenses & Attribution',
     'about.license.noto': 'Provided by Google Fonts. Used under SIL Open Font License 1.1.',
     'about.license.leaflet': 'Used under BSD 2-Clause License.',
@@ -374,6 +390,18 @@ const TRANSLATIONS = {
     'timetable.route.ir_ishikawa_south': 'IR Ishikawa Railway',
     'timetable.route.ir_ishikawa_north': 'IR Ishikawa Railway',
     'timetable.route.limo_komatsu': 'Komatsu Airport Shuttle',
+    'timetable.route.nomi_renkei_kitamawari':   'Nomibus Renkei (Morning/Evening, North)',
+    'timetable.route.nomi_renkei_minamimawari': 'Nomibus Renkei (Morning/Evening, South)',
+    'timetable.route.nomi_renkei_nichu':        'Nomibus Renkei (Daytime)',
+    'timetable.route.nomi_renkei_teraiko':      'Nomibus Renkei (Morning, Terai High School)',
+    'timetable.route.nomi_kanko_matsui':        'Nomibus Kanko (Matsui Museum)',
+    'timetable.route.nomi_kanko_tojimura':      'Nomibus Kanko (Ceramics Village & Tatsunokuchi Spa)',
+    'timetable.route.nomi_junkan_negami':       'Nomibus Junkan (Negami Area)',
+    'timetable.route.nomi_junkan_terai':        'Nomibus Junkan (Terai Area)',
+    'timetable.route.nomi_junkan_iwamoto':      'Nomibus Junkan (Iwamoto)',
+    'timetable.route.nomi_junkan_takaza':       'Nomibus Junkan (Takaza)',
+    'timetable.route.nomi_junkan_nagaya':       'Nomibus Junkan (Nagaya)',
+    'timetable.route.nomi_junkan_tsubono':      'Nomibus Junkan (Tsubono)',
   }
 };
 
@@ -666,6 +694,9 @@ function updateHeaderDate() {
 /** Re-render dynamic content after language change (main page only) */
 function refreshUI() {
   if (typeof DATA === 'undefined' || !DATA) return;
+
+  // Rebuild date selects with translated weekday labels (keeps selection)
+  if (typeof buildDateSelects === 'function') buildDateSelects();
 
   // Rebuild stop selects with translated names (keep selection)
   const savedFrom = selectedFromStop;

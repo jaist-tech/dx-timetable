@@ -1,5 +1,89 @@
 {
   "regular": {
+    "nomi_renkei_kitamawari": [
+      {
+        "file": "nomi_renkei_kitamawari_2026-03-14_null.json",
+        "valid_from": "2026-03-14",
+        "valid_until": null
+      }
+    ],
+    "nomi_renkei_minamimawari": [
+      {
+        "file": "nomi_renkei_minamimawari_2026-03-14_null.json",
+        "valid_from": "2026-03-14",
+        "valid_until": null
+      }
+    ],
+    "nomi_renkei_nichu": [
+      {
+        "file": "nomi_renkei_nichu_2026-03-14_null.json",
+        "valid_from": "2026-03-14",
+        "valid_until": null
+      }
+    ],
+    "nomi_renkei_teraiko": [
+      {
+        "file": "nomi_renkei_teraiko_2026-03-14_null.json",
+        "valid_from": "2026-03-14",
+        "valid_until": null
+      }
+    ],
+    "nomi_kanko_matsui": [
+      {
+        "file": "nomi_kanko_matsui_2026-03-14_null.json",
+        "valid_from": "2026-03-14",
+        "valid_until": null
+      }
+    ],
+    "nomi_kanko_tojimura": [
+      {
+        "file": "nomi_kanko_tojimura_2026-03-14_null.json",
+        "valid_from": "2026-03-14",
+        "valid_until": null
+      }
+    ],
+    "nomi_junkan_negami": [
+      {
+        "file": "nomi_junkan_negami_2026-03-14_null.json",
+        "valid_from": "2026-03-14",
+        "valid_until": null
+      }
+    ],
+    "nomi_junkan_terai": [
+      {
+        "file": "nomi_junkan_terai_2026-03-14_null.json",
+        "valid_from": "2026-03-14",
+        "valid_until": null
+      }
+    ],
+    "nomi_junkan_iwamoto": [
+      {
+        "file": "nomi_junkan_iwamoto_2026-03-14_null.json",
+        "valid_from": "2026-03-14",
+        "valid_until": null
+      }
+    ],
+    "nomi_junkan_takaza": [
+      {
+        "file": "nomi_junkan_takaza_2026-03-14_null.json",
+        "valid_from": "2026-03-14",
+        "valid_until": null
+      }
+    ],
+    "nomi_junkan_nagaya": [
+      {
+        "file": "nomi_junkan_nagaya_2026-03-14_null.json",
+        "valid_from": "2026-03-14",
+        "valid_until": null
+      }
+    ],
+    "nomi_junkan_tsubono": [
+      {
+        "file": "nomi_junkan_tsubono_2026-03-14_null.json",
+        "valid_from": "2026-03-14",
+        "valid_until": null
+      }
+    ],
     "ir_ishikawa": [
       {
         "file": "ir_ishikawa_2026-03-14_null.json",
