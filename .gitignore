@@ -5,3 +5,5 @@ __pycache__/
 .claude/
 tools/output/
 tools/parsers/__pycache__/
+tools/nomibus/cache/
+tools/nomibus/intermediate/

@@ -4,7 +4,9 @@
     { "from": "小松駅", "to": "小松駅", "min": 3 },
     { "from": "鶴来駅", "to": "鶴来駅", "min": 1 },
     { "from": "新西金沢駅", "to": "西金沢駅", "min": 3, "walk": true },
-    { "from": "西金沢駅", "to": "新西金沢駅", "min": 3, "walk": true }
+    { "from": "西金沢駅", "to": "新西金沢駅", "min": 3, "walk": true },
+    { "from": "先端大学", "to": "JAIST", "min": 3, "walk": true },
+    { "from": "JAIST", "to": "先端大学", "min": 3, "walk": true }
   ],
   "geo_mappings": {
     "ishikawa_line": {

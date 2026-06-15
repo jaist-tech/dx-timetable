@@ -23,7 +23,8 @@ function updateStatus() {
   const trip = sched[selectedTripIdx];
   if (!trip) return;
 
-  const now = nowMin();
+  // Future-date view: now = -1 makes every stop "upcoming" and the badge "運行前"
+  const now = isViewingToday() ? nowMin() : -1;
   const depTime = trip[0];
   const arrTime = trip[trip.length - 1];
   const depMin = timeToMin(depTime);
@@ -130,7 +131,8 @@ function updateMultiStatus(header, timeline) {
   }
 
   const conn = currentConnections[selectedTripIdx];
-  const now = nowMin();
+  // Future-date view: now = -1 makes every stop "upcoming" and the badge "運行前"
+  const now = isViewingToday() ? nowMin() : -1;
 
   // Ensure _multiStops is populated
   if (_multiStops.length === 0) {

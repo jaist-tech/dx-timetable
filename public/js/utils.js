@@ -9,6 +9,7 @@ let dayType = 'weekday';
 let selectedRouteId = 'komatsu_outbound';
 let selectedFromStop = '';
 let selectedToStop = '';
+let selectedDate = null; // 'YYYY-MM-DD' when viewing another day; null = today (live mode)
 let selectedTripIdx = -1;
 let _scrollToSelected = false;
 let _expandedSegs = new Set();
@@ -65,8 +66,20 @@ function _segmentSpecialEntries(segmentId) {
   return [];
 }
 
+// True when the search view targets the current service day (live mode).
+// A selected date can become "today" after midnight, which re-enables live mode.
+function isViewingToday() {
+  return !selectedDate || selectedDate === debugTodayStr();
+}
+
 function getDayType(segmentId) {
-  const now = _getDebugDatetimeNow() || new Date();
+  let now;
+  if (!isViewingToday()) {
+    const [y, mo, da] = selectedDate.split('-').map(Number);
+    now = new Date(y, mo - 1, da);
+  } else {
+    now = _getDebugDatetimeNow() || new Date();
+  }
   const dateStr = now.getFullYear() + '-' +
     String(now.getMonth() + 1).padStart(2, '0') + '-' +
     String(now.getDate()).padStart(2, '0');
