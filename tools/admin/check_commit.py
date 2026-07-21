@@ -247,6 +247,28 @@ def check_payload(payload, manifest):
         else:
             add_pass(CAT_DUP, '同区間内で期間重複なし')
 
+        # schedule_key は同一区間内で一意でなければならない (special のみ)。
+        # フロントは schedules[schedule_key] に時刻表を格納するため (public/js/app.js
+        # buildSegments)、同区間で重複すると後勝ちで一方が上書きされ、期間が重ならなくても
+        # 時刻が壊れる。期間の重なりチェックとは別に必要。
+        if kind == 'special':
+            sk = meta.get('schedule_key')
+            reserved = {'weekday', 'weekend', 'default'}
+            if sk and KEY_RE.match(sk):
+                if sk in reserved:
+                    add_err(CAT_META,
+                            f'識別キー (schedule_key) に予約語は使えません: {sk!r}',
+                            '通常ダイヤ用のキー (weekday / weekend / default) と衝突します。別のキーにしてください')
+                dup_files = [e.get('file', '(fallback_to entry)') for e in existing
+                             if e.get('schedule_key') == sk]
+                if dup_files:
+                    add_err(CAT_DUP,
+                            f'識別キー {sk!r} が同区間の既存ダイヤと重複: {", ".join(dup_files)}',
+                            '同じ区間内では schedule_key を一意にしてください '
+                            '(区間をまたぐ重複は可)。重複すると一方の時刻表が上書きされます')
+                else:
+                    add_pass(CAT_DUP, f'識別キー {sk!r}: 同区間内で重複なし')
+
     return {
         'errors': errors,
         'warnings': warnings,

@@ -113,6 +113,11 @@
         "file": "limo_komatsu_2026-06-01_2026-06-30.json",
         "valid_from": "2026-06-01",
         "valid_until": "2026-06-30"
+      },
+      {
+        "file": "limo_komatsu_2026-07-01_2026-07-31.json",
+        "valid_from": "2026-07-01",
+        "valid_until": "2026-07-31"
       }
     ],
     "shuttle_komatsu": [
@@ -164,6 +169,22 @@
             "until": "2026-04-29"
           }
         ]
+      },
+      {
+        "file": "shuttle_komatsu_2026-08-08_2026-08-15.json",
+        "apply_periods": [
+          {
+            "from": "2026-08-08",
+            "until": "2026-08-09"
+          },
+          {
+            "from": "2026-08-11",
+            "until": "2026-08-15"
+          }
+        ],
+        "schedule_key": "komatsu_summer_2026",
+        "label_ja": "夏季特別ダイヤ",
+        "label_en": "Summer Special"
       }
     ],
     "shuttle_tsurugi": [
@@ -180,6 +201,22 @@
         "schedule_key": "gw_2026",
         "label_ja": "GW特別ダイヤ",
         "label_en": "Golden Week Special"
+      },
+      {
+        "file": "shuttle_tsurugi_2026-08-08_2026-08-15.json",
+        "apply_periods": [
+          {
+            "from": "2026-08-08",
+            "until": "2026-08-09"
+          },
+          {
+            "from": "2026-08-11",
+            "until": "2026-08-15"
+          }
+        ],
+        "schedule_key": "tsurugi_summer_2026",
+        "label_ja": "夏季特別ダイヤ",
+        "label_en": "Summer Special"
       }
     ]
   }
