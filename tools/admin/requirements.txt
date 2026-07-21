@@ -1,0 +1,4 @@
+# 管理者ツール (tools/admin/server.py) と PDF パーサー (tools/parsers/) の依存
+# start.sh がプロジェクト直下の .venv に自動インストールする。
+pdfplumber
+pandas

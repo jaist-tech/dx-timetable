@@ -43,7 +43,8 @@ SEGMENT_KEYWORDS = [
 # Special schedule keywords
 SPECIAL_KEYWORDS = [
     r'特別', r'臨時', r'GW', r'ＧＷ', r'お盆', r'年末年始', r'夏休み', r'冬休み',
-    r'special', r'holiday',
+    r'夏季', r'冬季', r'夏', r'盆',
+    r'special', r'holiday', r'summer', r'winter',
 ]
 
 

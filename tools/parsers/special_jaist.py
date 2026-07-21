@@ -1,16 +1,18 @@
-"""JAIST シャトルバス 特別ダイヤ用パーサー
+"""JAIST シャトルバス 特別ダイヤ（臨時ダイヤ）用パーサー
 
-対応フォーマット:
-- GW_fix/5月連休鶴来線特別ダイヤ（別紙１） (1).pdf
-- GW_fix/5月連休小松線特別ダイヤ（別紙２）.pdf
+対応フォーマット（別紙1=鶴来線 / 別紙2=小松線 と同じ表構造のPDF）:
+- 5月連休鶴来線特別ダイヤ（別紙１）.pdf   / 5月連休小松線特別ダイヤ（別紙２）.pdf   (GW)
+- shuttle_turugi-summer.pdf              / shuttle_komatsu-summer.pdf              (夏季)
 
-これらのPDFと同じ構造の特別ダイヤPDF専用。
+時刻表の表構造は上記いずれも共通。適用日の抽出は日別運行表（「N日 …特別ダイヤ運行」）を
+1行ずつ読む方式なので、GWのような連続期間でも夏季のような飛び日でも正しく反映される。
+サマリ行の区切り記号の揺れ（、 . , ～ から）にも依存しない。詳細は _extract_apply_periods を参照。
 """
 
 import re
 import pdfplumber
 import pandas as pd
-from datetime import date
+from datetime import date, timedelta
 
 
 # 鶴来線 通常ダイヤの停留所別所要分パターン (中間時刻推定用)
@@ -49,47 +51,196 @@ def _m2t(x):
 # 全角→半角数字
 _ZEN2HAN = str.maketrans('０１２３４５６７８９', '0123456789')
 
+_MONTH_NAMES = {
+    'jan': 1, 'january': 1, 'feb': 2, 'february': 2, 'mar': 3, 'march': 3,
+    'apr': 4, 'april': 4, 'may': 5, 'jun': 6, 'june': 6,
+    'jul': 7, 'july': 7, 'aug': 8, 'august': 8, 'sep': 9, 'sept': 9, 'september': 9,
+    'oct': 10, 'october': 10, 'nov': 11, 'november': 11, 'dec': 12, 'december': 12,
+}
 
-def _extract_apply_periods(text):
-    """本文から「☆５月２日から６日の…」「May 2～6,2026」などを探して apply_periods を返す。
 
-    Returns: list of {'from': 'YYYY-MM-DD', 'until': 'YYYY-MM-DD'}
-    """
-    # 1) 英語表記が確実: "May 2～6,2026" or "May 2~6,2026" or "May 2-6,2026"
-    m = re.search(r'(\w+)\s+(\d{1,2})\s*[~～\-–]\s*(\d{1,2})\s*,?\s*(\d{4})', text)
-    if m:
-        month_name, d_from, d_until, year = m.group(1), int(m.group(2)), int(m.group(3)), int(m.group(4))
-        month = _month_name_to_num(month_name)
-        if month:
-            return [{
-                'from': f"{year}-{month:02d}-{d_from:02d}",
-                'until': f"{year}-{month:02d}-{d_until:02d}",
-            }]
-
-    # 2) 日本語の「☆Ｎ月Ｄ日から/～Ｄ日の…」
-    text_han = text.translate(_ZEN2HAN)
-    m = re.search(r'(\d{1,2})\s*月\s*(\d{1,2})\s*日\s*(?:から|~|～|-|–)\s*(\d{1,2})\s*日', text_han)
-    if m:
-        month, d_from, d_until = int(m.group(1)), int(m.group(2)), int(m.group(3))
-        # 年は本文から探す
-        y_match = re.search(r'(\d{4})\s*年', text_han)
-        year = int(y_match.group(1)) if y_match else date.today().year
-        return [{
-            'from': f"{year}-{month:02d}-{d_from:02d}",
-            'until': f"{year}-{month:02d}-{d_until:02d}",
-        }]
-
-    return []
+def _han(s):
+    """全角数字を半角に。"""
+    return (s or '').translate(_ZEN2HAN)
 
 
 def _month_name_to_num(name):
-    table = {
-        'Jan': 1, 'January': 1, 'Feb': 2, 'February': 2, 'Mar': 3, 'March': 3,
-        'Apr': 4, 'April': 4, 'May': 5, 'Jun': 6, 'June': 6,
-        'Jul': 7, 'July': 7, 'Aug': 8, 'August': 8, 'Sep': 9, 'September': 9,
-        'Oct': 10, 'October': 10, 'Nov': 11, 'November': 11, 'Dec': 12, 'December': 12,
-    }
-    return table.get(name)
+    return _MONTH_NAMES.get((name or '').strip().lower())
+
+
+def _compress_dates(dates):
+    """date のリストを連続区間ごとに [{'from','until'}, ...] へまとめる (飛び日対応)。"""
+    if not dates:
+        return []
+    ds = sorted(set(dates))
+    ranges = []
+    start = prev = ds[0]
+    for d in ds[1:]:
+        if d == prev + timedelta(days=1):
+            prev = d
+        else:
+            ranges.append((start, prev))
+            start = prev = d
+    ranges.append((start, prev))
+    return [{'from': a.isoformat(), 'until': b.isoformat()} for a, b in ranges]
+
+
+def _parse_header_period(text):
+    """「2026年8月8日から8月16日までの期間は」→ (year, (from_month, from_day), (until_month, until_day))。
+
+    見つからなければ None。年・月の文脈を得るために使う。
+    """
+    t = _han(text)
+    m = re.search(
+        r'(\d{4})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日\s*から\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日',
+        t,
+    )
+    if not m:
+        return None
+    y, sm, sd, em, ed = (int(g) for g in m.groups())
+    return y, (sm, sd), (em, ed)
+
+
+def _apply_periods_from_daily_table(text):
+    """日別運行表 (「N日 … 特別ダイヤ運行」) を1行ずつ読み、特別ダイヤ該当日だけを集約する。
+
+    これが最も堅牢。☆サマリ行の区切り記号 (、 . , ～ から) の揺れに依存せず、
+    通常運行・土日祝ダイヤの日は自動的に除外されるため飛び日も正しく反映される。
+    """
+    hdr = _parse_header_period(text)
+    if not hdr:
+        return []
+    year, (start_month, _sd), (_em, _ed) = hdr
+    cur_month = start_month
+    prev_day = None
+    special_dates = []
+    for raw in text.splitlines():
+        line = _han(raw)
+        # 行頭が「(N月) N日」で始まる日別行だけを対象にする (☆行やヘッダ行は弾く)
+        m = re.match(r'\s*(?:(\d{1,2})\s*月)?\s*(\d{1,2})\s*日', line)
+        if not m:
+            continue
+        day = int(m.group(2))
+        if m.group(1):
+            cur_month = int(m.group(1))
+        elif prev_day is not None and day < prev_day:
+            # 月をまたいだ (日が前の行より小さくなった) → 翌月へ繰り上げ
+            cur_month = cur_month % 12 + 1
+        prev_day = day
+        # 「特 別 ダ イ ヤ 運 行」のような字間スペースを潰して判定
+        despaced = re.sub(r'\s', '', raw)
+        if '特別ダイヤ' in despaced:
+            try:
+                special_dates.append(date(year, cur_month, day))
+            except ValueError:
+                pass  # 不正な日付は無視
+    return _compress_dates(special_dates)
+
+
+def _expand_day_list(chunk, year, month):
+    """'8,9,11～15' / '8.9.11~15' / '2から6' のような日リストを date 群に展開する。"""
+    dates = []
+    for tok in re.split(r'[,\.、\s]+', chunk.strip()):
+        if not tok:
+            continue
+        rng = re.match(r'^(\d{1,2})\s*(?:[~～\-–]|から)\s*(\d{1,2})$', tok)
+        if rng:
+            a, b = int(rng.group(1)), int(rng.group(2))
+            for d in range(a, b + 1):
+                try:
+                    dates.append(date(year, month, d))
+                except ValueError:
+                    pass
+        elif re.match(r'^\d{1,2}$', tok):
+            try:
+                dates.append(date(year, month, int(tok)))
+            except ValueError:
+                pass
+    return dates
+
+
+def _apply_periods_from_summary(text):
+    """☆サマリの英語行「Aug 8,9,11～15,2026」「May 2～6,2026」から適用日を抽出する (フォールバック)。"""
+    t = _han(text)
+    m = re.search(r'([A-Za-z]{3,9})\.?\s+([\d,\.、~～\-–\s]+?)\s*,?\s*(\d{4})\b', t)
+    if m and _month_name_to_num(m.group(1)):
+        month = _month_name_to_num(m.group(1))
+        year = int(m.group(3))
+        dates = _expand_day_list(m.group(2), year, month)
+        if dates:
+            return _compress_dates(dates)
+    return []
+
+
+def _apply_periods_from_header(text):
+    """ヘッダの「YYYY年M月D日からM月D日まで」全期間を1区間として返す (最も粗いフォールバック)。"""
+    hdr = _parse_header_period(text)
+    if not hdr:
+        return []
+    year, (sm, sd), (em, ed) = hdr
+    try:
+        return [{
+            'from': date(year, sm, sd).isoformat(),
+            'until': date(year, em, ed).isoformat(),
+        }]
+    except ValueError:
+        return []
+
+
+def _extract_apply_periods(text):
+    """本文から特別ダイヤの適用日を抽出し apply_periods を返す。
+
+    優先順位 (堅牢な方から):
+      1) 日別運行表の「特別ダイヤ運行」行を集約 (飛び日を正確に反映)
+      2) ☆サマリの英語行 (Aug 8,9,11～15,2026 等) のリスト・レンジ表記
+      3) ヘッダの全期間レンジ (粗い最終手段)
+
+    Returns: list of {'from': 'YYYY-MM-DD', 'until': 'YYYY-MM-DD'}
+    """
+    for extractor in (
+        _apply_periods_from_daily_table,
+        _apply_periods_from_summary,
+        _apply_periods_from_header,
+    ):
+        periods = extractor(text)
+        if periods:
+            return periods
+    return []
+
+
+def _segment_key_prefix(segment_id):
+    """schedule_key の接頭辞。区間ごとにキーを分けるために使う。
+
+    'shuttle_komatsu' → 'komatsu' / 'shuttle_tsurugi' → 'tsurugi'。
+    """
+    if segment_id and segment_id.startswith('shuttle_'):
+        return segment_id[len('shuttle_'):]
+    return segment_id or ''
+
+
+def _guess_schedule_identity(segment_id, apply_periods):
+    """区間と適用期間から schedule_key / label_ja / label_en の初期値を推定する。
+
+    schedule_key は区間ごとに異なるよう接頭辞を付ける
+    (例: komatsu_summer_2026 / tsurugi_summer_2026)。月から季節を推定。
+    管理画面フォームの下書きとして使うだけで、ユーザーがそのまま編集できる。
+    """
+    if not apply_periods:
+        return {}
+    first = apply_periods[0]['from']  # 'YYYY-MM-DD'
+    year = int(first[:4])
+    month = int(first[5:7])
+    if month in (7, 8, 9):
+        season, label_ja, label_en = 'summer', '夏季特別ダイヤ', 'Summer Special'
+    elif month in (12, 1):
+        season, label_ja, label_en = 'year_end', '年末年始特別ダイヤ', 'Year-end / New-year Special'
+    elif month in (4, 5):
+        season, label_ja, label_en = 'gw', 'GW特別ダイヤ', 'Golden Week Special'
+    else:
+        season, label_ja, label_en = 'special', '特別ダイヤ', 'Special Schedule'
+    prefix = _segment_key_prefix(segment_id)
+    schedule_key = f'{prefix}_{season}_{year}' if prefix else f'{season}_{year}'
+    return {'schedule_key': schedule_key, 'label_ja': label_ja, 'label_en': label_en}
 
 
 # ----- 鶴来線特別ダイヤ -----
@@ -277,6 +428,9 @@ def parse_special(pdf_path, segment_id):
         'operator': 'JAISTシャトルバス',
         'note': '特別ダイヤ運行表（GW・連休等）',
     }
+    # schedule_key / label_ja / label_en は管理画面フォームの下書きとして推定値を入れておく
+    # (ユーザーがそのまま編集可能)。区間＋季節から区間ごとに異なるキーを付ける。
+    meta.update(_guess_schedule_identity(segment_id, apply_periods))
     if derived_fields:
         meta['derived_fields'] = derived_fields
 
