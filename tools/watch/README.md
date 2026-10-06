@@ -36,7 +36,10 @@ JAIST のページは季節ダイヤ（GW・夏季・ほうらい祭り・年末
 | ir_ishikawa | https://www.ishikawa-railway.jp/timetable/ | ir_ishikawa |
 | hokutetsu_airport | https://www.hokutetsu.co.jp/airport-bus | limo_komatsu |
 
-のみバスは `tools/nomibus/run.py --fetch --dry-run` をワークフロー内で実行して差分を確認する。
+| nomibus（のみバス） | https://www.city.nomi.ishikawa.jp/docs/1242.html（バス停一覧から約 140 ページ） | nomi_* の 13 区間 |
+
+のみバスは `run_local.py` が `tools/nomibus/run.py --refresh` を実行する（条件付き GET で更新のあったページだけ再取得．
+キャッシュ `tools/nomibus/cache/` はクローンに残る．初回は全ページ取得で約 8 分）。内容が変われば新しいバージョンのファイルと manifest を書く。
 
 ## 自動反映 (`apply.py`)
 
@@ -50,7 +53,33 @@ uv run --with pdfplumber --with pandas python tools/watch/apply.py             #
 git diff --stat public/data
 ```
 
-自動で反映しないもの（レポートに「要手動」と出る）: 特別ダイヤ，石川線（2 PDF），整合性エラーのもの。
+石川線は平日・休日の 2 PDF を組にして読み取る（片方だけ更新されたときは state.json の相方を使う）。
+自動で反映しないもの（レポートに「要手動」と出る）: 特別ダイヤ，整合性・検査に落ちたもの，既存の期間の内容が変わったもの（石川線を含む）。
+
+## 検査 (`validate.py`)
+
+取得→読み取り→JSON の各段で正常に動いているかを確かめる。`apply.py` は書き込む前に，`run_local.py` は commit する前（のみバスを含む全区間）に実行し，
+落ちたものは commit せず「要手動」としてメールで理由を知らせる。
+
+```bash
+python3 tools/watch/validate.py            # 全ファイルと manifest を検査
+python3 tools/watch/validate.py --changed  # git で変更されたファイルだけ
+python3 -m unittest discover -s tools/watch -p 'test_*.py'   # 試験（過去のデータで通る・壊すと落ちる）
+```
+
+| 段 | 検査 |
+|---|---|
+| 取得 | PDF でない応答・リンク切れ・取得失敗（watch.py），robots.txt の禁止 |
+| 読み取り | 例外，便 0 件の路線，路線の組・停留所の並びが直前のバージョンと違う，便数が 0.5〜2 倍の外 |
+| JSON | 時刻の書式，便ごとの時刻数＝停留所数，便内の時刻が単調増加（日またぎは許す），有効期間の日付 |
+| manifest | ファイルの実在，期間の重なり（エラー），切れ目・開いたままの旧エントリ（警告） |
+
+公式の資料自体の誤りで落ちる既知の例は `validate.py` の `KNOWN_SOURCE_ANOMALY` に理由つきで登録する（現在 1 件: のみバス南回りの「松が岡 2 丁目」7:50）。
+
+## 定期実行の監視
+
+`run_local.py` は毎回の結果（成功・失敗と理由）をクローンの `.git/run_history.json` に残す。公式ページの取得失敗・のみバスの失敗・例外が **2 回続けて**起きたら
+メール「定期実行が続けて失敗しています」を 1 回送る（回復すると解除）。cron 自体が動かない場合は自分では検知できない（記録が増えないだけ）。
 
 ## アクセスの配慮
 
