@@ -2,14 +2,13 @@
 """共有サーバーの cron から呼ぶ．検知→ブランチ作成→解析→commit→メール通知（push はしない）
 
 専用のクローン（既定 ~/project/tmp/dx-timetable-watch）を origin/main に合わせ，
-auto/timetable-update-YYYYMMDD ブランチで watch.py と apply.py を実行する．
+dev ブランチ（無ければ origin/main から作る）で watch.py と apply.py を実行する．
 変化（新規・更新・期限切れ・要手動）があり，前回のメールと内容が違うときだけ，
 morning-paper の SMTP（Simple Mail Transfer Protocol）設定でメールを送る．
 
     uv run --with pdfplumber --with pandas python tools/watch/run_local.py [--no-mail] [--clone DIR]
 """
 import argparse
-import datetime
 import hashlib
 import os
 import subprocess
@@ -52,7 +51,10 @@ def main():
         os.makedirs(os.path.dirname(d), exist_ok=True)
         sh(["git", "clone", "-q", args.remote, d], cwd=os.path.dirname(d))
     sh(["git", "fetch", "-q", "origin"], cwd=d)
-    branch = "auto/timetable-update-" + datetime.date.today().strftime("%Y%m%d")
+    # 運用は dev → main の PR（過去の PR #1〜#6 はすべて dev→main）．dev が無ければ main から作る
+    branch = "dev"
+    if args.base == "origin/main" and sh(["git", "rev-parse", "-q", "--verify", "origin/dev"], cwd=d, check=False).returncode == 0:
+        args.base = "origin/dev"
     sh(["git", "checkout", "-q", "-f", "-B", branch, args.base], cwd=d)
     sh(["git", "clean", "-qfd", "public/data"], cwd=d)
 
@@ -82,7 +84,7 @@ def main():
 ## 反映の流れ（あなたの作業は 1〜3）
 1. 差分を確認する: cd {d} && git show --stat HEAD && git diff origin/main -- public/data/manifest.json
 2. 問題なければ push する: cd {d} && git push -u origin {branch}
-3. GitHub で PR（Pull Request）を作り，目視確認して main へ merge する（merge で GitHub Pages に自動公開）
+3. GitHub で dev → main の PR（Pull Request）を作り，目視確認して merge する（main への push で deploy.yml が GitHub Pages に公開する）
 「要手動」の行は自動で反映していません．tools/admin/ で PDF を追加してください．
 
 ## 変更ファイル
