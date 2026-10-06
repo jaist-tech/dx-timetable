@@ -1,0 +1,90 @@
+# 時刻表ソース監視: 公式ページのPDF更新と manifest の期限切れを検知して Issue で知らせる
+name: Watch timetable sources
+
+on:
+  schedule:
+    - cron: "0 0 * * 1,4"   # 月・木 09:00 JST
+  workflow_dispatch:
+
+permissions:
+  contents: write   # state.json の更新コミット
+  issues: write     # 通知 Issue の作成・更新
+
+concurrency:
+  group: watch-sources
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check sources and coverage
+        id: watch
+        run: |
+          set +e
+          python3 tools/watch/watch.py --update-state > report.md
+          echo "exit=$?" >> "$GITHUB_OUTPUT"
+          set -e
+          cat report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Parse new PDFs into public/data (no push)
+        id: apply
+        run: |
+          pip install -q pdfplumber pandas
+          set +e
+          python3 tools/watch/apply.py > apply.md
+          echo "exit=$?" >> "$GITHUB_OUTPUT"
+          set -e
+          cat apply.md >> report.md
+          cat apply.md >> "$GITHUB_STEP_SUMMARY"
+          git add -N public/data
+          git diff -- public/data > timetable-update.patch
+
+      - name: Upload patch
+        uses: actions/upload-artifact@v4
+        with:
+          name: timetable-update-patch
+          path: timetable-update.patch
+          if-no-files-found: ignore
+
+      - name: Check Nomi bus site (dry-run)
+        continue-on-error: true
+        run: |
+          cd tools/nomibus
+          python3 run.py --fetch --dry-run > ../../nomibus.log 2>&1 || true
+          {
+            echo
+            echo "## のみバス（能美市サイト）"
+            echo
+            echo '```'
+            tail -n 20 ../../nomibus.log
+            echo '```'
+          } >> ../../report.md
+
+      - name: Commit state.json
+        if: steps.watch.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tools/watch/state.json
+          git restore --staged public/data 2>/dev/null || true
+          git commit -m "watch: 監視状態を更新 [skip ci]" || exit 0
+          git pull --rebase -q
+          git push
+
+      - name: Open or update issue
+        if: always() && steps.watch.outputs.exit == '10'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="時刻表ソースの更新／期限切れを検知（$(TZ=Asia/Tokyo date +%Y-%m-%d)）"
+          body_file=report.md
+          existing=$(gh issue list --label timetable-watch --state open --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file "$body_file"
+          else
+            gh label create timetable-watch --color FBCA04 --description "時刻表ソース監視の自動通知" 2>/dev/null || true
+            gh issue create --title "$title" --label timetable-watch --body-file "$body_file"
+          fi
