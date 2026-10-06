@@ -1,7 +1,7 @@
 # 時刻表ソース監視 (`tools/watch/`)
 
 公式ページの時刻表PDFの更新と，`public/data/manifest.json` の有効期間切れを自動検知するツール。
-GitHub Actions（`.github/workflows/watch-sources.yml`）が月・木に実行し，変化があれば Issue で通知する。
+共有サーバーの cron（月・木 09:00，`run_local.sh`）が実行し，変化があればメールで通知する（Actions では動かさない。state.json の更新が dev と衝突し，SMTP の秘密情報を共有リポジトリに置くことになるため）。
 
 ## ローカルでの使い方
 
@@ -60,16 +60,17 @@ GitHub Actions では差分を `timetable-update.patch`（Artifact）として�
 - 取得済み PDF は `If-None-Match` / `If-Modified-Since` の条件付き GET（未更新なら 304 で本体を転送しない）
 - 実行は週 2 回（月・木）。ページ 4 件と掲載中 PDF のみ
 
-## メールによる検知（案・未実装）
+## メールによる検知（やらない）
 
-JAIST シャトルの改定・臨時便はメールでも届く。HP 検知より早い可能性があるが，受信箱への接続が必要。
+JAIST のメール（受信箱）を読んで改定を検知する案は，個人の受信箱に触れるため採用しない．検知は公式ページの監視のみ．
 
-- 案 A: 受信箱に転送ルール（件名「シャトル」等）を作り，専用アドレス／Issue 作成用のメール受信（GitHub は標準では不可．外部の転送サービスが必要）へ送る
-- 案 B: 手元で Gmail API（読み取り専用）を週 1 回呼び，該当メールの本文と PDF 添付を `tools/watch/inbox/` に保存して `apply.py` に渡す
-- いずれも個人の受信箱に触れるため，公開リポジトリでは動かさず，手元の実行に限る（添付 PDF のみ取り込み，本文は保存しない）
+## 本番への反映の流れ
 
-## 通知後の作業
+```
+cron（月・木 09:00）→ run_local.py: origin/dev（無ければ main）から dev を作り watch→apply→commit
+ → メール（差分・push のコマンド）→ あなた: git push -u origin dev → dev→main の PR → 確認 → merge
+ → deploy.yml が public/ を GitHub Pages に公開（Pages の公開元は main のみ）
+```
 
-1. Issue のレポートで変わったPDFを確認する
-2. `tools/admin/` でPDFをドロップして追加（石川線は `tools/run_all.py`）
-3. `git diff public/data/manifest.json` を確認して commit / push
+cron の登録: `0 9 * * 1,4 ~/project/dx-timetable/tools/watch/run_local.sh`（クローンは `~/project/tmp/dx-timetable-watch`，ログは `~/project/tmp/dx-timetable-watch.log`）。
+同じ内容のメールは再送しない。「要手動」の行は `tools/admin/` で PDF を追加する。
