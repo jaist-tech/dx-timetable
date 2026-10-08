@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ja" data-i18n-title="route.title">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>経路検索（試験公開）</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/route.css">
+<script>
+(function(){
+  try {
+    var s = localStorage.getItem('theme');
+    if (s) document.documentElement.setAttribute('data-theme', s);
+    var l = localStorage.getItem('lang');
+    if (l) document.documentElement.setAttribute('lang', l);
+  } catch (e) {}
+})();
+</script>
+</head>
+<body>
+<div id="app">
+<header>
+  <div class="header-side header-left">
+    <a href="about.html" class="back-btn about-link" data-i18n-aria="header.back" aria-label="戻る">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
+  </div>
+  <div class="header-center">
+    <span id="header-date">--/--</span>
+    <span id="header-dow">(-)</span>
+    <span class="header-time" id="header-time">--:--</span>
+  </div>
+  <div class="header-side header-right">
+    <div class="settings-dropdown" id="settings-dropdown">
+      <div class="settings-backdrop" id="settings-backdrop"></div>
+      <button class="settings-dropdown-btn" id="settings-dropdown-btn" aria-label="設定">
+        <svg class="settings-icon-lang" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        <span class="settings-sep"></span>
+        <svg class="settings-icon-sun" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg class="settings-icon-moon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <div class="settings-dropdown-menu" id="settings-dropdown-menu">
+        <div class="settings-group">
+          <div class="settings-group-label" data-i18n="settings.language">言語</div>
+          <button class="settings-option" data-setting="lang" data-value="ja"><span class="settings-check">✓</span>JA <span class="settings-option-sub">日本語</span></button>
+          <button class="settings-option" data-setting="lang" data-value="en"><span class="settings-check">✓</span>EN <span class="settings-option-sub">English</span></button>
+        </div>
+        <div class="settings-group">
+          <div class="settings-group-label" data-i18n="settings.theme">テーマ</div>
+          <button class="settings-option" data-setting="theme" data-value="light"><span class="settings-check">✓</span><span data-i18n="settings.light">ライト</span></button>
+          <button class="settings-option" data-setting="theme" data-value="dark"><span class="settings-check">✓</span><span data-i18n="settings.dark">ダーク</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="route-main">
+  <div class="rt-wrap">
+    <div class="rt-badge" data-i18n="route.beta">試験公開: のみバスを含む全路線から経路を探します</div>
+
+    <form id="rt-form" class="rt-card" autocomplete="off">
+      <div class="rt-row rt-places">
+        <label class="rt-field"><span data-i18n="route.from">出発</span>
+          <input id="rt-from" list="rt-stops" type="text" inputmode="search" placeholder="JAIST" required></label>
+        <button type="button" id="rt-swap" class="rt-icon" data-i18n-aria="search.swap" aria-label="入れ替え" title="⇄">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 4v14M3 14l4 4 4-4M17 20V6M13 10l4-4 4 4"/></svg>
+        </button>
+        <label class="rt-field"><span data-i18n="route.to">到着</span>
+          <input id="rt-to" list="rt-stops" type="text" inputmode="search" placeholder="金沢駅" required></label>
+      </div>
+      <datalist id="rt-stops"></datalist>
+
+      <div class="rt-row">
+        <label class="rt-field rt-narrow"><span data-i18n="route.date">日付</span>
+          <select id="rt-date"></select></label>
+        <label class="rt-field rt-narrow"><span data-i18n="route.mode">時刻の指定</span>
+          <select id="rt-mode"><option value="depart" data-i18n="route.depart">出発</option><option value="arrive" data-i18n="route.arrive">到着</option></select></label>
+        <label class="rt-field rt-narrow"><span data-i18n="route.time">時刻</span>
+          <input id="rt-time" type="time" required></label>
+      </div>
+
+      <div class="rt-row">
+        <label class="rt-field"><span data-i18n="route.priority">重視する条件</span>
+          <select id="rt-prio">
+            <option value="time" data-i18n="route.prio.time">合計時間が短い</option>
+            <option value="transfers" data-i18n="route.prio.transfers">乗換が少ない</option>
+            <option value="wait" data-i18n="route.prio.wait">待ち時間が短い</option>
+            <option value="ride" data-i18n="route.prio.ride">乗っている時間が短い</option>
+            <option value="fare" data-i18n="route.prio.fare" id="rt-prio-fare" disabled>金額が安い（運賃表の準備中）</option>
+          </select></label>
+      </div>
+
+      <details class="rt-details">
+        <summary data-i18n="route.advanced">詳細設定</summary>
+        <div class="rt-row">
+          <label class="rt-field rt-narrow"><span data-i18n="route.maxTransfers">乗換回数の上限</span>
+            <select id="rt-maxtr"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="5">5</option><option value="unlimited" data-i18n="route.unlimited">無制限</option></select></label>
+          <label class="rt-field rt-narrow"><span data-i18n="route.walk">徒歩の乗換</span>
+            <select id="rt-walk"><option value="0" data-i18n="route.walk.none">使わない</option><option value="5" selected>5分</option><option value="10">10分</option><option value="15">15分</option></select></label>
+          <label class="rt-field rt-narrow"><span data-i18n="route.speed">歩く速さ</span>
+            <select id="rt-speed"><option value="60" data-i18n="route.speed.slow">ゆっくり</option><option value="80" selected data-i18n="route.speed.normal">普通</option><option value="100" data-i18n="route.speed.fast">速い</option></select></label>
+        </div>
+        <div class="rt-row">
+          <label class="rt-field rt-narrow"><span data-i18n="route.maxWait">待ちの上限</span>
+            <select id="rt-maxwait"><option value="30">30分</option><option value="60">60分</option><option value="120" selected>120分</option><option value="1000" data-i18n="route.unlimited">無制限</option></select></label>
+          <label class="rt-check"><input id="rt-gain" type="checkbox" checked> <span data-i18n="route.gain">乗換を増やして 3 分/回 以上縮まない経路は除く</span></label>
+        </div>
+      </details>
+
+      <button type="submit" class="rt-submit" id="rt-go"><span data-i18n="route.search">検索</span></button>
+    </form>
+
+    <div id="rt-status" class="rt-status" role="status"></div>
+    <div id="rt-results"></div>
+    <p class="rt-note" data-i18n="route.note">時刻表のデータに基づく静的な案内です．遅延・運休は反映されません．のみバスの停留所の座標が未確認の箇所があり，徒歩の乗換は一部の停留所のみ使えます．</p>
+  </div>
+</main>
+</div>
+
+<script src="js/debug.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/planner.js"></script>
+<script src="js/route.js"></script>
+</body>
+</html>

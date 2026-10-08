@@ -1,0 +1,2627 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-10-08T15:03:35Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "node",
+  "id": 663662852,
+  "lat": 36.4431749,
+  "lon": 136.5915958,
+  "tags": {
+    "bench": "yes",
+    "highway": "bus_stop",
+    "local_ref": "JAISTシャトルバス, 能美バス",
+    "name": "北陸先端大 (JAIST)",
+    "name:en": "JAIST",
+    "name:ja": "北陸先端科学技術大学院大学",
+    "name:ja-Hira": "ほくりくせんたんかがくぎじゅつだいがくいんだいがく",
+    "name:ja_rm": "Hokuriku Sentan-kagaku-gijutsu-daigakuin-daigaku",
+    "shelter": "yes",
+    "tactile_paving": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 664060428,
+  "lat": 36.4525392,
+  "lon": 136.6238618,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "local_ref": "JAISTシャトルバス",
+    "name": "鶴来駅",
+    "name:en": "Tsurugi Station",
+    "name:ja": "鶴来駅",
+    "name:ja_rm": "Tsurugi Eki",
+    "operator": "北陸先端科学技術大学院大学",
+    "public_transport": "platform",
+    "shelter": "no",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 2175364972,
+  "lat": 36.4526792,
+  "lon": 136.5939991,
+  "tags": {
+    "bench": "no",
+    "bin": "no",
+    "bus": "yes",
+    "check_date:shelter": "2025-09-27",
+    "highway": "bus_stop",
+    "local_ref": "JAISTシャトルバス",
+    "name": "宮竹 (Miyatake)JAIST Bus",
+    "name:en": "Miyatake",
+    "name:ja": "宮竹",
+    "name:ja_rm": "Miyatake",
+    "operator": "JAIST",
+    "public_transport": "platform",
+    "shelter": "no",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 2175365016,
+  "lat": 36.4457061,
+  "lon": 136.5916790,
+  "tags": {
+    "bench": "no",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "local_ref": "JAISTシャトルバス",
+    "name": "石川ハイテクセンター前 (Ishikawa High-Tech Centre)",
+    "name:en": "Ishikawa High-Tech Centre",
+    "name:ja": "石川ハイテクセンター前",
+    "name:ja_rm": "Ishikawa Haitekusentā",
+    "operator": "JAIST",
+    "public_transport": "platform",
+    "shelter": "no",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 2175365064,
+  "lat": 36.4456630,
+  "lon": 136.5918587,
+  "tags": {
+    "bench": "no",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "local_ref": "JAISTシャトルバス",
+    "name": "石川ハイテクセンター前 (Ishikawa High-Tech Centre)",
+    "name:en": "Ishikawa High-Tech Centre",
+    "name:ja": "石川ハイテクセンター前",
+    "name:ja_rm": "Ishikawa Haitekusentā",
+    "operator": "JAIST",
+    "public_transport": "platform",
+    "shelter": "no",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 2614404527,
+  "lat": 36.4526606,
+  "lon": 136.5941410,
+  "tags": {
+    "bench": "no",
+    "bin": "no",
+    "bus": "yes",
+    "check_date:shelter": "2025-09-27",
+    "highway": "bus_stop",
+    "name": "宮竹 (Miyatake)JAIST Bus",
+    "name:en": "Miyatake",
+    "name:ja": "宮竹",
+    "name:ja_rm": "Miyatake",
+    "operator": "JAIST",
+    "public_transport": "platform",
+    "shelter": "no",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 2616087116,
+  "lat": 36.4519652,
+  "lon": 136.6114603,
+  "tags": {
+    "bench": "yes",
+    "bin": "no",
+    "bus": "yes",
+    "check_date:shelter": "2025-09-27",
+    "highway": "bus_stop",
+    "lit": "no",
+    "local_ref": "JAISTシャトルバス",
+    "name": "岩本 (Iwamoto)",
+    "name:en": "Iwamoto",
+    "name:ja": "岩本",
+    "name:ja_rm": "Iwamoto",
+    "operator": "能美市",
+    "public_transport": "platform",
+    "shelter": "yes",
+    "tactile_paving": "no",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 2616087123,
+  "lat": 36.4521416,
+  "lon": 136.6113843,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "local_ref": "JAISTシャトルバス",
+    "name": "岩本 (Iwamoto)",
+    "name:en": "Iwamoto",
+    "name:ja": "岩本",
+    "name:ja_rm": "Iwamoto",
+    "operator": "能美市",
+    "public_transport": "platform",
+    "shelter": "no",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 2619293862,
+  "lat": 36.4475146,
+  "lon": 136.6217166,
+  "tags": {
+    "bench": "no",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "local_ref": "JAISTシャトルバス",
+    "name": "本鶴来 (Hon-Tsurugi)",
+    "name:en": "Hon-Tsurugi",
+    "name:ja": "本鶴来",
+    "name:ja_rm": "Hon-tsurugi",
+    "public_transport": "platform",
+    "shelter": "no",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 2619293863,
+  "lat": 36.4503480,
+  "lon": 136.6227759,
+  "tags": {
+    "bench": "no",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "local_ref": "JAISTシャトルバス",
+    "name": "本鶴来 (Hon-Tsurugi)",
+    "name:en": "Hon-Tsurugi",
+    "name:ja": "本鶴来",
+    "name:ja_rm": "Hon-tsurugi",
+    "public_transport": "platform",
+    "shelter": "no",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 2619293864,
+  "lat": 36.4532940,
+  "lon": 136.6043318,
+  "tags": {
+    "bench": "no",
+    "highway": "bus_stop",
+    "local_ref": "JAISTシャトルバス",
+    "name": "灯台笹町 (Todashinomachi)",
+    "name:en": "Todashinomachi",
+    "name:ja": "灯台笹",
+    "name:ja_rm": "Todashinomachi",
+    "operator": "能美市",
+    "shelter": "no",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 2619293865,
+  "lat": 36.4533814,
+  "lon": 136.6044439,
+  "tags": {
+    "bench": "yes",
+    "highway": "bus_stop",
+    "local_ref": "JAISTシャトルバス",
+    "name": "灯台笹町 (Todashinomachi)",
+    "name:en": "Todashinomachi",
+    "name:ja": "灯台笹",
+    "name:ja_rm": "Todashinomachi",
+    "operator": "能美市",
+    "shelter": "yes",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 2619293866,
+  "lat": 36.4486011,
+  "lon": 136.6255562,
+  "tags": {
+    "bench": "yes",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "local_ref": "JAISTシャトルバス",
+    "name": "鶴来本町 (Tsurugi Honmachi)",
+    "name:en": "Tsurugi Honmachi",
+    "name:ja": "鶴来本町",
+    "name:ja_rm": "Tsurugi hon-machi",
+    "public_transport": "platform",
+    "shelter": "yes",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 2619293867,
+  "lat": 36.4487107,
+  "lon": 136.6255088,
+  "tags": {
+    "bench": "no",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "local_ref": "JAISTシャトルバス",
+    "name": "鶴来本町 (Tsurugi Honmachi)",
+    "name:en": "Tsurugi Honmachi",
+    "name:ja": "鶴来本町",
+    "name:ja_rm": "Tsurugi hon-machi",
+    "public_transport": "platform",
+    "shelter": "no",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 4249430489,
+  "lat": 36.3875659,
+  "lon": 136.4496919,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "kitamura ",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4789928718,
+  "lat": 36.4017351,
+  "lon": 136.4521579,
+  "tags": {
+    "bench": "yes",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "public_transport": "platform",
+    "shelter": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 4838192009,
+  "lat": 36.4521806,
+  "lon": 136.4599583,
+  "tags": {
+    "bench": "yes",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "能美根上駅(のみバス)",
+    "name:en": "Nomi-Neagari station",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4838192015,
+  "lat": 36.4518263,
+  "lon": 136.4592797,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "能美根上駅西口(のみバス)",
+    "name:en": "Nomi-Neagari station-West",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4840900248,
+  "lat": 36.4535507,
+  "lon": 136.5887314,
+  "tags": {
+    "bench": "no",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "宮竹一歩(のみバス)",
+    "name:en": "Miyatake-Ippo",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4840900249,
+  "lat": 36.4534612,
+  "lon": 136.5888172,
+  "tags": {
+    "bench": "yes",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "宮竹一歩(のみバス)",
+    "name:en": "Miyatake-Ippo",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4840900250,
+  "lat": 36.4540740,
+  "lon": 136.5840627,
+  "tags": {
+    "highway": "bus_stop",
+    "name": "宮竹西(のみバス)",
+    "name:en": "Miyatake-West"
+  }
+},
+{
+  "type": "node",
+  "id": 4840900251,
+  "lat": 36.4539382,
+  "lon": 136.5840703,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "宮竹西(のみバス)",
+    "name:en": "Miyatake-West",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4840900252,
+  "lat": 36.4541724,
+  "lon": 136.5781549,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "三ツ口(のみバス)",
+    "name:en": "Mitsukuchi",
+    "name:ja": "三ツ口",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4840900253,
+  "lat": 36.4540726,
+  "lon": 136.5784256,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "三ツ口(のみバス)",
+    "name:en": "Mitsukuchi",
+    "name:ja": "三ツ口",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4840901596,
+  "lat": 36.4526717,
+  "lon": 136.5940051,
+  "tags": {
+    "bench": "no",
+    "bin": "no",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "宮竹東(のみバス)",
+    "name:en": "Miyatake-East",
+    "operator": "能美市",
+    "public_transport": "platform",
+    "shelter": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 4840901597,
+  "lat": 36.4526944,
+  "lon": 136.5941359,
+  "tags": {
+    "bench": "no",
+    "bin": "no",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "宮竹東(のみバス)",
+    "name:en": "Miyatake-East",
+    "operator": "能美市",
+    "public_transport": "platform",
+    "shelter": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 4841533646,
+  "lat": 36.4472185,
+  "lon": 136.5536807,
+  "tags": {
+    "bench": "no",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "能美市役所(のみバス)",
+    "name:en": "Nomi city hall",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4844947174,
+  "lat": 36.4446038,
+  "lon": 136.5479893,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "辰口福祉会館(のみバス)",
+    "name:en": "Tatsunokuchi-Fukushi-Kaikan",
+    "name:ja": "辰口福祉会館",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4844947175,
+  "lat": 36.4546643,
+  "lon": 136.5678955,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "岩内西(のみバス)",
+    "name:en": "Iwauchi-West",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4844947176,
+  "lat": 36.4545607,
+  "lon": 136.5679572,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "岩内西(のみバス)",
+    "name:en": "Iwauchi-West",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4844947177,
+  "lat": 36.4544828,
+  "lon": 136.5700059,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "岩内東(のみバス)",
+    "name:en": "Iwauchi-East",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4844947179,
+  "lat": 36.4543443,
+  "lon": 136.5703833,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "岩内東(のみバス)",
+    "name:en": "Iwauchi-East",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4847413030,
+  "lat": 36.4529656,
+  "lon": 136.6249523,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "鶴来駅前",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4854739281,
+  "lat": 36.4419820,
+  "lon": 136.5362110,
+  "tags": {
+    "bench": "no",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "芳珠記念病院(のみバス)",
+    "name:en": "Houju Memorial hospital",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4856888827,
+  "lat": 36.4553578,
+  "lon": 136.4599140,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "市立病院(のみバス)",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4879897597,
+  "lat": 36.4434499,
+  "lon": 136.5471517,
+  "tags": {
+    "bench": "no",
+    "bin": "no",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "lit": "no",
+    "name": "辰口温泉口(のみバス)",
+    "name:en": "Tatsunokuchi-Onsen-Guchi",
+    "operator": "能美市",
+    "public_transport": "platform",
+    "shelter": "no",
+    "tactile_paving": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 4881190970,
+  "lat": 36.4531564,
+  "lon": 136.5605977,
+  "tags": {
+    "bench": "yes",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "火釜(のみバス)",
+    "name:en": "Higama",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4881190971,
+  "lat": 36.4530512,
+  "lon": 136.5606073,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "火釜(のみバス)",
+    "name:en": "Higama",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4881190972,
+  "lat": 36.4508742,
+  "lon": 136.5476623,
+  "tags": {
+    "bench": "no",
+    "bin": "no",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "lit": "no",
+    "name": "辰口東(のみバス)",
+    "operator": "能美市",
+    "public_transport": "platform",
+    "shelter": "no",
+    "tactile_paving": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 4881190973,
+  "lat": 36.4508909,
+  "lon": 136.5474980,
+  "tags": {
+    "bench": "no",
+    "bin": "no",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "lit": "yes",
+    "name": "辰口東(のみバス)",
+    "name:en": "Tatsunokuchi-East",
+    "operator": "能美市",
+    "public_transport": "platform",
+    "shelter": "no",
+    "tactile_paving": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 4889289594,
+  "lat": 36.4529265,
+  "lon": 136.5494513,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "三ツ屋(のみバス)",
+    "name:en": "Mitsuya",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4889355327,
+  "lat": 36.4469054,
+  "lon": 136.5165784,
+  "tags": {
+    "bench": "no",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "秋常(のみバス)",
+    "name:en": "Akitsune",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4889355328,
+  "lat": 36.4466029,
+  "lon": 136.5167346,
+  "tags": {
+    "bench": "no",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "秋常(のみバス)",
+    "name:en": "Akitsune",
+    "operator": "能美市",
+    "public_transport": "platform",
+    "shelter": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 4889355333,
+  "lat": 36.4531599,
+  "lon": 136.5056292,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "粟生中(のみバス)",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4893320479,
+  "lat": 36.4349435,
+  "lon": 136.5245913,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "湯寿園前",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4893320480,
+  "lat": 36.4330682,
+  "lon": 136.5252243,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "クアハウス久谷(のみバス)",
+    "name:en": "kurhaus-kutani",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4893320489,
+  "lat": 36.4322878,
+  "lon": 136.5225317,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "泉台コミュニティセンター",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4893320490,
+  "lat": 36.4321971,
+  "lon": 136.5225588,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "泉台コミュニティセンター",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4897407731,
+  "lat": 36.4396653,
+  "lon": 136.5075462,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "ふるさと交流センター(のみバス)",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4897407733,
+  "lat": 36.4382967,
+  "lon": 136.5004039,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "寺井東口(のみバス)",
+    "name:en": "Terai-East",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4897407734,
+  "lat": 36.4381890,
+  "lon": 136.5004085,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "寺井東口(のみバス)",
+    "name:en": "Terai-East",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4897407736,
+  "lat": 36.4372891,
+  "lon": 136.4925337,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "寺井図書館前(のみバス)",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4897407745,
+  "lat": 36.4388380,
+  "lon": 136.4916098,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "町民センター(のみバス)",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4897407746,
+  "lat": 36.4389406,
+  "lon": 136.4915620,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "町民センター(のみバス)",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4897427264,
+  "lat": 36.4406260,
+  "lon": 136.4934531,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "寺井南(のみバス)",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4897492022,
+  "lat": 36.4423733,
+  "lon": 136.4937582,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "寺井北(のみバス)",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4897492023,
+  "lat": 36.4438619,
+  "lon": 136.4933251,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "ブックメイト・フルールとくひさ(のみバス)",
+    "name:en": "BookmateTokuhisa",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4897492024,
+  "lat": 36.4439992,
+  "lon": 136.4937461,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "ブックメイト・フルールとくひさ(のみバス)",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4897492032,
+  "lat": 36.4436731,
+  "lon": 136.4896876,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "マリータウン(のみバス)",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4897492033,
+  "lat": 36.4435949,
+  "lon": 136.4896859,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "マリータウン(のみバス)",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4897492034,
+  "lat": 36.4434997,
+  "lon": 136.4855792,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "五間堂(のみバス)",
+    "name:en": "Gokendo",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4897492035,
+  "lat": 36.4435831,
+  "lon": 136.4855776,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "五間堂(のみバス)",
+    "name:en": "Gokendo",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4897492036,
+  "lat": 36.4459064,
+  "lon": 136.4777027,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "中庄(のみバス)",
+    "name:en": "Nakajo",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4897492037,
+  "lat": 36.4480360,
+  "lon": 136.4731477,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "福岡(のみバス)",
+    "name:en": "Fukuoka",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4897492038,
+  "lat": 36.4485567,
+  "lon": 136.4679984,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "大成東部(のみバス)",
+    "name:en": "Taisei-West",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4897492039,
+  "lat": 36.4491079,
+  "lon": 136.4653746,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "根上ショッピングタウン(のみバス)",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4897492040,
+  "lat": 36.4492437,
+  "lon": 136.4651992,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "根上ショッピングタウン(のみバス)",
+    "name:en": "Neagari shopping-town",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4897492041,
+  "lat": 36.4508204,
+  "lon": 136.4620533,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "根上郵便局(のみバス)",
+    "name:en": "Neagari Post office",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4897492042,
+  "lat": 36.4507088,
+  "lon": 136.4619576,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "根上郵便局(のみバス)",
+    "name:en": "Neagari post office",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4915895606,
+  "lat": 36.4426444,
+  "lon": 136.5449263,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "辰口丘陵公園口(のみバス)",
+    "name:en": "Tatsunokuchi-Kyuryo-Koen-Guchi",
+    "name:ja": "辰口丘陵公園口",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4915895607,
+  "lat": 36.4427624,
+  "lon": 136.5447413,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "辰口丘陵公園口(のみバス)",
+    "name:ja": "辰口丘陵公園口",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4930919698,
+  "lat": 36.4490880,
+  "lon": 136.5256909,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "徳久(のみバス)",
+    "name:en": "Tokuhisa",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 4945897517,
+  "lat": 36.4539473,
+  "lon": 136.5163867,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "新保(のみバス)",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 5265114957,
+  "lat": 36.4451169,
+  "lon": 136.5259802,
+  "tags": {
+    "bench": "no",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "荒屋(のみバス)",
+    "name:en": "Araya",
+    "public_transport": "platform",
+    "shelter": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 5348387696,
+  "lat": 36.4007707,
+  "lon": 136.4525915,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "イオンモール新小松シャトルバス",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 5355867787,
+  "lat": 36.4007977,
+  "lon": 136.4525909,
+  "tags": {
+    "bench": "yes",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "lit": "no",
+    "name": "高速バス",
+    "public_transport": "platform",
+    "shelter": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 5426026854,
+  "lat": 36.4450757,
+  "lon": 136.5454412,
+  "tags": {
+    "bench": "no",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "lit": "no",
+    "name": "辰口温泉(のみバス)",
+    "name:en": "Tatsunokuchi-Onsen",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 5472025275,
+  "lat": 36.4007483,
+  "lon": 136.4525912,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "JAISTシャトルバス",
+    "name:en": "JAIST shuttle bus",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 5748076008,
+  "lat": 36.4518442,
+  "lon": 136.5442888,
+  "tags": {
+    "bench": "no",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "lit": "no",
+    "name": "辰口図書館前(のみバス)",
+    "name:en": "Tatsunokuchi Library",
+    "public_transport": "platform",
+    "shelter": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 5828552279,
+  "lat": 36.4454717,
+  "lon": 136.5801756,
+  "tags": {
+    "bench": "no",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "lit": "no",
+    "name": "長滝(のみバス)",
+    "operator": "能美市",
+    "passenger_information_display": "no",
+    "public_transport": "platform",
+    "shelter": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 5828552280,
+  "lat": 36.4379817,
+  "lon": 136.5952258,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "大口(のみバス)",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 5828552281,
+  "lat": 36.4294160,
+  "lon": 136.5851942,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "坪野(のみバス)",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 5828552282,
+  "lat": 36.4526076,
+  "lon": 136.5565920,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "来丸(のみバス)",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 5828552283,
+  "lat": 36.4530246,
+  "lon": 136.5535357,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "山田(のみバス)",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 5859893005,
+  "lat": 36.4014964,
+  "lon": 136.4524083,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 5859893006,
+  "lat": 36.4012859,
+  "lon": 136.4523796,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 5859893007,
+  "lat": 36.4015426,
+  "lon": 136.4521085,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 5859893008,
+  "lat": 36.4013501,
+  "lon": 136.4520639,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6444142349,
+  "lat": 36.4465477,
+  "lon": 136.4969923,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "寺井高校(のみバス)",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6507297262,
+  "lat": 36.4076883,
+  "lon": 136.4207970,
+  "tags": {
+    "bench": "no",
+    "bin": "no",
+    "bus": "yes",
+    "covered": "no",
+    "highway": "bus_stop",
+    "public_transport": "platform",
+    "shelter": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 6507315870,
+  "lat": 36.4079786,
+  "lon": 136.4275286,
+  "tags": {
+    "bench": "yes",
+    "bin": "yes",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "public_transport": "platform",
+    "shelter": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 6660188148,
+  "lat": 36.4395225,
+  "lon": 136.5516124,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "アーティスト村",
+    "operator": "のみバス",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737869620,
+  "lat": 36.4525128,
+  "lon": 136.6238814,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "鶴来駅",
+    "name:en": "Tsurugi Station",
+    "name:ja": "鶴来駅",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737869621,
+  "lat": 36.4524866,
+  "lon": 136.6239003,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "鶴来駅",
+    "name:en": "Tsurugi Station",
+    "name:ja": "鶴来駅",
+    "operator": "北陸鉄道株式会社",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737869623,
+  "lat": 36.4457386,
+  "lon": 136.5917562,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "大学院口",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737869624,
+  "lat": 36.4436528,
+  "lon": 136.5908637,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "先端大学前",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737869625,
+  "lat": 36.4436974,
+  "lon": 136.5909376,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "先端大学前",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737894193,
+  "lat": 36.4339826,
+  "lon": 136.5501402,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "上徳山",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737894194,
+  "lat": 36.4424382,
+  "lon": 136.5529316,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "湯屋",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737894195,
+  "lat": 36.4264761,
+  "lon": 136.5435469,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "原口和光台",
+    "operator": "北陸鉄道株式会社",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737894196,
+  "lat": 36.4263708,
+  "lon": 136.5443714,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "和光台",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737894197,
+  "lat": 36.4261970,
+  "lon": 136.5443387,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "和光台",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737894198,
+  "lat": 36.4260597,
+  "lon": 136.5376597,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "下和気",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737894199,
+  "lat": 36.4252190,
+  "lon": 136.5404832,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "中和気",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737894200,
+  "lat": 36.4240658,
+  "lon": 136.5442899,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "上和気",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737894201,
+  "lat": 36.4229764,
+  "lon": 136.5487334,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "寺畠",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737894202,
+  "lat": 36.4192213,
+  "lon": 136.5506377,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "岩﨑",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737894203,
+  "lat": 36.4097309,
+  "lon": 136.5545754,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "仏大寺",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737894204,
+  "lat": 36.4202448,
+  "lon": 136.5602437,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "口鍋谷",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737894205,
+  "lat": 36.4205481,
+  "lon": 136.5748834,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "上鍋谷",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737894206,
+  "lat": 36.4220685,
+  "lon": 136.5674693,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "鍋谷八幡神社",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737894208,
+  "lat": 36.4213264,
+  "lon": 136.5644320,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "中鍋谷",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737894209,
+  "lat": 36.4186284,
+  "lon": 136.5766587,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "奥鍋谷",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737894210,
+  "lat": 36.4230492,
+  "lon": 136.5553418,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "下舘",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737894211,
+  "lat": 36.4278641,
+  "lon": 136.5616660,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "上舘",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737894212,
+  "lat": 36.4302682,
+  "lon": 136.5695957,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "金剛寺",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737894214,
+  "lat": 36.4552793,
+  "lon": 136.5551394,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "山田",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737894215,
+  "lat": 36.4558595,
+  "lon": 136.5442008,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "出口",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6737894216,
+  "lat": 36.4534126,
+  "lon": 136.5463850,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "三ツ屋住宅前",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6755438923,
+  "lat": 36.4438722,
+  "lon": 136.4859397,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "五間堂(のみバス)",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6755438966,
+  "lat": 36.4349591,
+  "lon": 136.5204876,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "亀齢荘（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6755438967,
+  "lat": 36.4350627,
+  "lon": 136.5204849,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "亀齢荘（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6755438968,
+  "lat": 36.4289164,
+  "lon": 136.5200377,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "久谷陶芸村（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6755438969,
+  "lat": 36.4323413,
+  "lon": 136.5211426,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "泉台（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6755438970,
+  "lat": 36.4323477,
+  "lon": 136.5209844,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "泉台（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6755438971,
+  "lat": 36.4349092,
+  "lon": 136.5190502,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "久谷温泉（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6755438972,
+  "lat": 36.4349405,
+  "lon": 136.5191918,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "久谷温泉（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6755438973,
+  "lat": 36.4289124,
+  "lon": 136.5150297,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "泉台西（のみバス）",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6755438974,
+  "lat": 36.4318517,
+  "lon": 136.5128089,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "佐野公民館（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6755438976,
+  "lat": 36.4319461,
+  "lon": 136.5099673,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "佐野（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6755438977,
+  "lat": 36.4318912,
+  "lon": 136.5025679,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "牛島（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6755438978,
+  "lat": 36.4345699,
+  "lon": 136.5002759,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "末信（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6755438979,
+  "lat": 36.4294593,
+  "lon": 136.4983100,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "牛島西（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6755438980,
+  "lat": 36.4287645,
+  "lon": 136.4927605,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "大長野公民館（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6755438981,
+  "lat": 36.4271692,
+  "lon": 136.4897952,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "大長野体育館（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6755438982,
+  "lat": 36.4232373,
+  "lon": 136.4887600,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "小杉公民館（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6755438984,
+  "lat": 36.4327196,
+  "lon": 136.4913528,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "小長野（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6755438985,
+  "lat": 36.4311233,
+  "lon": 136.4913050,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "大傘末公園（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758731683,
+  "lat": 36.4371720,
+  "lon": 136.4957964,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "寺井中央（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758731684,
+  "lat": 36.4370862,
+  "lon": 136.4958032,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "寺井中央（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732885,
+  "lat": 36.4407617,
+  "lon": 136.5004654,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "能美市健康福祉センター（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732886,
+  "lat": 36.4379202,
+  "lon": 136.5106105,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "石子（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732888,
+  "lat": 36.4370561,
+  "lon": 136.5131417,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "石子農村公園（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732889,
+  "lat": 36.4353316,
+  "lon": 136.5172746,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "湯谷（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732890,
+  "lat": 36.4448123,
+  "lon": 136.5116606,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "末寺（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732891,
+  "lat": 36.4531236,
+  "lon": 136.5088309,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "粟生東（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732892,
+  "lat": 36.4507947,
+  "lon": 136.4990895,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "吉光（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732893,
+  "lat": 36.4485695,
+  "lon": 136.4949862,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "東任田（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732894,
+  "lat": 36.4449417,
+  "lon": 136.4954044,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "緑町（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732896,
+  "lat": 36.4457749,
+  "lon": 136.5020013,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "九谷町（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732898,
+  "lat": 36.4466971,
+  "lon": 136.5061724,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "三道山（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732899,
+  "lat": 36.4396453,
+  "lon": 136.4932925,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "北國銀行寺井支店前（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732900,
+  "lat": 36.4497758,
+  "lon": 136.4870883,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "西任田（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732901,
+  "lat": 36.4550594,
+  "lon": 136.4847591,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "赤井（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732902,
+  "lat": 36.4645353,
+  "lon": 136.4744375,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "吉原作業場（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732903,
+  "lat": 36.4641150,
+  "lon": 136.4723419,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "吉原熊田神社（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732904,
+  "lat": 36.4604047,
+  "lon": 136.4689258,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "福島北（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732905,
+  "lat": 36.4574092,
+  "lon": 136.4661671,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "福島中部（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732906,
+  "lat": 36.4532714,
+  "lon": 136.4634259,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "法林寺前（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732907,
+  "lat": 36.4543674,
+  "lon": 136.4644934,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "福島南（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732908,
+  "lat": 36.4476015,
+  "lon": 136.4631040,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "文化会館（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732909,
+  "lat": 36.4469931,
+  "lon": 136.4641984,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "学習センター（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732910,
+  "lat": 36.4462897,
+  "lon": 136.4696419,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "西二口（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732911,
+  "lat": 36.4460511,
+  "lon": 136.4730325,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "福岡南（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732912,
+  "lat": 36.4450152,
+  "lon": 136.4781096,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "中庄公民館（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732914,
+  "lat": 36.4497535,
+  "lon": 136.4606374,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "大成商店街（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732915,
+  "lat": 36.4490907,
+  "lon": 136.4575709,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "浜小学校前（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732916,
+  "lat": 36.4464135,
+  "lon": 136.4543358,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "浜町公民館（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732917,
+  "lat": 36.4465775,
+  "lon": 136.4543143,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "浜町公民館（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732918,
+  "lat": 36.4483597,
+  "lon": 136.4525655,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "浜町春日神社前（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732919,
+  "lat": 36.4444674,
+  "lon": 136.4502642,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "浜町南（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732920,
+  "lat": 36.4417746,
+  "lon": 136.4461228,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "道林（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732921,
+  "lat": 36.4406240,
+  "lon": 136.4427173,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "パークゴルフ場前（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732922,
+  "lat": 36.4344340,
+  "lon": 136.4370086,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "翠ヶ丘運動公園前（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732923,
+  "lat": 36.4306667,
+  "lon": 136.4360561,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "松井秀喜ミュージアム（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732924,
+  "lat": 36.4345684,
+  "lon": 136.4392265,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "山口（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732925,
+  "lat": 36.4370546,
+  "lon": 136.4453763,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "根上台（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732926,
+  "lat": 36.4385567,
+  "lon": 136.4491105,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "高坂公園前（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732927,
+  "lat": 36.4375793,
+  "lon": 136.4524984,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "高坂（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732928,
+  "lat": 36.4353421,
+  "lon": 136.4546856,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "サンタウン南（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732929,
+  "lat": 36.4371083,
+  "lon": 136.4691993,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "中ノ江（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732930,
+  "lat": 36.4411908,
+  "lon": 136.4540824,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "下ノ江作業場前（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732931,
+  "lat": 36.4451804,
+  "lon": 136.4573514,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "浜開発（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 6758732932,
+  "lat": 36.4476147,
+  "lon": 136.4593034,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "浜小学校前（のみバス）",
+    "operator": "能美市",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 7814208118,
+  "lat": 36.4523620,
+  "lon": 136.5703537,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "莇生(のみバス)",
+    "public_transport": "platform"
+  }
+},
+{
+  "type": "node",
+  "id": 7900310582,
+  "lat": 36.4218506,
+  "lon": 136.4327658,
+  "tags": {
+    "bus": "yes",
+    "departures_board": "timetable",
+    "highway": "bus_stop",
+    "name": "北陸小松",
+    "public_transport": "platform",
+    "shelter": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 8638283891,
+  "lat": 36.4953165,
+  "lon": 136.5911571,
+  "tags": {
+    "bus": "yes",
+    "departures_board": "timetable",
+    "highway": "bus_stop",
+    "name": "南部車庫",
+    "operator": "北陸鉄道",
+    "public_transport": "platform",
+    "shelter": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 8638283892,
+  "lat": 36.4956689,
+  "lon": 136.5905360,
+  "tags": {
+    "bus": "yes",
+    "departures_board": "timetable",
+    "highway": "bus_stop",
+    "name": "南部車庫",
+    "public_transport": "platform",
+    "shelter": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 11960765475,
+  "lat": 36.4244824,
+  "lon": 136.4496124,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "大島町南",
+    "public_transport": "platform"
+  }
+}
+
+  ]
+}
