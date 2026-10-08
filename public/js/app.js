@@ -385,11 +385,13 @@ function initApp() {
   updateClock();
   checkHolidayData();
   initTutorial();
+  restoreLastSelection(); // 30 分以内に戻ったときだけ直近の選択を復元（js/selection-memory.js）
 
   // Real-time updates (every second)
   setInterval(() => {
     updateClock();
     checkDateRollover();
+    saveLastSelectionIfChanged();
     if (currentTab === 'search') updateSearchCountdown();
     if (currentTab === 'status') updateStatus();
     if (currentTab === 'map') updateMap();
