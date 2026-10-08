@@ -174,3 +174,17 @@ test('徒歩を使わない設定では徒歩の乗換経路を返さない', ()
   const r = Planner.plan(net, { date: WK, from: 'A', to: 'D', depart: '08:00', walk: { enabled: false } });
   assert.equal(r.journeys.length, 0);
 });
+
+test('運賃: JAIST→小松駅→金沢駅は 0+580 円，のみバス同士の乗継は 2 本目が無料', async () => {
+  const net = await getNet(); await net.ensureDate(WK);
+  assert.ok(net.fares, 'fares.json が読まれる');
+  const r = Planner.plan(net, { date: WK, from: 'JAIST', to: '金沢駅', depart: '08:00', results: 30, minGainPerTransfer: 0, priority: 'fare' });
+  const viaKomatsu = r.journeys.find(j => j.legs.some(l => l.base === 'shuttle_komatsu') && j.legs.some(l => l.base === 'ir_ishikawa'));
+  assert.ok(viaKomatsu);
+  assert.equal(viaKomatsu.fare, 580);
+  const n = Planner.plan(net, { date: WK, from: '辰口福祉会館', to: '岩本', depart: '08:00', results: 10 });
+  for (const j of n.journeys) {
+    const trips = j.legs.filter(l => l.type === 'trip');
+    assert.ok(j.fare === (trips.length >= 2 && trips.every(l => l.base.startsWith('nomi_')) ? 100 : j.fare));
+  }
+});
