@@ -322,21 +322,37 @@
   }
 
   // ---------- 運賃 ----------
-  // fares.json: { version:1, rules:[{ routePrefix|routeId, flat:円 | table:{"出発|到着":円} }] }
+  // data/fares.json（docs/fares.md）: segments.<名前>.kind = flat(fare) | matrix(fares[出発][到着]) | table(pairs["出発>到着"])
+  const FARE_SEGMENT = base => (/^nomi_/.test(base) ? 'nomibus' : base === 'ir_ishikawa' ? 'ir_ishikawa_south' : base);
   function legFare(fares, leg) {
-    if (!fares) return null;
-    for (const r of fares.rules || []) {
-      const hit = (r.routeId && r.routeId === leg.routeId) || (r.routePrefix && leg.routeId.startsWith(r.routePrefix)) || (r.base && r.base === leg.base);
-      if (!hit) continue;
-      if (typeof r.flat === 'number') return r.flat;
-      if (r.table) {
-        const v = r.table[leg.from + '|' + leg.to];
-        if (typeof v === 'number') return v;
-        const v2 = r.table[leg.to + '|' + leg.from];
-        if (typeof v2 === 'number') return v2;
-      }
+    if (!fares || !fares.segments) return null;
+    const seg = fares.segments[FARE_SEGMENT(leg.base)];
+    if (!seg) return null;
+    if (seg.kind === 'flat') return typeof seg.fare === 'number' ? seg.fare : null;
+    if (seg.kind === 'matrix') {
+      const v = seg.fares && seg.fares[leg.from] && seg.fares[leg.from][leg.to];
+      return typeof v === 'number' ? v : null;
+    }
+    if (seg.kind === 'table') {
+      const p = seg.pairs || {};
+      const v = p[leg.from + '>' + leg.to];
+      return typeof v === 'number' ? v : null;
     }
     return null;
+  }
+  // 運賃の合計．のみバス同士の乗継は 2 本目が無料（乗継券．同日・降車時に申し出）．不明な区間があれば null
+  function journeyFare(fares, legs) {
+    if (!fares) return null;
+    let sum = 0, prev = null;
+    for (const l of legs) {
+      if (l.type !== 'trip') continue;
+      const f = legFare(fares, l);
+      if (f === null) return null;
+      const free = prev && /^nomi_/.test(prev.base) && /^nomi_/.test(l.base);
+      sum += free ? 0 : f;
+      prev = l;
+    }
+    return sum;
   }
 
   // ---------- 候補の指標 ----------
@@ -352,12 +368,7 @@
       if (i > 0) wait += Math.max(0, l.dep - legs[i - 1].arr - (l.type === 'walk' ? 0 : 0));
     }
     // 徒歩の前後の待ち: 徒歩の leg は到着直後に歩き始めるものとして dep を置いているため，上の差は待ちを含む乗換の隙間のみ
-    let fare = null;
-    if (net.fares) {
-      let sum = 0, ok = true;
-      for (const t of trips) { const f = legFare(net.fares, t); if (f === null) { ok = false; break; } sum += f; }
-      if (ok) fare = sum;
-    }
+    const fare = journeyFare(net.fares, legs);
     return { dep, arr, total: arr - dep, transfers: trips.length - 1, wait, ride, walk, fare, depStr: fmtTime(dep), arrStr: fmtTime(arr) };
   }
 
@@ -481,7 +492,7 @@
     const opt = async url => { try { return await fj(url); } catch (e) { return null; } };
     const [manifest, routes, holidays, stopsExtra, fares] = await Promise.all([
       fj(base + 'manifest.json'), fj(base + 'routes.json'), opt(base + 'holidays.json'),
-      opt(base + 'route/stops.json'), opt(base + 'route/fares.json'),
+      opt(base + 'route/stops.json'), opt(base + 'fares.json'),
     ]);
     const net = createNetwork({ manifest, routes, holidays: holidays || [], stopsExtra: stopsExtra || { stops: {}, links: [] }, fares, regular: {}, special: {} });
     net.ensureDate = async function (dateStr) {
