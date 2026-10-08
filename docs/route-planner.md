@@ -23,6 +23,8 @@
 | `public/data/route/stops.json` | 停留所の座標・徒歩の乗換（`tools/route/build_stops.py` で生成） |
 | `public/data/fares.json` | 運賃表（別タスクで収集．無ければ金額の条件は無効） |
 | `public/js/selection-memory.js` | 既存画面の直近の選択の記憶（30 分以内だけ復元） |
+| `public/data/route/version.json` | データのバージョン（ハッシュ）．`Planner.load` が JSON の URL に `?v=` を付け，更新後の古いキャッシュを避ける（`tools/route/build_version.py`） |
+| `tools/route/rebuild.py` | 座標表とバージョンを作り直し，試験（`node --test tests/planner.test.js`）を回す．`tools/watch/apply.py` が反映後に自動で呼ぶ |
 | `tests/planner.test.js` | Node の自動試験 |
 
 時刻表は既存の `manifest.json`・`regular/`・`special/` をそのまま読むため，時刻表の更新（`tools/watch`）に自動で追従する．

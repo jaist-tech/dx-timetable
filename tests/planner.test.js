@@ -6,7 +6,7 @@ const path = require('path');
 const Planner = require('../public/js/planner.js');
 
 const BASE = path.join(__dirname, '..', 'public', 'data') + '/';
-const readJson = async url => JSON.parse(fs.readFileSync(url, 'utf8'));
+const readJson = async url => JSON.parse(fs.readFileSync(url.split('?')[0], 'utf8'));
 let netP;
 const getNet = () => (netP = netP || Planner.load(BASE, readJson));
 const WK = '2026-10-09'; // 金
@@ -187,4 +187,14 @@ test('運賃: JAIST→小松駅→金沢駅は 0+580 円，のみバス同士の
     const trips = j.legs.filter(l => l.type === 'trip');
     assert.ok(j.fare === (trips.length >= 2 && trips.every(l => l.base.startsWith('nomi_')) ? 100 : j.fare));
   }
+});
+
+test('データのバージョンがあれば読み込みの URL に ?v= が付き，無くても動く', async () => {
+  const urls = [];
+  const ver = JSON.parse(fs.readFileSync(BASE + 'route/version.json', 'utf8')).version;
+  await Planner.load(BASE, async u => { urls.push(u); return readJson(u); });
+  assert.ok(urls.filter(u => !/route\/version\.json$/.test(u)).every(u => u.endsWith('?v=' + ver)));
+  const noVer = u => (u.endsWith('route/version.json') ? Promise.reject(new Error('404')) : readJson(u));
+  const net = await Planner.load(BASE, noVer);
+  assert.ok(net.raw.manifest);
 });

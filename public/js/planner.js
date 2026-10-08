@@ -488,7 +488,10 @@
 
   // ---------- 読み込み（ブラウザ・Node 共通．fetchJson を差し替え可）----------
   async function load(base, fetchJson) {
-    const fj = fetchJson || (async url => { const r = await fetch(url); if (!r.ok) throw new Error(url + ' ' + r.status); return r.json(); });
+    const fj0 = fetchJson || (async url => { const r = await fetch(url); if (!r.ok) throw new Error(url + ' ' + r.status); return r.json(); });
+    // データのバージョン（tools/route/build_version.py）．あれば ?v= を付けて更新後の古いキャッシュを避ける
+    const ver = await fj0(base + 'route/version.json').catch(() => null);
+    const fj = ver && ver.version ? url => fj0(url + '?v=' + ver.version) : fj0;
     const opt = async url => { try { return await fj(url); } catch (e) { return null; } };
     const [manifest, routes, holidays, stopsExtra, fares] = await Promise.all([
       fj(base + 'manifest.json'), fj(base + 'routes.json'), opt(base + 'holidays.json'),

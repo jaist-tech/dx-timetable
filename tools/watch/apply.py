@@ -13,6 +13,7 @@
 石川線は平日・休日の 2 PDF を組にして読む（片方だけ更新されたときも state.json の相方を使う）．
 自動反映しない（人が確認する）もの: 特別ダイヤ，整合性エラーのあるもの，石川線の既存期間の内容変更
 """
+import subprocess
 import argparse
 import json
 import os
@@ -218,6 +219,11 @@ def main():
                 continue
             w = check_commit.commit_payload(pl, manifest)
             print(f"| {name} | {seg} {period} | 反映 {w['data_file']}（便数 {n}） |")
+    if not args.dry_run:  # 経路探索の派生データ（座標表・データのバージョン）を作り直して試験を回す
+        r = subprocess.run([sys.executable, os.path.join(os.path.dirname(__file__), "..", "route", "rebuild.py")])
+        if r.returncode:
+            print("\n経路探索の試験に落ちた（tools/route/rebuild.py）．")
+            manual += 1
     return 10 if manual else 0
 
 
