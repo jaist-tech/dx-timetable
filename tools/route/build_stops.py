@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """停留所の座標表 public/data/route/stops.json を作る．
 
-入力: public/data/geo/*.geojson（既存の駅・停留所の点），tools/route/official_coords.json と
+入力: public/data/geo/*.geojson（既存の駅・停留所の点），tools/route/osm_stations_snapshot.json（OSM の駅），tools/route/official_coords.json と
       tools/route/osm_busstops_snapshot.json（OpenStreetMap の bus_stop．Overpass で取得，ODbL）．
 優先順: 既存 geojson > のみバス公式ページの座標 > OSM．名前が一致し，候補が 200 m 以内にまとまるもの（向かい合う 2 本は平均）だけ採用する．離れた複数候補・不一致は座標なしにし，
 unconfirmed に挙げる（人の確認が要る）．
@@ -48,6 +48,18 @@ for e in json.load(open(f'{HERE}/osm_busstops_snapshot.json'))['elements']:
 for n in sorted(names):
     if n in stops: continue
     c = osm.get(n, {})
+    if c and close(list(c.values())):
+        lat, lon = centroid(list(c.values()))
+        stops[n] = {'lat': round(lat, 6), 'lon': round(lon, 6), 'source': 'osm:node/' + '+'.join(str(i) for i in sorted(c))}
+
+# OSM の駅（railway=station|halt．同じ名前の候補が 200 m 以内にまとまるものだけ．「〜駅」は「駅」を除いて比べる）
+osm_st = collections.defaultdict(dict)
+for e in json.load(open(f'{HERE}/osm_stations_snapshot.json'))['elements']:
+    c = e.get('center', e)
+    if e['tags'].get('name'): osm_st[e['tags']['name']][e['id']] = (c['lat'], c['lon'])
+for n in sorted(names):
+    if n in stops or not n.endswith('駅'): continue
+    c = osm_st.get(n[:-1], {})
     if c and close(list(c.values())):
         lat, lon = centroid(list(c.values()))
         stops[n] = {'lat': round(lat, 6), 'lon': round(lon, 6), 'source': 'osm:node/' + '+'.join(str(i) for i in sorted(c))}

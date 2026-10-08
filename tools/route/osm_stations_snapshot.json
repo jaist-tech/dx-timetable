@@ -1,0 +1,1344 @@
+{
+ "version": 0.6,
+ "generator": "Overpass API 0.7.62.11 87bfad18",
+ "osm3s": {
+  "timestamp_osm_base": "2026-10-08T15:25:30Z",
+  "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+ },
+ "elements": [
+  {
+   "type": "node",
+   "id": 264457781,
+   "lat": 36.2124196,
+   "lon": 136.2024226,
+   "tags": {
+    "name": "番田",
+    "name:en": "Banden",
+    "name:ja": "番田",
+    "name:ja-Hira": "ばんでん",
+    "name:ja-Latn": "Banden",
+    "name:ko": "반덴",
+    "public_transport": "station",
+    "railway": "station",
+    "ref": "E39",
+    "source": "KSJ2",
+    "wikidata": "Q4854517",
+    "wikipedia": "ja:番田駅 (福井県)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 264457860,
+   "lat": 36.2049767,
+   "lon": 136.2030539,
+   "tags": {
+    "name": "本荘",
+    "name:en": "Honjyo",
+    "name:ja": "本荘",
+    "name:ja-Hira": "ほんじょう",
+    "name:ja-Latn": "Honjō",
+    "name:ko": "혼조",
+    "public_transport": "station",
+    "railway": "station",
+    "ref": "E38",
+    "source": "KSJ2",
+    "wikidata": "Q1027848",
+    "wikipedia": "ja:本荘駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 267306898,
+   "lat": 36.4518274,
+   "lon": 136.4595421,
+   "tags": {
+    "addr:city": "能美市",
+    "addr:neighbourhood": "チ303",
+    "addr:province": "石川県",
+    "addr:quarter": "大成町",
+    "internet_access": "no",
+    "name": "能美根上",
+    "name:en": "Nomi-Neagari",
+    "name:ja": "能美根上",
+    "name:ko": "노미네아가리",
+    "old_name": "寺井",
+    "operator": "IRいしかわ鉄道",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "website": "https://www.jr-odekake.net/eki/top.php?id=0541443",
+    "wikidata": "Q5359868",
+    "wikipedia": "ja:能美根上駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 267307344,
+   "lat": 36.3283587,
+   "lon": 136.3830171,
+   "tags": {
+    "name": "動橋",
+    "name:en": "Iburihashi",
+    "name:ja": "動橋",
+    "name:ko": "이부리하시",
+    "note": "National-Land Numerical Information (Railway) 2007, MLIT Japan",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q3611075",
+    "wikipedia": "ja:動橋駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 267307956,
+   "lat": 36.4247198,
+   "lon": 136.4630942,
+   "tags": {
+    "name": "明峰",
+    "name:en": "Meihō",
+    "name:ja": "明峰",
+    "name:ko": "메이호",
+    "note": "National-Land Numerical Information (Railway) 2007, MLIT Japan",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q6810028",
+    "wikipedia": "ja:明峰駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 267307984,
+   "lat": 36.3555113,
+   "lon": 136.4244391,
+   "tags": {
+    "name": "粟津",
+    "name:en": "Awazu",
+    "name:ja": "粟津",
+    "name:ko": "아와즈",
+    "note": "National-Land Numerical Information (Railway) 2007, MLIT Japan",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q4829987",
+    "wikipedia": "ja:粟津駅 (石川県)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 267308141,
+   "lat": 36.2587248,
+   "lon": 136.2814036,
+   "tags": {
+    "name": "牛ノ谷",
+    "name:en": "Ushinoya",
+    "name:ja": "牛ノ谷",
+    "name:ko": "우시노야",
+    "note": "National-Land Numerical Information (Railway) 2007, MLIT Japan",
+    "railway": "station",
+    "source": "KSJ2",
+    "wikidata": "Q5359834",
+    "wikipedia": "ja:牛ノ谷駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 267456422,
+   "lat": 36.7475748,
+   "lon": 136.7167644,
+   "tags": {
+    "name": "横山",
+    "name:en": "Yokoyama",
+    "name:ja": "横山",
+    "name:ja-Hira": "よこやま",
+    "name:ko": "요코야마",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q8054695",
+    "wikipedia": "ja:横山駅 (石川県)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 267456539,
+   "lat": 36.7228176,
+   "lon": 136.702952,
+   "tags": {
+    "name": "宇野気",
+    "name:en": "Unoke",
+    "name:ja": "宇野気",
+    "name:ko": "우노케",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q11449891",
+    "wikipedia": "ja:宇野気駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 267456605,
+   "lat": 36.6931516,
+   "lon": 136.7198511,
+   "tags": {
+    "name": "能瀬",
+    "name:en": "Nose",
+    "name:ja": "能瀬",
+    "name:ko": "노세",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q11611990",
+    "wikipedia": "ja:能瀬駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 267456631,
+   "lat": 36.795429,
+   "lon": 136.7472773,
+   "tags": {
+    "name": "免田",
+    "name:en": "Menden",
+    "name:ja": "免田",
+    "name:ko": "멘덴",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "wheelchair": "yes",
+    "wikidata": "Q6816597",
+    "wikipedia": "ja:免田駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 267456893,
+   "lat": 36.7683145,
+   "lon": 136.7288109,
+   "tags": {
+    "name": "高松",
+    "name:en": "Takamatsu",
+    "name:ja": "高松",
+    "name:ko": "다카마쓰",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q7677134",
+    "wikipedia": "ja:高松駅 (石川県)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 267457138,
+   "lat": 36.6713908,
+   "lon": 136.7404126,
+   "tags": {
+    "name": "中津幡",
+    "name:en": "Naka-Tsubata",
+    "name:ja": "中津幡",
+    "name:ja-Hira": "なかつばた",
+    "name:ja_rm": "Naka-Tsubata",
+    "name:ko": "나카쓰바타",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q6960100",
+    "wikipedia": "ja:中津幡駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 267457150,
+   "lat": 36.6766775,
+   "lon": 136.7320833,
+   "tags": {
+    "name": "本津幡",
+    "name:en": "Hon-Tsubata",
+    "name:ja": "本津幡",
+    "name:ja-Hira": "ほんつばた",
+    "name:ja_rm": "Hon-Tsubata",
+    "name:ko": "혼쓰바타",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q5891934",
+    "wikipedia": "ja:本津幡駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 355835358,
+   "lat": 36.4988633,
+   "lon": 136.6156913,
+   "tags": {
+    "addr:city": "金沢市",
+    "addr:housenumber": "4-286",
+    "addr:province": "石川県",
+    "addr:quarter": "四十万",
+    "internet_access": "no",
+    "name": "四十万",
+    "name:en": "Shijima",
+    "name:ja_rm": "Shijima",
+    "operator": "北陸鉄道",
+    "public_transport": "station",
+    "railway": "station",
+    "train": "yes",
+    "wikidata": "Q11419624",
+    "wikipedia": "ja:四十万駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 355835381,
+   "lat": 36.4767024,
+   "lon": 136.6123265,
+   "tags": {
+    "name": "井口",
+    "name:en": "Inokuchi",
+    "name:ja": "井口",
+    "name:ja-Hira": "いのくち",
+    "name:ko": "이노쿠치",
+    "network": "石川線",
+    "operator": "北陸鉄道",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q11373451",
+    "wikipedia": "ja:井口駅 (石川県)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 355835410,
+   "lat": 36.5185945,
+   "lon": 136.6188842,
+   "tags": {
+    "alt_name:ko": "누카주타쿠마에",
+    "name": "額住宅前",
+    "name:en": "Nukajutakumae",
+    "name:ja": "額住宅前",
+    "name:ja-Hira": "ぬかじゅうたくまえ",
+    "name:ko": "누카주택앞",
+    "network": "石川線",
+    "operator": "北陸鉄道",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q11665042",
+    "wikipedia": "ja:額住宅前駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 355835415,
+   "lat": 36.5534493,
+   "lon": 136.6334705,
+   "tags": {
+    "name": "西泉",
+    "name:en": "Nishi-izumi",
+    "name:ja": "西泉",
+    "name:ja-Hira": "にしいずみ",
+    "name:ko": "니시이즈미",
+    "network": "石川線",
+    "operator": "北陸鉄道",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q11629014",
+    "wikipedia": "ja:西泉駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 355835422,
+   "lat": 36.536491,
+   "lon": 136.6209386,
+   "tags": {
+    "name": "野々市",
+    "name:en": "Nonoichi",
+    "name:ja": "野々市",
+    "name:ja-Hira": "ののいち",
+    "name:ko": "노노이치",
+    "network": "石川線",
+    "operator": "北陸鉄道",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q11644912",
+    "wikipedia": "ja:野々市駅 (北陸鉄道)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 355835464,
+   "lat": 36.4842483,
+   "lon": 136.613493,
+   "tags": {
+    "name": "道法寺",
+    "name:en": "Douhouji",
+    "name:ja": "道法寺",
+    "name:ja-Hira": "どうほうじ",
+    "name:ko": "도호지",
+    "network": "石川線",
+    "operator": "北陸鉄道",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q11641768",
+    "wikipedia": "ja:道法寺駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 355835569,
+   "lat": 36.5230329,
+   "lon": 136.6206696,
+   "tags": {
+    "name": "馬替",
+    "name:en": "Magae",
+    "name:ja": "馬替",
+    "name:ja-Hira": "まがえ",
+    "name:ko": "마가에",
+    "network": "石川線",
+    "operator": "北陸鉄道",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q11667980",
+    "wikipedia": "ja:馬替駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 355835584,
+   "lat": 36.4709681,
+   "lon": 136.6114683,
+   "tags": {
+    "name": "小柳",
+    "name:en": "Oyanagi",
+    "name:ja": "小柳",
+    "name:ja-Hira": "おやなぎ",
+    "name:ko": "오야나기",
+    "network": "石川線",
+    "operator": "北陸鉄道",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q11461994",
+    "wikipedia": "ja:小柳駅 (石川県)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 355835612,
+   "lat": 36.4937025,
+   "lon": 136.6149054,
+   "tags": {
+    "internet_access": "no",
+    "internet_access:fee": "no",
+    "name": "陽羽里",
+    "name:en": "Hibari",
+    "network": "北陸鉄道",
+    "public_transport": "station",
+    "railway": "station",
+    "train": "yes",
+    "wikidata": "Q18124890",
+    "wikipedia": "ja:陽羽里駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 355835729,
+   "lat": 36.5325932,
+   "lon": 136.6218279,
+   "tags": {
+    "alt_name:ko": "노노이치코다이마에",
+    "name": "野々市工大前",
+    "name:en": "Nonoichi Kodaimae",
+    "name:ja": "野々市工大前",
+    "name:ja-Hira": "ののいちこうだいまえ",
+    "name:ko": "노노이치공대앞",
+    "network": "石川線",
+    "operator": "北陸鉄道",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q11644904",
+    "wikipedia": "ja:野々市工大前駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 355835737,
+   "lat": 36.5424894,
+   "lon": 136.6220595,
+   "tags": {
+    "name": "押野",
+    "name:en": "Oshino",
+    "name:ja": "押野",
+    "name:ja-Hira": "おしの",
+    "name:ko": "오시노",
+    "network": "石川線",
+    "operator": "北陸鉄道",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q11497729",
+    "wikipedia": "ja:押野駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 355835755,
+   "lat": 36.5119363,
+   "lon": 136.617681,
+   "tags": {
+    "name": "乙丸",
+    "name:en": "Otomaru",
+    "name:ja": "乙丸",
+    "name:ja-Hira": "おとまる",
+    "name:ko": "오토마루",
+    "network": "石川線",
+    "operator": "北陸鉄道",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q11369862",
+    "wikipedia": "ja:乙丸駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 355835787,
+   "lat": 36.4900166,
+   "lon": 136.6143508,
+   "tags": {
+    "name": "曽谷",
+    "name:en": "Sodani",
+    "name:ja": "曽谷",
+    "name:ja-Hira": "そだに",
+    "name:ko": "소다니",
+    "network": "石川線",
+    "operator": "北陸鉄道",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q11515382",
+    "wikipedia": "ja:曽谷駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 3977645705,
+   "lat": 36.5780499,
+   "lon": 136.6480247,
+   "tags": {
+    "highspeed": "yes",
+    "name": "金沢",
+    "name:de": "Kanazawa",
+    "name:en": "Kanazawa",
+    "name:es": "Kanazawa",
+    "name:ja": "金沢",
+    "name:ja_rm": "Kanazawa",
+    "name:ko": "가나자와",
+    "operator": "西日本旅客鉄道",
+    "public_transport": "station",
+    "railway": "station",
+    "train": "yes",
+    "wheelchair": "yes",
+    "wikidata": "Q1136378",
+    "wikipedia": "ja:金沢駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 3977861002,
+   "lat": 36.5935129,
+   "lon": 136.6697438,
+   "tags": {
+    "name": "東金沢",
+    "name:en": "Higashi-Kanazawa",
+    "name:ja": "東金沢",
+    "name:ko": "히가시카나자와",
+    "operator": "IRいしかわ鉄道",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q3611192",
+    "wikipedia": "ja:東金沢駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 3992285365,
+   "lat": 36.5531798,
+   "lon": 136.621186,
+   "tags": {
+    "name": "西金沢",
+    "name:en": "Nishi Kanazawa",
+    "name:ja": "西金沢",
+    "name:ko": "니시카나자와",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wheelchair": "yes",
+    "wikidata": "Q5359940",
+    "wikipedia": "ja:西金沢駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 3992490583,
+   "lat": 36.5266411,
+   "lon": 136.5661935,
+   "tags": {
+    "name": "松任",
+    "name:en": "Mattō",
+    "name:ja": "松任",
+    "name:ko": "맛토",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "Bing, Survey",
+    "train": "yes",
+    "wheelchair": "yes",
+    "wikidata": "Q5359660",
+    "wikipedia": "ja:松任駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 3992490584,
+   "lat": 36.5418691,
+   "lon": 136.598351,
+   "tags": {
+    "name": "野々市",
+    "name:en": "Nonoichi",
+    "name:ja": "野々市",
+    "name:ko": "노노이치",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q3701479",
+    "wikimedia_commons": "Category:Nonoichi Station (IR Ishikawa Railway)",
+    "wikipedia": "ja:野々市駅 (IRいしかわ鉄道)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 3992523881,
+   "lat": 36.5030168,
+   "lon": 136.5274221,
+   "tags": {
+    "name": "加賀笠間",
+    "name:en": "Kaga-Kasama",
+    "name:ja": "加賀笠間",
+    "name:ko": "가가카사마",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wheelchair": "no",
+    "wikidata": "Q5359826",
+    "wikipedia": "ja:加賀笠間駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 3992557915,
+   "lat": 36.4762043,
+   "lon": 136.4745237,
+   "tags": {
+    "name": "小舞子",
+    "name:en": "Komaiko",
+    "name:ja": "小舞子",
+    "name:ko": "고마이코",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q5359932",
+    "wikipedia": "ja:小舞子駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 3992557916,
+   "lat": 36.4859691,
+   "lon": 136.4892217,
+   "tags": {
+    "name": "美川",
+    "name:en": "Mikawa",
+    "name:ja": "美川",
+    "name:ko": "미카와",
+    "operator": "IRいしかわ鉄道",
+    "operator:en": "IR Ishikawa Railway",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wheelchair": "no",
+    "wikidata": "Q5359889",
+    "wikipedia": "ja:美川駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 3992638465,
+   "lat": 36.6123415,
+   "lon": 136.6896553,
+   "tags": {
+    "name": "森本",
+    "name:en": "Morimoto",
+    "name:ja": "森本",
+    "name:ja-Hira": "もりもと",
+    "name:ko": "모리모토",
+    "operator": "IRいしかわ鉄道",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q5359635",
+    "wikipedia": "ja:森本駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 3992671130,
+   "lat": 36.6577079,
+   "lon": 136.7307683,
+   "tags": {
+    "name": "津幡",
+    "name:en": "Tsubata",
+    "name:ja": "津幡",
+    "name:ja-Hira": "つばた",
+    "name:ja_rm": "Tsubata",
+    "name:ko": "쓰바타",
+    "operator": "IRいしかわ鉄道;西日本旅客鉄道",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q3701490",
+    "wikipedia": "ja:津幡駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 3992713500,
+   "lat": 36.672509,
+   "lon": 136.7916218,
+   "tags": {
+    "name": "倶利伽羅",
+    "name:en": "Kurikara",
+    "name:ja": "倶利伽羅",
+    "name:ja-Hira": "くりから",
+    "name:ja_rm": "Kurikara",
+    "name:ko": "구리카라",
+    "operator": "IRいしかわ鉄道;あいの風とやま鉄道",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "wikidata": "Q5360002",
+    "wikipedia": "ja:倶利伽羅駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 3992874374,
+   "lat": 36.6726074,
+   "lon": 136.8654291,
+   "tags": {
+    "name": "石動",
+    "name:en": "Isurugi",
+    "name:ja": "石動",
+    "name:ja-Hira": "いするぎ",
+    "name:ja_rm": "Isurugi",
+    "name:ko": "이스루기",
+    "operator": "あいの風とやま鉄道;西日本旅客鉄道",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "wikidata": "Q5359671",
+    "wikipedia": "ja:石動駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 4921417492,
+   "lat": 36.2146024,
+   "lon": 136.2350566,
+   "tags": {
+    "name": "芦原温泉",
+    "name:de": "Awaraonsen",
+    "name:en": "Awaraonsen",
+    "name:ja": "芦原温泉",
+    "name:ja-Hira": "あわらおんせん",
+    "name:ja_rm": "Awaraonsen",
+    "name:ko": "아와라온센",
+    "public_transport": "station",
+    "railway": "station",
+    "wikidata": "Q4829830",
+    "wikipedia": "ja:芦原温泉駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 6051747165,
+   "lat": 36.2412052,
+   "lon": 136.2571111,
+   "tags": {
+    "name": "細呂木",
+    "name:en": "Hosorogi",
+    "name:ja": "細呂木",
+    "note": "National-Land Numerical Information (Railway) 2007, MLIT Japan",
+    "public_transport": "station",
+    "railway": "station",
+    "wikipedia": "ja:細呂木駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 6433418033,
+   "lat": 36.5583025,
+   "lon": 136.8785696,
+   "tags": {
+    "name": "福光",
+    "name:en": "Fukumitsu",
+    "name:ja": "福光",
+    "name:ja-Hira": "ふくみつ",
+    "name:ja_rm": "Fukumitsu",
+    "name:ko": "후쿠미쓰",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "wikidata": "Q5507669",
+    "wikipedia": "ja:福光駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 6641719619,
+   "lat": 36.4018391,
+   "lon": 136.4528145,
+   "tags": {
+    "name": "小松",
+    "name:de": "Komatsu",
+    "name:en": "Komatsu",
+    "name:ja": "小松",
+    "name:ko": "고마쓰",
+    "note": "National-Land Numerical Information (Railway) 2007, MLIT Japan",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q5359990",
+    "wikipedia": "ja:小松駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 6641834272,
+   "lat": 36.3203882,
+   "lon": 136.3504996,
+   "tags": {
+    "name": "加賀温泉",
+    "name:en": "Kagaonsen",
+    "name:ja": "加賀温泉",
+    "name:ko": "가가온센",
+    "note": "National-Land Numerical Information (Railway) 2007, MLIT Japan",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "wikidata": "Q5359613",
+    "wikipedia": "ja:加賀温泉駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 6641834281,
+   "lat": 36.3004619,
+   "lon": 136.3143803,
+   "tags": {
+    "name": "大聖寺",
+    "name:en": "Daishōji",
+    "name:ja": "大聖寺",
+    "name:ja-Hira": "だいしょうじ",
+    "name:ja_rm": "Daishōji",
+    "name:ko": "다이쇼지",
+    "note": "National-Land Numerical Information (Railway) 2007, MLIT Japan",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "wikidata": "Q3701465",
+    "wikipedia": "ja:大聖寺駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 7496544729,
+   "lat": 36.4521853,
+   "lon": 136.6238858,
+   "tags": {
+    "name": "鶴来",
+    "name:en": "Tsurugi",
+    "name:ja": "鶴来",
+    "name:ja-Hira": "つるぎ",
+    "name:ko": "쓰루기",
+    "network": "石川線",
+    "operator": "北陸鉄道",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q11676036",
+    "wikipedia": "ja:鶴来駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 7826334198,
+   "lat": 36.5539047,
+   "lon": 136.6443889,
+   "tags": {
+    "name": "野町",
+    "name:en": "Nomachi",
+    "name:ja": "野町",
+    "name:ja-Hira": "のまち",
+    "name:ko": "노마치",
+    "network": "石川線",
+    "operator": "北陸鉄道",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q11646078",
+    "wikimedia_commons": "Category:Nomachi Station",
+    "wikipedia": "ja:野町駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 7826344435,
+   "lat": 36.4650245,
+   "lon": 136.6149359,
+   "tags": {
+    "name": "日御子",
+    "name:en": "Hinomiko",
+    "name:ja": "日御子",
+    "name:ja-Hira": "ひのみこ",
+    "name:ko": "히노미코",
+    "network": "石川線",
+    "operator": "北陸鉄道",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wikidata": "Q11505327",
+    "wikipedia": "ja:日御子駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 7826347786,
+   "lat": 36.5530483,
+   "lon": 136.6227309,
+   "tags": {
+    "name": "新西金沢",
+    "name:en": "Shin Nishi Kanazawa",
+    "name:ja": "新西金沢",
+    "name:ja-Hira": "しんにしかなざわ",
+    "name:ko": "니시카나자와",
+    "public_transport": "station",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "wheelchair": "no",
+    "wikidata": "Q5359940",
+    "wikipedia": "ja:新西金沢駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 7826372584,
+   "lat": 36.5968457,
+   "lon": 136.6483596,
+   "tags": {
+    "name": "磯部",
+    "name:en": "Isobe",
+    "name:ja": "磯部",
+    "name:ja-Hira": "いそべ",
+    "name:ja-Latn": "Isobe",
+    "name:ko": "이소베",
+    "operator": "北陸鉄道株式会社",
+    "railway": "halt",
+    "ref": "A04",
+    "request_stop": "no",
+    "start_date": "1925-05-10",
+    "train": "yes",
+    "wikidata": "Q11588103",
+    "wikipedia": "ja:磯部駅 (石川県)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 7826372778,
+   "lat": 36.5782896,
+   "lon": 136.6494881,
+   "tags": {
+    "name": "北鉄金沢",
+    "name:en": "Hokutetsu Kanazawa",
+    "name:ja": "北鉄金沢",
+    "name:ja-Hira": "ほくてつかなざわ",
+    "name:ja-Latn": "Hokutetsu Kanazawa",
+    "name:ko": "가나자와",
+    "operator": "北陸鉄道株式会社",
+    "public_transport": "station",
+    "railway": "station",
+    "ref": "A01",
+    "start_date": "1926-05-18",
+    "station": "subway",
+    "train": "yes",
+    "wikidata": "Q1136378",
+    "wikipedia": "ja:金沢駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 7826378581,
+   "lat": 36.6026545,
+   "lon": 136.6484746,
+   "tags": {
+    "name": "割出",
+    "name:en": "Waridashi",
+    "name:ja": "割出",
+    "name:ja-Hira": "わりだし",
+    "name:ja-Latn": "Waridashi",
+    "name:ko": "와리다시",
+    "operator": "北陸鉄道株式会社",
+    "railway": "halt",
+    "ref": "A05",
+    "request_stop": "no",
+    "start_date": "1925-05-10",
+    "train": "yes",
+    "wikidata": "Q11398004",
+    "wikipedia": "ja:割出駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 7826378669,
+   "lat": 36.6303142,
+   "lon": 136.6380715,
+   "tags": {
+    "name": "粟ヶ崎",
+    "name:en": "Awagasaki",
+    "name:ja": "粟ヶ崎",
+    "name:ja-Hira": "あわがさき",
+    "name:ja-Latn": "Awagasaki",
+    "name:ko": "아와가사키",
+    "operator": "北陸鉄道株式会社",
+    "railway": "halt",
+    "ref": "A11",
+    "train": "yes",
+    "wikidata": "Q11604554",
+    "wikipedia": "ja:粟ヶ崎駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 7826389043,
+   "lat": 36.6334313,
+   "lon": 136.6342184,
+   "tags": {
+    "name": "内灘",
+    "name:en": "Uchinada",
+    "name:ja": "内灘",
+    "name:ja-Hira": "うちなだ",
+    "name:ja-Latn": "Uchinada",
+    "name:ko": "우치나다",
+    "old_name": "粟ヶ崎遊園前駅",
+    "operator": "北陸鉄道株式会社",
+    "public_transport": "station",
+    "railway": "station",
+    "ref": "A12",
+    "source": "KSJ2",
+    "start_date": "1929-07-14",
+    "train": "yes",
+    "wikidata": "Q11394162",
+    "wikipedia": "ja:内灘駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 8568997241,
+   "lat": 36.6259191,
+   "lon": 136.6432153,
+   "tags": {
+    "name": "蚊爪",
+    "name:en": "Kagatsume",
+    "name:ja": "蚊爪",
+    "name:ja-Hira": "かがつめ",
+    "name:ja-Latn": "Kagatsume",
+    "name:ko": "가가쓰메",
+    "operator": "北陸鉄道株式会社",
+    "railway": "halt",
+    "ref": "A10",
+    "start_date": "1925-05-10",
+    "train": "yes",
+    "wikidata": "Q11625479",
+    "wikipedia": "ja:蚊爪駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 8568997244,
+   "lat": 36.6226788,
+   "lon": 136.641256,
+   "tags": {
+    "name": "北間",
+    "name:en": "Kitama",
+    "name:ja": "北間",
+    "name:ja-Hira": "きたま",
+    "name:ja-Latn": "Kitama",
+    "name:ko": "기타마",
+    "operator": "北陸鉄道株式会社",
+    "railway": "halt",
+    "ref": "A09",
+    "start_date": "1925-05-10",
+    "train": "yes",
+    "wikidata": "Q11404354",
+    "wikipedia": "ja:北間駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 8568997245,
+   "lat": 36.6167265,
+   "lon": 136.6433796,
+   "tags": {
+    "name": "大河端",
+    "name:en": "Okobata",
+    "name:ja": "大河端",
+    "name:ja-Hira": "おこばた",
+    "name:ja-Latn": "Okobata",
+    "name:ko": "오코바타",
+    "operator": "北陸鉄道株式会社",
+    "railway": "halt",
+    "ref": "A08",
+    "start_date": "1925-05-10",
+    "train": "yes",
+    "wikidata": "Q11437101",
+    "wikipedia": "ja:大河端駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 8568997247,
+   "lat": 36.6065596,
+   "lon": 136.6476596,
+   "tags": {
+    "name": "三口",
+    "name:en": "Mitsukuchi",
+    "name:ja": "三口",
+    "name:ja-Hira": "みつくち",
+    "name:ja-Latn": "Mitsukuchi",
+    "name:ko": "미쓰쿠치",
+    "operator": "北陸鉄道株式会社",
+    "railway": "halt",
+    "ref": "A06",
+    "start_date": "1925-05-10",
+    "train": "yes",
+    "wikidata": "Q11354598",
+    "wikipedia": "ja:三口駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 8568997253,
+   "lat": 36.5908926,
+   "lon": 136.6489453,
+   "tags": {
+    "name": "上諸江",
+    "name:en": "Kamimoroe",
+    "name:ja": "上諸江",
+    "name:ja-Hira": "かみもろえ",
+    "name:ja-Latn": "Kamimoroe",
+    "name:ko": "가미모로에",
+    "name:zh-Hans": "上诸江",
+    "name:zh-Hant": "上諸江",
+    "operator": "北陸鉄道株式会社",
+    "railway": "halt",
+    "ref": "A03",
+    "request_stop": "no",
+    "start_date": "1925-05-10",
+    "train": "yes",
+    "wikidata": "Q11360123",
+    "wikipedia": "ja:上諸江駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 8606216813,
+   "lat": 36.5830997,
+   "lon": 136.6517842,
+   "tags": {
+    "name": "七ツ屋",
+    "name:en": "Nanatsuya",
+    "name:ja": "七ツ屋",
+    "name:ja-Hira": "ななつや",
+    "name:ja-Latn": "Nanatsuya",
+    "name:ko": "나나쓰야",
+    "name:zh": "七屋",
+    "network": "北陸鉄道浅野川線",
+    "operator": "北陸鉄道株式会社",
+    "railway": "halt",
+    "ref": "A02",
+    "request_stop": "no",
+    "start_date": "1925-05-10",
+    "train": "yes",
+    "wikidata": "Q11353350",
+    "wikipedia": "ja:七ツ屋駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 9009657749,
+   "lat": 36.6119834,
+   "lon": 136.6455252,
+   "tags": {
+    "name": "三ツ屋",
+    "name:en": "Mitsuya",
+    "name:ja": "三ツ屋",
+    "name:ja-Hira": "みつや",
+    "name:ja-Latn": "Mitsuya",
+    "name:ko": "미쓰야",
+    "operator": "北陸鉄道株式会社",
+    "railway": "station",
+    "ref": "A07",
+    "start_date": "1925-05-10",
+    "train": "yes",
+    "wikidata": "Q11354011",
+    "wikipedia": "ja:三ツ屋駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10970864089,
+   "lat": 36.5382411,
+   "lon": 136.8879204,
+   "tags": {
+    "name": "越中山田",
+    "name:en": "Etchu-Yamada",
+    "name:ja": "越中山田",
+    "name:ja-Hira": "えっちゅうやまだ",
+    "name:ja-Latn": "Etchū-Yamada",
+    "name:ko": "엣츄야마다",
+    "public_transport": "station",
+    "railway": "halt",
+    "wikidata": "Q5402528",
+    "wikipedia": "ja:越中山田駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10970864111,
+   "lat": 36.5758924,
+   "lon": 136.8979566,
+   "tags": {
+    "name": "東石黒",
+    "name:en": "Higashi-Ishiguro",
+    "name:ja": "東石黒",
+    "name:ja-Hira": "ひがしいしぐろ",
+    "name:ja-Latn": "Higashi-Ishiguro",
+    "name:ko": "히가시이시구로",
+    "public_transport": "station",
+    "railway": "halt",
+    "wikidata": "Q11528125",
+    "wikipedia": "ja:東石黒駅"
+   }
+  },
+  {
+   "type": "node",
+   "id": 11297630052,
+   "lat": 36.5177744,
+   "lon": 136.5490493,
+   "tags": {
+    "name": "西松任",
+    "name:en": "Nishi-Mattō",
+    "name:ja": "西松任",
+    "name:zh-Hant": "西松任",
+    "public_transport": "station",
+    "railway": "station",
+    "train": "yes",
+    "wikidata": "Q111179802",
+    "wikipedia": "ja:西松任駅"
+   }
+  },
+  {
+   "type": "way",
+   "id": 840511578,
+   "center": {
+    "lat": 36.4023629,
+    "lon": 136.4531381
+   },
+   "tags": {
+    "building": "yes",
+    "building:levels": "2",
+    "name": "小松",
+    "public_transport": "station",
+    "railway": "station",
+    "train": "yes"
+   }
+  },
+  {
+   "type": "relation",
+   "id": 21099520,
+   "center": {
+    "lat": 36.5420982,
+    "lon": 136.5988526
+   },
+   "tags": {
+    "name": "野々市",
+    "name:en": "Nonoichi",
+    "name:ja": "野々市",
+    "name:ko": "노노이치",
+    "network": "IRいしかわ鉄道線",
+    "operator": "IRいしかわ鉄道株式会社",
+    "public_transport": "stop_area",
+    "railway": "station",
+    "source": "KSJ2",
+    "train": "yes",
+    "type": "public_transport",
+    "wikidata": "Q3701479",
+    "wikimedia_commons": "Category:Nonoichi Station (IR Ishikawa Railway)",
+    "wikipedia": "ja:野々市駅 (IRいしかわ鉄道)"
+   }
+  }
+ ]
+}
