@@ -198,7 +198,13 @@
       const r2 = Planner.plan(net, Object.assign({}, q, { walk: Object.assign({}, o.walk, { enabled: false }), results: 1 }));
       noWalk = r2.journeys[0] || null;
     }
-    out.innerHTML += r.journeys.map((j, i) => renderJourney(j, i, noWalk, q)).join('');
+    q.nextIdx = ref === null ? -1 : r.journeys.findIndex(j => j.dep >= ref);
+    out.innerHTML += '<div class="card rt-list">' + r.journeys.map((j, i) => renderJourney(j, i, noWalk, q)).join('') + '</div>';
+    out.querySelectorAll('.trip-header').forEach(hd => {
+      const toggle = () => { const on = hd.parentElement.classList.toggle('expanded'); hd.setAttribute('aria-expanded', on); };
+      hd.addEventListener('click', toggle);
+      hd.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+    });
     bindMaps(out, r.journeys, date, q);
     if (!arriveAt && ref !== null && q.priority === 'time') {
       const first = out.querySelector('.rt-j:not(.rt-past)');
@@ -234,7 +240,7 @@
     openMaps.forEach(m => m.destroy()); openMaps = [];
     if (typeof L === 'undefined' || typeof JourneyMap === 'undefined') { out.querySelectorAll('.rt-mapbtn').forEach(b => b.remove()); return; }
     out.querySelectorAll('.rt-mapbtn').forEach(b => b.addEventListener('click', () => {
-      const card = b.closest('.rt-j'), ex = card.querySelector('.jm-wrap');
+      const card = b.closest('.rt-detail'), ex = card.querySelector('.jm-wrap');
       if (ex) {
         const k = openMaps.findIndex(m => m.box === ex); if (k >= 0) { openMaps[k].destroy(); openMaps.splice(k, 1); }
         ex.remove(); b.setAttribute('aria-expanded', 'false'); return;
@@ -257,36 +263,57 @@
     return ' · ' + esc(t(key, { m: l.meters == null ? '' : Math.round(l.meters / 10) * 10 }));
   }
 
-  function renderJourney(j, i, noWalk, q) {
+  // 検索タブ（search.js）の trip-item と同じ見た目: 1 行の要約を押すと区間ごとの詳細が開く
+  const MAP_SVG = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg>';
+  const CHEVRON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>';
+
+  function renderDetail(j, i, noWalk) {
     const hasWalk = j.legs.some(l => l.type === 'walk');
-    const tags = [
-      `<span class="rt-tag${i === 0 ? ' best' : ''}">${i === 0 ? esc(t('route.best')) + ' · ' : ''}${esc(j.transfers === 0 ? t('route.direct') : t('route.transfers', { n: j.transfers }))}</span>`,
-      `<span class="rt-tag">${esc(t('route.total'))} ${dur(j.total)}</span>`,
-      `<span class="rt-tag">${esc(t('route.wait'))} ${dur(j.wait)}</span>`,
-      `<span class="rt-tag">${esc(t('route.ride'))} ${dur(j.ride)}</span>`,
-    ];
-    if (j.walk) tags.push(`<span class="rt-tag">${esc(t('route.walkMin'))} ${dur(j.walk)}</span>`);
-    if (j.fare !== null) tags.push(`<span class="rt-tag">${esc(t('route.fare'))} ${j.fare}${esc(t('route.yen'))}</span>`);
-    let cmp = '';
+    const f = Planner.fmtTime;
+    const row = (name, times) => `<div class="seg-stop-row${times.length > 1 ? ' seg-stop-transfer' : ''}"><span class="seg-stop-name">${esc(placeName(name))}</span><div class="seg-stop-times-col">${times.join('')}</div></div>`;
+    const tm = (x, key) => `<span class="seg-stop-time">${f(x)} ${esc(t(key))}</span>`;
+    let h = '<div class="trip-segments">';
+    j.legs.forEach((l, k) => {
+      const prev = j.legs[k - 1], next = j.legs[k + 1];
+      if (!prev) h += row(l.from, [tm(l.dep, 'trip.dep')]);
+      if (l.type === 'walk') {
+        h += `<div class="seg-transfer walk">${esc(t('route.walkLeg'))} ${l.minutes}${esc(t('route.min'))}${walkBasis(l)}</div>`;
+      } else {
+        const rname = currentLang === 'ja' ? (l.routeName || l.routeId) : (typeof SEG_ROUTE_NAMES_EN !== 'undefined' && SEG_ROUTE_NAMES_EN[l.routeName]) || l.routeName;
+        const via = l.stops.length > 2 ? ' · ' + l.stops.length + ' ' + (currentLang === 'ja' ? '停車' : 'stops') : '';
+        h += `<div class="seg-transfer rt-ride">${esc(rname)}${via}</div>`;
+      }
+      if (!next) { h += row(l.to, [tm(l.arr, 'trip.arr')]); return; }
+      const w = next.dep - l.arr;
+      const tight = w <= 3 && l.type === 'trip' && next.type === 'trip' ? ' <span class="rt-warn">' + esc(t('route.tight')) + '</span>' : '';
+      const parts = [tm(l.arr, 'trip.arr')];
+      if (w > 0) parts.push(`<div class="seg-transfer walk">${esc(t('route.waitMin', { n: w }))}${tight}</div>`);
+      parts.push(tm(next.dep, 'trip.dep'));
+      h += row(l.to, parts);
+    });
+    const sum = [];
+    if (j.wait) sum.push([t('route.wait'), j.wait]);
+    sum.push([t('route.ride'), j.ride]);
+    if (j.walk) sum.push([t('route.walkMin'), j.walk]);
+    h += `<div class="rt-sum">${sum.map(([k, v]) => esc(k) + ' ' + esc(dur(v))).join(' · ')}</div>`;
     if (noWalk && hasWalk && i === 0) {
       const d = noWalk.arr - j.arr;
-      cmp = `<div class="rt-wait">${esc(d > 0 ? t('route.walkFaster', { n: d }) : t('route.walkSame'))}</div>`;
+      h += `<div class="rt-sum">${esc(d > 0 ? t('route.walkFaster', { n: d }) : t('route.walkSame'))}</div>`;
     }
-    const legs = j.legs.map((l, k) => {
-      const prev = j.legs[k - 1];
-      let gap = '';
-      if (prev && l.dep - prev.arr > 0) {
-        const w = l.dep - prev.arr;
-        gap = `<div class="rt-wait">${esc(t('route.waitMin', { n: w }))}${w <= 3 && l.type === 'trip' && prev.type === 'trip' ? ' <span class="rt-warn">' + esc(t('route.tight')) + '</span>' : ''}</div>`;
-      }
-      if (l.type === 'walk') {
-        return gap + `<div class="rt-leg walk"><span class="rt-name">${esc(t('route.walkLeg'))} ${l.minutes}${esc(t('route.min'))}</span> ${esc(placeName(l.from))} → ${esc(placeName(l.to))}<small>${Planner.fmtTime(l.dep)} → ${Planner.fmtTime(l.arr)}${walkBasis(l)}</small></div>`;
-      }
-      const rname = currentLang === 'ja' ? (l.routeName || l.routeId) : (typeof SEG_ROUTE_NAMES_EN !== 'undefined' && SEG_ROUTE_NAMES_EN[l.routeName]) || l.routeName;
-      const via = l.stops.length > 2 ? l.stops.slice(1, -1).map(s => tStop(s.name)).join(' → ') : '';
-      return gap + `<div class="rt-leg"><span class="rt-name">${Planner.fmtTime(l.dep)} ${esc(placeName(l.from))}</span> → ${Planner.fmtTime(l.arr)} ${esc(placeName(l.to))}<small>${esc(rname)}${via ? ' · ' + l.stops.length + ' ' + (currentLang === 'ja' ? '停車' : 'stops') : ''}</small></div>`;
-    }).join('');
-    return `<div class="rt-j${q.ref != null && j.dep < q.ref ? ' rt-past' : ''}"><div class="rt-j-head"><span class="rt-j-time">${j.depStr} → ${j.arrStr}</span><span class="rt-j-total">${esc(dur(j.total))}</span><button type="button" class="rt-mapbtn" data-map="${i}" aria-expanded="false" title="${esc(t('route.map'))}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg></button></div><div class="rt-tags">${tags.join('')}</div>${cmp}<div class="rt-legs">${legs}</div></div>`;
+    h += `<button type="button" class="rt-mapbtn" data-map="${i}" aria-expanded="false" title="${esc(t('route.map'))}">${MAP_SVG}</button></div>`;
+    return h;
+  }
+
+  function renderJourney(j, i, noWalk, q) {
+    const past = q.ref != null && j.dep < q.ref;
+    const isNext = q.ref != null && !past && q.priority === 'time' && i === q.nextIdx;
+    const cls = 'trip-item rt-j' + (past ? ' past rt-past' : '') + (isNext ? ' next-dep' : '');
+    const badge = isNext ? `<span class="next-dep-badge">${esc(t('trip.nextDep'))}</span>` : (i === 0 && q.ref == null ? `<span class="next-dep-badge">${esc(t('route.best'))}</span>` : '');
+    const meta = [`<span class="trip-duration">${esc(dur(j.total))}</span>`];
+    if (j.transfers > 0) meta.push(`<span class="trip-transfers">${esc(t('route.transfers', { n: j.transfers }))}</span>`);
+    else meta.push(`<span class="trip-duration">${esc(t('route.direct'))}</span>`);
+    if (j.fare !== null) meta.push(`<span class="trip-duration">${j.fare}${esc(t('route.yen'))}</span>`);
+    return `<div class="${cls}" data-idx="${i}"><div class="trip-header" role="button" tabindex="0" aria-expanded="false"><div class="trip-header-content"><div class="trip-times"><span class="trip-dep">${j.depStr}</span><span class="trip-arrow">&rarr;</span><span class="trip-arr">${j.arrStr}</span>${badge}</div><div class="trip-meta">${meta.join('')}</div></div><span class="trip-expand-btn">${CHEVRON}</span></div><div class="trip-segments-wrapper"><div class="trip-segments-inner rt-detail">${renderDetail(j, i, noWalk)}</div></div></div>`;
   }
 
   // ---- 起動 ----

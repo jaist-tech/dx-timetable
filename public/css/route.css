@@ -5,7 +5,6 @@
 .rt-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:end}
 .rt-row>.rt-field:only-child{grid-column:1/-1}
 .rt-row.rt-datetime{grid-template-columns:minmax(0,5fr) minmax(0,6fr)}
-.rt-j.rt-past{opacity:.5}
 .rt-field{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0;font-size:.74rem;color:var(--text-secondary)}
 .rt-field span:first-child{font-size:.85rem;font-weight:600;color:var(--text-secondary)}
 .rt-field input[type=time]{padding-right:8px}
@@ -18,21 +17,6 @@
 .rt-submit{border:none;background:var(--primary);color:#fff;border-radius:var(--radius-sm);height:48px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:2px}
 [data-theme="dark"] .rt-submit{color:#0b1b2e}
 .rt-status{min-height:1.2em;font-size:.82rem;color:var(--text-secondary);margin:10px 2px}
-.rt-j{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:12px 14px;margin-bottom:10px}
-.rt-j-head{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
-.rt-j-time{font-size:1.25rem;font-weight:700;font-variant-numeric:tabular-nums}
-.rt-j-total{font-size:.9rem;color:var(--text-secondary)}
-.rt-tags{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
-.rt-tag{font-size:.72rem;padding:2px 8px;border-radius:999px;background:var(--bg);color:var(--text-secondary)}
-.rt-tag.best{background:var(--primary);color:#fff}
-[data-theme="dark"] .rt-tag.best{color:#0b1b2e}
-.rt-legs{margin-top:8px;border-left:3px solid var(--border);padding-left:10px;display:flex;flex-direction:column;gap:6px}
-.rt-leg{font-size:.86rem;line-height:1.5}
-.rt-leg .rt-name{font-weight:600}
-.rt-leg.walk{color:var(--text-secondary)}
-.rt-leg.walk .rt-name{color:#E65100}
-[data-theme="dark"] .rt-leg.walk .rt-name{color:#FFB300}
-.rt-leg small{display:block;color:var(--text-secondary);font-size:.74rem}
 .rt-wait{font-size:.74rem;color:var(--text-secondary)}
 .rt-note{font-size:.74rem;color:var(--text-secondary);margin-top:16px;line-height:1.7}
 .rt-warn{font-size:.74rem;color:#E65100}
@@ -77,3 +61,13 @@
 .jm-play{border:none;background:var(--primary,#1565C0);color:#fff;border-radius:50%;width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
 .jm-slider{flex:1;min-width:0}
 .jm-clock{font-variant-numeric:tabular-nums;font-size:.9rem;min-width:3em;text-align:right}
+
+/* 結果の一覧（検索タブの trip-item を流用．詳細は押すと開く） */
+.rt-list{padding:8px 12px;margin-bottom:0}
+.rt-j .trip-header{display:flex;align-items:flex-start;gap:4px;cursor:pointer}
+.rt-j .trip-meta{display:flex;align-items:center;flex-wrap:wrap;gap:2px 10px}
+.rt-j .seg-stop-name{white-space:normal;min-width:4.5em;max-width:55%}
+.rt-j .rt-detail{position:relative}
+.rt-j .rt-ride{color:var(--text-secondary)}
+.rt-sum{font-size:.78rem;color:var(--text-secondary);margin-top:8px}
+.rt-j .rt-mapbtn{margin:8px 0 0}
