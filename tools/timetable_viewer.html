@@ -91,8 +91,12 @@ async function loadSelected() {
     document.getElementById('meta').textContent = metaText;
     render();
   } catch (e) {
-    document.getElementById('content').innerHTML =
-      '<div class="loading">読み込みに失敗しました: ' + e.message + '</div>';
+    const box = document.createElement('div');
+    box.className = 'loading';
+    box.textContent = '読み込みに失敗しました: ' + e.message;
+    const content = document.getElementById('content');
+    content.innerHTML = '';
+    content.appendChild(box);
   }
 }
 
