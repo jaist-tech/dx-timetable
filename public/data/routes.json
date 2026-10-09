@@ -1,13 +1,14 @@
 {
   "default_transfer_min": 5,
   "transfers": [
-    { "from": "小松駅", "to": "小松駅", "min": 3 },
-    { "from": "鶴来駅", "to": "鶴来駅", "min": 1 },
-    { "from": "新西金沢駅", "to": "西金沢駅", "min": 3, "walk": true },
-    { "from": "西金沢駅", "to": "新西金沢駅", "min": 3, "walk": true },
-    { "from": "先端大学", "to": "JAIST", "min": 3, "walk": true },
-    { "from": "JAIST", "to": "先端大学", "min": 3, "walk": true }
+    { "from": "小松駅", "to": "小松駅", "min": 3, "basis": "従来の値．根拠の記録なし（空港連絡バスは西口 4 番のりばとの情報があるが，シャトルの乗り場は不明）" },
+    { "from": "鶴来駅", "to": "鶴来駅", "min": 1, "basis": "JAIST シャトルは駅出口の左手約 50 m（ゲーム情報学研究会 2013 年の案内．古い）" },
+    { "from": "新西金沢駅", "to": "西金沢駅", "min": 3, "walk": true, "basis": "従来の値．根拠の記録なし" },
+    { "from": "西金沢駅", "to": "新西金沢駅", "min": 3, "walk": true, "basis": "従来の値．根拠の記録なし" },
+    { "from": "先端大学", "to": "JAIST", "min": 3, "walk": true, "basis": "従来の値．OSM の道のり 163 m（約 3 分）と一致" },
+    { "from": "JAIST", "to": "先端大学", "min": 3, "walk": true, "basis": "従来の値．OSM の道のり 163 m（約 3 分）と一致" }
   ],
+  "unknown_transfers": "野々市駅・能美根上駅・金沢駅・野町駅・西金沢駅など，名前が同じ停留所の乗換は乗り場の位置が不明なため既定の 5 分を使う",
   "geo_mappings": {
     "ishikawa_line": {
       "geo_file": "tsurugi_shinnishikanazawa_nomachi",
