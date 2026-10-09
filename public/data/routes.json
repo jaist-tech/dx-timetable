@@ -8,7 +8,8 @@
     { "from": "先端大学", "to": "JAIST", "min": 3, "walk": true, "basis": "従来の値．OSM の道のり 163 m（約 3 分）と一致" },
     { "from": "JAIST", "to": "先端大学", "min": 3, "walk": true, "basis": "従来の値．OSM の道のり 163 m（約 3 分）と一致" }
   ],
-  "unknown_transfers": "野々市駅・能美根上駅・金沢駅・野町駅・西金沢駅など，名前が同じ停留所の乗換は乗り場の位置が不明なため既定の 5 分を使う",
+  "place_aliases": { "ishikawa_line": { "野々市駅": "野々市駅（北鉄）" } },
+  "unknown_transfers": "能美根上駅・金沢駅・野町駅・西金沢駅など，名前が同じ停留所の乗換は乗り場の位置が不明なため既定の 5 分を使う",
   "geo_mappings": {
     "ishikawa_line": {
       "geo_file": "tsurugi_shinnishikanazawa_nomachi",

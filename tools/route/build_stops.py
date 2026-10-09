@@ -10,16 +10,21 @@ import glob, json, re, collections, os, datetime, math
 ROOT = os.path.join(os.path.dirname(__file__), '..', '..')
 norm = lambda s: re.sub(r'\(折り返し\)', '', s).strip()
 
+# 路線ごとの別名（routes.json の place_aliases．planner.js の aliasName と同じ）．野々市駅は IR と北鉄が別の駅
+aliases = json.load(open(f'{ROOT}/public/data/routes.json')).get('place_aliases', {})
+alias = lambda base, n: aliases.get(base, {}).get(n, n)
 names = set()
 for f in glob.glob(f'{ROOT}/public/data/regular/*.json'):
+    base = re.sub(r'_\d{4}-\d{2}-\d{2}_.*$', '', os.path.basename(f))
     for r in json.load(open(f))['routes']:
-        names |= {norm(s) for s in r['stops']}
+        names |= {alias(base, norm(s)) for s in r['stops']}
 
 stops = {}
 for f in glob.glob(f'{ROOT}/public/data/geo/*.geojson'):
     for ft in json.load(open(f))['features']:
         if ft['geometry']['type'] != 'Point': continue
         n = ft['properties'].get('name')
+        if os.path.basename(f).startswith('tsurugi_'): n = alias('ishikawa_line', n)   # 石川線の駅の点
         lon, lat = ft['geometry']['coordinates'][:2]
         if n in names and n not in stops:
             stops[n] = {'lat': round(lat, 6), 'lon': round(lon, 6), 'source': 'geojson'}

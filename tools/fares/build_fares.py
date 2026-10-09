@@ -48,7 +48,8 @@ def main(irfile):
                 assert raw[a][b] == raw[b][a], (a, b, raw[a][b], raw[b][a])
     ir = {a+"駅": {b+"駅": raw[a][b] for b in IR_ORDER if b != a} for a in IR_ORDER}
     isk = sym(IS_ORDER, IS_ROWS)
-    isk = {a+"駅": {b+"駅": v for b, v in row.items()} for a, row in isk.items()}
+    nm = lambda s: "野々市駅（北鉄）" if s == "野々市" else s + "駅"   # IR の野々市駅とは別の駅（routes.json の place_aliases）
+    isk = {nm(a): {nm(b): v for b, v in row.items()} for a, row in isk.items()}
     out = {
       "meta": {"checked": CHECKED, "currency": "JPY", "passenger": "大人・普通運賃（現金・片道）",
                "note": "IC・学割・定期は含まない．各 segment の source に出典と確認日"},
