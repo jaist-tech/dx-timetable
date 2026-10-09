@@ -237,3 +237,20 @@ test('運賃: 同じ IR の運賃区間を続けて乗るときは通しの運�
   assert.ok(j, 'IR だけの経路がある');
   assert.equal(j.fare, 1130);
 });
+
+test('0 件のときは原因を返す（終発後・探す幅の外・乗換上限・つながらない）', async () => {
+  const net = await getNet(); await net.ensureDate(WK);
+  const late = Planner.plan(net, { date: WK, from: 'JAIST', to: '小松空港', depart: '20:00' });
+  assert.equal(late.journeys.length, 0);
+  assert.equal(late.reason, 'after-last');
+  assert.ok(late.edge > 0 && late.edge < 20 * 60);
+  const early = Planner.plan(net, { date: WK, from: 'JAIST', to: '金沢駅', depart: '01:00' });
+  assert.equal(early.reason, 'window');           // 3 時間の外だが始発はある
+  assert.ok(early.journeys.length > 0 && early.widened);
+  assert.ok(early.journeys.every(j => j.dep >= 60));
+  const lim = Planner.plan(net, { date: WK, from: 'JAIST', to: '金沢駅', depart: '08:00', maxTransfers: 0 });
+  assert.equal(lim.reason, 'limit');
+  assert.ok(lim.needTransfers >= 1);
+  const arr = Planner.plan(net, { date: WK, from: 'JAIST', to: '金沢駅', arrive: '04:00' });
+  assert.ok(['before-first', 'window'].includes(arr.reason));
+});
