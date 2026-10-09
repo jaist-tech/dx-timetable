@@ -40,6 +40,8 @@ route.html?from=JAIST&to=金沢駅&date=2026-10-10&arrive=18:30&prio=time&auto=1
 
 `from`・`to` は停留所名か `緯度,経度`（座標は徒歩 15 分以内の近い 5 停留所を候補にする）．`depart=HH:MM` または `arrive=HH:MM`，`prio=time|transfers|wait|ride|fare`．
 
+画面に時刻の入力欄は無く，選んだ日の全出発（`depart: '00:00'`・`window: 2000`・`results: 1000`）を表示順で一覧にする．今日は今の時刻より前の出発を薄くして最初の候補へ移る．`depart=` はその時刻を今の時刻の代わりに使い，`arrive=` は最初の 1 回だけ到着指定で探す（従来どおり上位 5 件）．2026-10-09 の測定（Node．1 日分の探索）: JAIST→金沢駅 22 件 77 ms，JAIST→小松空港（乗換無制限・待ち時間順）11 件 64 ms，金沢駅→加賀温泉駅（乗換無制限・乗車時間順）31 件 80 ms．
+
 ### B JS の部品
 
 ```js

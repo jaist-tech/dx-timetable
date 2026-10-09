@@ -302,3 +302,19 @@ test('野々市駅: IR と北鉄は別の地点で，北鉄側の運賃・座標
   const ir = Planner.plan(net, { date: WK, from: '野々市駅', to: '金沢駅', depart: '08:00', walk: { enabled: false } });
   assert.ok(ir.journeys.length > 0 && ir.journeys.every(j => j.legs.every(l => l.base === 'ir_ishikawa')), 'IR の野々市駅は IR だけ');
 });
+
+// ---- 経路検索ページ: 時刻を指定せず 1 日分を一覧にする（route.js の呼び方）----
+test('1 日の一覧: 00:00 起点・window 2000 で全出発が昇順に並び，探索は 2 秒未満', async () => {
+  const net = await getNet(); await net.ensureDate(WK);
+  const t0 = performance.now();
+  const r = Planner.plan(net, { date: WK, from: 'JAIST', to: '金沢駅', depart: '00:00', window: 2000, results: 1000, maxTransfers: 3, maxWaitMin: 120, minGainPerTransfer: 3 });
+  const ms = performance.now() - t0;
+  console.log('1 日一覧', r.journeys.length, '件', ms.toFixed(0), 'ms');
+  assert.ok(r.journeys.length >= 10);
+  assert.equal(r.count, r.journeys.length);
+  const deps = r.journeys.map(j => j.dep);
+  assert.ok(Math.min(...deps) < 8 * 60 && Math.max(...deps) > 17 * 60);
+  const part = Planner.plan(net, { date: WK, from: 'JAIST', to: '金沢駅', depart: '08:00', results: 1000, maxTransfers: 3 });
+  assert.ok(part.journeys.every(j => r.journeys.some(x => x.dep === j.dep && x.arr === j.arr)), '時刻指定の候補は 1 日一覧に含まれる');
+  assert.ok(ms < 2000);
+});
