@@ -1,0 +1,10 @@
+/* 地図の記号（map-icons.js） */
+.mi-wrap{background:none!important;border:none!important}
+.mi-sign,.mi-vehicle,.mi-station{display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.45);box-sizing:border-box}
+.mi-sign,.mi-vehicle{border-radius:50%}
+.mi-station{border-radius:6px}
+.mi-busstop{display:flex;flex-direction:column;align-items:center}
+.mi-pole{width:3px;height:6px;margin-top:-1px;border:1px solid #fff;border-top:none;box-sizing:content-box}
+@keyframes miWalk{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.mi-walk{animation:miWalk .5s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.mi-walk{animation:none}}

@@ -173,7 +173,26 @@
       noWalk = r2.journeys[0] || null;
     }
     out.innerHTML = r.journeys.map((j, i) => renderJourney(j, i, noWalk, q)).join('');
+    bindMaps(out, r.journeys, date, q);
     saveMemory();
+  }
+
+  // 候補ごとの地図（押すと開き，もう一度押すと閉じる．開いている間だけ動かす）
+  let openMaps = [];
+  function bindMaps(out, journeys, date, q) {
+    openMaps.forEach(m => m.destroy()); openMaps = [];
+    if (typeof L === 'undefined' || typeof JourneyMap === 'undefined') { out.querySelectorAll('.rt-mapbtn').forEach(b => b.remove()); return; }
+    out.querySelectorAll('.rt-mapbtn').forEach(b => b.addEventListener('click', () => {
+      const card = b.closest('.rt-j'), ex = card.querySelector('.jm-wrap');
+      if (ex) {
+        const k = openMaps.findIndex(m => m.box === ex); if (k >= 0) { openMaps[k].destroy(); openMaps.splice(k, 1); }
+        ex.remove(); b.setAttribute('aria-expanded', 'false'); return;
+      }
+      const box = document.createElement('div'); box.className = 'jm-wrap';
+      card.appendChild(box); b.setAttribute('aria-expanded', 'true');
+      const h = JourneyMap.attach(box, journeys[+b.dataset.map], net, date, q, () => { box.remove(); b.setAttribute('aria-expanded', 'false'); });
+      h.box = box; openMaps.push(h);
+    }));
   }
 
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -209,7 +228,7 @@
       const via = l.stops.length > 2 ? l.stops.slice(1, -1).map(s => tStop(s.name)).join(' → ') : '';
       return gap + `<div class="rt-leg"><span class="rt-name">${Planner.fmtTime(l.dep)} ${esc(placeName(l.from))}</span> → ${Planner.fmtTime(l.arr)} ${esc(placeName(l.to))}<small>${esc(rname)}${via ? ' · ' + l.stops.length + ' ' + (currentLang === 'ja' ? '停車' : 'stops') : ''}</small></div>`;
     }).join('');
-    return `<div class="rt-j"><div class="rt-j-head"><span class="rt-j-time">${j.depStr} → ${j.arrStr}</span><span class="rt-j-total">${esc(dur(j.total))}</span></div><div class="rt-tags">${tags.join('')}</div>${cmp}<div class="rt-legs">${legs}</div></div>`;
+    return `<div class="rt-j"><div class="rt-j-head"><span class="rt-j-time">${j.depStr} → ${j.arrStr}</span><span class="rt-j-total">${esc(dur(j.total))}</span><button type="button" class="rt-mapbtn" data-map="${i}" aria-expanded="false" title="${esc(t('route.map'))}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg></button></div><div class="rt-tags">${tags.join('')}</div>${cmp}<div class="rt-legs">${legs}</div></div>`;
   }
 
   // ---- 起動 ----

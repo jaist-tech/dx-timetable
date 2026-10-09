@@ -99,11 +99,14 @@
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 18,
     }).addTo(map);
     const pts = [];
+    // 電車の路線に含まれる停留所は駅の記号，それ以外はバス停の記号
+    const stations = new Set();
+    for (const l of Planner.listLines(net, ctx.getDate())) if (l.kind === 'train') l.stops.forEach(n => stations.add(n));
     day.places.forEach((p, i) => {
       const c = day.coords[i];
       if (!c) return;
       pts.push([c.lat, c.lon]);
-      const m = L.circleMarker([c.lat, c.lon], { radius: 6, weight: 2, color: '#fff', fillColor: '#1565C0', fillOpacity: .9 }).addTo(map);
+      const m = L.marker([c.lat, c.lon], { icon: MapIcons.stop(stations.has(p.name) ? 'train' : 'bus', stations.has(p.name) ? '#2E7D32' : '#1565C0', 22), keyboard: false }).addTo(map);
       const pop = document.createElement('div');
       pop.className = 'rp-pop';
       pop.innerHTML = `<b>${esc(tStop(p.name))}</b><br>`;
