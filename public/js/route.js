@@ -14,7 +14,7 @@
     'route.walk': '徒歩の乗換', 'route.walk.none': '使わない', 'route.speed': '歩く速さ',
     'route.speed.slow': 'ゆっくり', 'route.speed.normal': '普通', 'route.speed.fast': '速い',
     'route.maxWait': '待ちの上限', 'route.gain': '乗換を増やして 3 分/回 以上縮まない経路は除く',
-    'route.search': '検索',
+    'route.search': '検索', 'route.placeholder': '駅、バス停',
     'route.note': '時刻表のデータに基づく静的な案内です．遅延・運休は反映されません．のみバスの停留所の座標が未確認の箇所があり，徒歩の乗換は一部の停留所のみ使えます．',
     'route.unknownPlace': '停留所が見つかりません: ${name}', 'route.loading': '時刻表を読み込み中…',
     'route.none': '条件に合う経路がありません．時刻・日付・乗換回数の上限を変えてみてください．',
@@ -42,7 +42,7 @@
     'route.walk': 'Walking transfers', 'route.walk.none': 'None', 'route.speed': 'Walking speed',
     'route.speed.slow': 'Slow', 'route.speed.normal': 'Normal', 'route.speed.fast': 'Fast',
     'route.maxWait': 'Max wait', 'route.gain': 'Hide routes that add a transfer but save under 3 min',
-    'route.search': 'Search',
+    'route.search': 'Search', 'route.placeholder': 'Station, bus stop',
     'route.note': 'Static guidance from timetable data. Delays and cancellations are not reflected. Some Nomi Bus stop coordinates are unconfirmed, so walking transfers are available at only some stops.',
     'route.unknownPlace': 'Stop not found: ${name}', 'route.loading': 'Loading timetables…',
     'route.none': 'No route found. Try changing the time, date or transfer limit.',
@@ -298,9 +298,11 @@
     const n = nowDate();
     $('header-time').textContent = pad(n.getHours()) + ':' + pad(n.getMinutes());
   }
+  function setPlaceholders() { $('rt-from').placeholder = $('rt-to').placeholder = t('route.placeholder'); }
   // 言語切替の再描画（i18n.js の refreshUI を上書き）
   window.refreshUI = function () {
     applyStaticTranslations();
+    setPlaceholders();
     const keep = $('rt-date').value; buildDateSelect(keep);
     fillStops(); updateFareOption(!!(net && net.fares));
     if ($('rt-results').children.length) search();
@@ -309,7 +311,7 @@
   async function init() {
     initSettingsDropdown();
     buildDateSelect();
-    applyStaticTranslations();
+    applyStaticTranslations(); setPlaceholders();
     updateClock(); setInterval(updateClock, 10000);
     $('rt-status').textContent = t('route.loading');
     try {
