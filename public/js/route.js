@@ -5,7 +5,7 @@
 
   // ---- 翻訳（既存の辞書に，このページ用のキーだけを足す．既存ページは影響を受けない）----
   Object.assign(TRANSLATIONS.ja, {
-    'route.title': '経路検索（試験公開）', 'route.beta': '試験公開: のみバスを含む全路線から経路を探します',
+    'route.title': '経路検索（試験公開）',
     'route.from': '出発', 'route.to': '到着', 'route.date': '日付', 'route.mode': '時刻の指定', 'route.time': '時刻',
     'route.depart': '出発', 'route.arrive': '到着', 'route.priority': '重視する条件',
     'route.prio.time': '早：到着時刻順', 'route.prio.transfers': '楽：乗換回数順', 'route.prio.wait': '待ち時間順',
@@ -33,7 +33,7 @@
     'route.dayErr': 'この日のダイヤを読み込めませんでした',
   });
   Object.assign(TRANSLATIONS.en, {
-    'route.title': 'Route search (trial)', 'route.beta': 'Trial: route search across all lines including Nomi Bus',
+    'route.title': 'Route search (trial)',
     'route.from': 'From', 'route.to': 'To', 'route.date': 'Date', 'route.mode': 'Time is', 'route.time': 'Time',
     'route.depart': 'Departure', 'route.arrive': 'Arrival', 'route.priority': 'Priority',
     'route.prio.time': 'Fast: by arrival time', 'route.prio.transfers': 'Easy: by transfers', 'route.prio.wait': 'By waiting time',
