@@ -486,6 +486,12 @@ const ROUTE_NAMES_EN = {
 
 // Segment route name translations (from segment JSON route.name)
 const SEG_ROUTE_NAMES_EN = {
+  // 地点の選択一覧用（方向をまとめた路線名）
+  'JAISTシャトル 鶴来線': 'JAIST Shuttle Tsurugi Line',
+  'JAISTシャトル 小松線': 'JAIST Shuttle Komatsu Line',
+  '北陸鉄道 石川線': 'Hokuriku Railway Ishikawa Line',
+  'IRいしかわ鉄道': 'IR Ishikawa Railway',
+  '小松空港連絡バス': 'Airport Shuttle',
   'JAISTシャトル 鶴来線（大学 → 鶴来駅）': 'JAIST Shuttle Tsurugi Line (JAIST → Tsurugi Sta.)',
   'JAISTシャトル 鶴来線（鶴来駅 → 大学）': 'JAIST Shuttle Tsurugi Line (Tsurugi Sta. → JAIST)',
   'JAISTシャトル 小松線（大学 → 小松駅）': 'JAIST Shuttle Komatsu Line (JAIST → Komatsu Sta.)',
