@@ -10,9 +10,9 @@ dev（main との差分 24 commit・52 ファイル）に，merge を止める�
 | データ検査（`tools/watch/validate.py`） | エラー 0・警告 3（manifest の切れ目．下記） |
 | 画面（4 ページ × 幅 360/768/1280 × 明暗） | 横はみ出し 0・コンソールエラー 0・HTTP 失敗 0 |
 | セキュリティ | XSS 無し・外部読み込みは Leaflet（SRI あり）・OSM タイル・Google Fonts のみ・秘密情報の値の混入無し |
-| security-audit | ユーザー本人の実行待ち（`/security-audit quick`．モデルからは呼べない） |
+| security-audit（quick） | confirmed 1 件（低）・要検証 1 件・未検査 3 件（下記「security-audit の結果」） |
 
-あなたの作業: ターミナルで `/security-audit quick` を実行し，結果を貼る．merge と push はしていない．
+あなたの作業: GitHub で jaist-tech/dx-timetable の書き込み権限者と dev の保護設定を確認する（要検証 1 件）．merge と push はしていない．
 
 ## 直したもの（dev に commit）
 
@@ -40,3 +40,15 @@ dev（main との差分 24 commit・52 ファイル）に，merge を止める�
 - reviewer（Claude）によるコードレビュー．Codex は使っていない（理由: 代替の reviewer で足りると判断．付箋に記録）．
 - 画面検査は scratchpad の Playwright スクリプト（Chrome for Testing）．URL 引数に `<img onerror>` と `<script>` を入れて実行されないことを確認．
 - 既存画面（検索・詳細・マップ）の差分は `index.html`・`app.js`・`map.js` の小変更のみで，マップの記号以外の動作変更は無い．
+
+## security-audit の結果（quick・2026-10-09）
+
+部分的な点検（エージェント 7・ソースの読み取りのみ）．詳細は `~/security-audit-skill/dx-timetable/run-1/REPORT.md`（リポジトリの外）．
+
+| 区分 | 内容 | 対応 |
+|---|---|---|
+| 確認済み（低） | `tools/watch/run_local.py` の SMTP が証明書を検証せずにパスワードを送る | `ssl.create_default_context()` を渡すよう修正（dev に commit） |
+| 要検証 | cron が origin/dev のコードをシークレットのあるユーザーで実行する．書き込み権限者がサーバーのシェルを持たない人を含むか不明 | 所有者が GitHub の Collaborators・Branches を確認 |
+| 補強 | `server.js` が 0.0.0.0 で待ち受け | 127.0.0.1 に修正 |
+| 却下 | Nomi の停留所名が unescaped な出力先に届く | 現在は届かない（index.html は Nomi を読まない）．出力側のエスケープは補強として残す |
+| 未検査 | `tools/admin/server.py`（CSRF・DNS リバインディング），`check_commit.py` の segment のファイル名，その他の入口 | 別タスクで点検 |
