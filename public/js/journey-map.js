@@ -4,8 +4,8 @@
 // 乗換の待ちの間は，人の記号が直前の停留所・駅に止まる．
 (function () {
   'use strict';
-  Object.assign(TRANSLATIONS.ja, { 'route.map': '地図で見る', 'route.mapPlay': '再生', 'route.mapPause': '停止' });
-  Object.assign(TRANSLATIONS.en, { 'route.map': 'Show on map', 'route.mapPlay': 'Play', 'route.mapPause': 'Pause' });
+  Object.assign(TRANSLATIONS.ja, { 'route.map': '地図で見る', 'route.mapPlay': '再生', 'route.mapPause': '停止', 'route.mapUnverified': 'JAIST↔小松駅のシャトルの経路は未確認（線は目安）' });
+  Object.assign(TRANSLATIONS.en, { 'route.map': 'Show on map', 'route.mapPlay': 'Play', 'route.mapPause': 'Pause', 'route.mapUnverified': 'JAIST–Komatsu Station shuttle route is unverified (line is approximate)' });
   const SEC_PER_MIN = 0.5, MIN_SEC = 8; // 1 分を 0.5 秒で再生（短い行程は 8 秒以上）
   const COLORS = { bus: '#43A047', train: '#1976D2', walk: '#E65100' };
   const ICON_PLAY = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M6 4v16l14-8z"/></svg>';
@@ -62,6 +62,8 @@
   }
 
   // 区間ごとに，[時刻, 座標] の折れ線（時刻の昇順）を作る．座標の無い停留所は前後から補間される
+  // JAIST↔小松駅の直通シャトル（小松線）の区間か
+  const isKomatsuShuttle = l => [l.from, l.to].sort().join('|') === ['JAIST', '小松駅'].sort().join('|');
   function buildTracks(j, day, q, shapes) {
     return j.legs.map(l => {
       let pts;
@@ -105,16 +107,20 @@
     const el = box.querySelector('.jm-map'), btn = box.querySelector('.jm-play'), sl = box.querySelector('.jm-slider'), clk = box.querySelector('.jm-clock');
     const map = L.map(el, { center: [36.5, 136.57], zoom: 11, attributionControl: true });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap', maxZoom: 18 }).addTo(map);
-    const all = [];
+    const all = []; let unverified = false;
     tracks.forEach(tr => {
       if (!tr.pts) return;
       const kind = tr.leg.type === 'walk' ? 'walk' : tr.leg.kind;
       const ll = tr.pts.map(p => p[1]); all.push(...ll);
-      L.polyline(ll, { color: COLORS[kind], weight: kind === 'walk' ? 3 : 5, opacity: .75, dashArray: kind === 'walk' ? '2 7' : kind === 'train' ? '8 4' : null }).addTo(map);
+      const unv = tr.leg.type === 'trip' && kind === 'bus' && isKomatsuShuttle(tr.leg);   // 小松線の経路は出典が無く未確認
+      if (unv) unverified = true;
+      const pl = L.polyline(ll, { color: COLORS[kind], weight: kind === 'walk' ? 3 : 5, opacity: .75, dashArray: kind === 'walk' ? '2 7' : kind === 'train' ? '8 4' : unv ? '4 6' : null }).addTo(map);
+      if (unv) pl.bindTooltip(t('route.mapUnverified'), { sticky: true });
       if (tr.leg.type === 'trip') {
         [tr.pts[0][1], ll[ll.length - 1]].forEach(c => L.marker(c, { icon: MapIcons.stop(kind, COLORS[kind], 20), keyboard: false }).addTo(map));
       }
     });
+    if (unverified) { const n = document.createElement('div'); n.className = 'jm-note'; n.textContent = t('route.mapUnverified'); n.style.cssText = 'font-size:12px;color:var(--sub);padding:2px 4px'; box.appendChild(n); }
     if (!all.length) { onFail && onFail(); return { destroy() { map.remove(); } }; }
     map.fitBounds(all, { padding: [30, 30], maxZoom: 15 });
     setTimeout(() => map.invalidateSize(), 50);
