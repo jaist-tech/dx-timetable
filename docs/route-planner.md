@@ -161,9 +161,21 @@ const res = Planner.plan(net, {
 
 ### 未対応・変えないと決めた点
 
-- 未対応: JAIST↔小松駅のシャトルの実際の経路（北側か OSRM の南側か）．公式資料・OSM に無く，既存の geojson（北側）を使っている．乗っている人への確認が必要
+- 未対応: JAIST↔小松駅のシャトルの実際の経路（北側か OSRM の南側か）．2026-10-10 に下の資料を調べたが経路を示すものは無く，確認できなかった．線は今のまま（推測で決めない）で，`route.html` の地図（`journey-map.js`）はこの区間を点線にし「経路は未確認」と表示する．乗っている人への確認が必要
 - 未対応: 空港バス 6 停留所の座標（既知）．徒歩の区間の線は直線のまま（道のりは `walk.json` にあるが形は持たない）．津幡〜倶利伽羅など Overpass の取得が不安定な区間は `tools/route/osm_rail_cache/` に保存して再現できる
 - 変えないと決めた点: JAIST 鶴来線の geojson（OSM の路線との差が最大 72 m で，マップタブの位置の計算に影響しない）．のみバスの停留所の順（時刻表の順をそのまま使う．往復の動きは先端大学への出入りで実際の動き）
 - 形は OSRM（最短・最速の車の経路）で，バスが実際に通る道と違うことがある．OSM の route=bus の路線がある系統（鶴来線）だけ実際の路線で確かめた
 
 再作成: `python3 tools/route/build_shapes.py`（形．ネットワークが必要．取得結果は `osrm_cache/`・`osm_rail_cache/`）→ `python3 tools/route/update_geo_lines.py`（マップタブの 3 本の線）．試験は `node --test tests/shapes.test.js`（隣り合う停留所の組すべてに形がある）．
+
+### 小松線の経路の調査（2026-10-10．結果: 確認できず）
+
+| 資料 | 経路の記載 |
+|---|---|
+| [JAIST 交通アクセス](https://www.jaist.ac.jp/top/access/index.html)・小松線の時刻表 PDF（2026/9/1〜30，`top/data/shuttle_komatsu2026.pdf`） | 時刻のみ．路線図・経由道路なし |
+| [JAIST Shuttle (Komatsu Line) User's Guide 2018](https://www.jaist.ac.jp/jaist_sds/reserve/guide_e.pdf) | JAIST 事務棟前→イノベーションプラザ（予約時のみ）→小松駅東口の順．道路の記載なし |
+| [能美市「市民の方は JAIST シャトルバスを利用できます」](https://www.city.nomi.lg.jp/docs/406.html) | 乗降できる停留所は先端大・ハイテク前・宮竹・灯台笹・岩本（鶴来線）．小松線の経路なし |
+| OSM（Overpass API．2026-10-09） | route=bus は鶴来線（relation 3429948）のみ．小松線の路線なし．バス停 node 5472025275「JAIST shuttle bus」は小松駅側の 1 点 |
+| 検索（国道 360 号・千代の組み合わせ） | 該当なし（国道 360 号の記載は空港バスの自動運転試験のみ） |
+
+あなたの作業: 乗ったことのある人に経路（北側か国道 360 号沿いか）を聞く，または JAIST のシャトル担当へ問い合わせる．
