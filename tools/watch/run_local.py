@@ -178,15 +178,21 @@ def run(args):
     else:
         stat = "（public/data の変更なし）"
     preview = preview_url(d)
-    body = f"""時刻表ソースの更新または期限切れを検知しました．ブランチ {branch} に反映して止めています（push はしていません）．
-
-## 確認と反映の流れ（あなたの作業は 1〜3）
+    if changed:
+        head = f"時刻表ソースの更新または期限切れを検知しました．ブランチ {branch} に反映して止めています（push はしていません）．"
+        steps = f"""## 確認と反映の流れ（あなたの作業は 1〜3）
 1. プレビューで見る（手元の端末から ssh -L 8800:127.0.0.1:8800 <共有サーバー> のあとで開く）:
    {preview}
    差分: cd {d} && git show --stat HEAD && git diff {args.base} -- public/data/manifest.json
 2. 問題なければ push する: cd {d} && git push -u origin {branch}
 3. GitHub で {branch} → main の PR（Pull Request）を作り，確認して merge する（main への push で deploy.yml が GitHub Pages に公開する）
-問題があれば何もしなくてよい（次回の実行で同じ内容は再送しない）．起点は手元の dev（{args.base}）で，dev の未 push の commit も PR に含まれる．
+問題があれば何もしなくてよい（次回の実行で同じ内容は再送しない）．起点は手元の dev（{args.base}）で，dev の未 push の commit も PR に含まれる．"""
+    else:
+        head = "時刻表ソースの更新または期限切れを検知しましたが，自動で反映できたデータはありません（ブランチは作っていません）．"
+        steps = "## あなたの作業\n下の「要手動」「検知レポート」の行を確認し，必要なら tools/admin/ で PDF を追加してください．"
+    body = f"""{head}
+
+{steps}
 「要手動」の行は自動で反映していません．tools/admin/ で PDF を追加してください．
 
 ## 変更ファイル
