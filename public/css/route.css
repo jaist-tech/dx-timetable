@@ -67,3 +67,13 @@
 .rp-mapwrap{position:relative;height:100%}
 .rp-maphint{position:absolute;left:8px;right:8px;bottom:8px;z-index:500;font-size:.74rem;background:var(--card);color:var(--text-secondary);padding:6px 10px;border-radius:8px;box-shadow:var(--shadow)}
 .rp-pop button{border:none;background:var(--primary);color:#fff;border-radius:6px;padding:6px 12px;font-size:.9rem;margin-top:4px;cursor:pointer}
+
+/* 経路の地図（journey-map.js） */
+.rt-mapbtn{margin-left:auto;border:1px solid var(--border);background:none;color:var(--text-secondary);border-radius:8px;padding:4px 8px;cursor:pointer;display:inline-flex;align-items:center}
+.rt-mapbtn[aria-expanded=true]{color:var(--primary,#1565C0);border-color:currentColor}
+.jm-wrap{margin-top:8px}
+.jm-map{height:260px;border-radius:8px;overflow:hidden}
+.jm-bar{display:flex;align-items:center;gap:8px;margin-top:6px}
+.jm-play{border:none;background:var(--primary,#1565C0);color:#fff;border-radius:50%;width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.jm-slider{flex:1;min-width:0}
+.jm-clock{font-variant-numeric:tabular-nums;font-size:.9rem;min-width:3em;text-align:right}

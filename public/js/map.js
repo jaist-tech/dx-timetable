@@ -388,18 +388,16 @@ function buildRouteLayersForRoute(routeId, userFrom, userTo) {
 
     stops.forEach(stop => {
       const isKey = keyStopNames.has(stop.name);
-      const marker = L.circleMarker(stop.latlng, {
-        radius: isKey ? 7 : 4,
-        fillColor: color,
-        color: '#fff',
-        weight: isKey ? 3 : 2,
-        fillOpacity: 1
+      const marker = L.marker(stop.latlng, {
+        icon: MapIcons.stop(segType, color, isKey ? 24 : 16),
+        keyboard: false,
+        zIndexOffset: isKey ? 500 : 0
       });
       if (isKey) {
         marker.bindTooltip(tStop(stop.name), {
           permanent: true,
           direction: 'top',
-          offset: [0, -8],
+          offset: [0, segType === 'train' ? -16 : -32],
           className: 'stop-tooltip'
         });
       } else {
@@ -600,10 +598,11 @@ function updateMap() {
 
       // 走行中バスアイコン: アイコンURL/サイズが変わったときだけ再生成
       const iconUrl = getBusIconUrl(selectedRouteId);
-      const sig = `running|${iconUrl}`;
+      const runType = SEGMENTS[progress.segId] ? SEGMENTS[progress.segId].type : 'bus';
+      const sig = `running|${runType}|${iconUrl}`;
       if (!_busMarker || _busMarkerSig !== sig) {
         if (_busMarker) busLayer.removeLayer(_busMarker);
-        const busIcon = L.icon({
+        const busIcon = runType === 'train' ? MapIcons.train(getRouteColor(selectedRouteId), 38) : L.icon({
           iconUrl: iconUrl,
           iconSize: [42, 42],
           iconAnchor: [21, 21],
@@ -735,10 +734,11 @@ function showStaticBusMarker(now) {
 
   // 同じ署名なら何もしない（位置とラベルだけ追従）
   const iconUrl = getBusIconUrl(selectedRouteId);
-  const sig = `static|${iconUrl}`;
+  const waitType = SEGMENTS[_lastFoundSegId] ? SEGMENTS[_lastFoundSegId].type : 'bus';
+  const sig = `static|${waitType}|${iconUrl}`;
   if (!_staticBusMarker || _staticBusSig !== sig) {
     if (_staticBusMarker) busLayer.removeLayer(_staticBusMarker);
-    const staticIcon = L.icon({
+    const staticIcon = waitType === 'train' ? MapIcons.train(getRouteColor(selectedRouteId), 30) : L.icon({
       iconUrl: iconUrl,
       iconSize: [33, 33],
       iconAnchor: [16, 16],
@@ -760,13 +760,14 @@ function showStaticBusMarker(now) {
   }
 }
 
+let _lastFoundSegId = null; // _findStopLatLng が最後に見つけた停留所の区間（待機中の記号の種類に使う）
 function _findStopLatLng(stopName, segIds) {
   if (!stopName) return null;
   for (const sid of segIds) {
     const sp = STOP_POINTS[sid];
     if (!sp) continue;
     const found = sp.find(s => s.name === stopName);
-    if (found) return found.latlng;
+    if (found) { _lastFoundSegId = sid; return found.latlng; }
   }
   return null;
 }
