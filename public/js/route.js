@@ -18,6 +18,12 @@
     'route.note': '時刻表のデータに基づく静的な案内です．遅延・運休は反映されません．のみバスの停留所の座標が未確認の箇所があり，徒歩の乗換は一部の停留所のみ使えます．',
     'route.unknownPlace': '停留所が見つかりません: ${name}', 'route.loading': '時刻表を読み込み中…',
     'route.none': '条件に合う経路がありません．時刻・日付・乗換回数の上限を変えてみてください．',
+    'route.why.limit': '乗換${n}回以上にすると経路があります（今の上限では出ません）．乗換回数の上限か待ちの上限を上げてください．',
+    'route.why.afterLast': 'この日は ${t} 発が最終で，指定の時刻以降に出る便がありません．',
+    'route.why.beforeFirst': 'この日は ${t} 着が最も早く，指定の時刻までに着く便がありません．',
+    'route.why.unconnected': 'この日のダイヤでは，この 2 地点を結ぶ路線の組み合わせがありません（徒歩の乗換の範囲も含む）．',
+    'route.why.nextDay': '翌日（${d}）の始発は ${t} 発 → ${a} 着です．日付を翌日にして探してください．',
+    'route.why.window': '指定の時刻から 3 時間以内に便が無いため，範囲を広げて表示しています（最も近い便は ${t}）．',
     'route.count': '${n} 件の候補のうち上位 ${m} 件', 'route.transfers': '乗換${n}回', 'route.direct': '直通',
     'route.total': '合計', 'route.wait': '待ち', 'route.ride': '乗車', 'route.walkMin': '徒歩', 'route.fare': '運賃',
     'route.walkLeg': '徒歩', 'route.waitMin': '待ち${n}分', 'route.tight': '乗り遅れに注意',
@@ -39,6 +45,12 @@
     'route.note': 'Static guidance from timetable data. Delays and cancellations are not reflected. Some Nomi Bus stop coordinates are unconfirmed, so walking transfers are available at only some stops.',
     'route.unknownPlace': 'Stop not found: ${name}', 'route.loading': 'Loading timetables…',
     'route.none': 'No route found. Try changing the time, date or transfer limit.',
+    'route.why.limit': 'A route exists with ${n}+ transfer(s). Raise the transfer or waiting limit.',
+    'route.why.afterLast': 'The last departure that day is ${t}; nothing runs at or after your time.',
+    'route.why.beforeFirst': 'The earliest arrival that day is ${t}; nothing arrives by your time.',
+    'route.why.unconnected': 'No combination of routes (including walking transfers) connects these two places on this date.',
+    'route.why.nextDay': 'Next day (${d}): first departure ${t}, arriving ${a}. Change the date to search it.',
+    'route.why.window': 'No service within 3 hours of your time, so the search range was widened (nearest: ${t}).',
     'route.count': 'Top ${m} of ${n} candidates', 'route.transfers': '${n} transfer(s)', 'route.direct': 'Direct',
     'route.total': 'Total', 'route.wait': 'Waiting', 'route.ride': 'Riding', 'route.walkMin': 'Walking', 'route.fare': 'Fare',
     'route.walkLeg': 'Walk', 'route.waitMin': 'Wait ${n} min', 'route.tight': 'Tight connection',
@@ -166,16 +178,38 @@
     const r = Planner.plan(net, q);
     if (r.error === 'unknown-place') { st.textContent = t('route.unknownPlace', { name: $('rt-from').value + ' / ' + $('rt-to').value }); return; }
     st.textContent = r.journeys.length ? t('route.count', { n: r.count, m: r.journeys.length }) : '';
-    if (!r.journeys.length) { out.innerHTML = '<p class="rt-note">' + esc(t('route.none')) + '</p>'; saveMemory(); return; }
+    if (!r.journeys.length) { out.innerHTML = '<p class="rt-note">' + esc(await noneMessage(r, date)) + '</p>'; saveMemory(); return; }
+    if (r.widened) out.innerHTML = '<p class="rt-note">' + esc(t('route.why.window', { t: Planner.fmtTime(r.edge) })) + '</p>';
     // 徒歩を使う候補には，徒歩なしの最良との差を添える
     let noWalk = null;
     if (o.walk.enabled && r.journeys.some(j => j.legs.some(l => l.type === 'walk' && l.from !== '出発地' && l.to !== '目的地'))) {
       const r2 = Planner.plan(net, Object.assign({}, q, { walk: Object.assign({}, o.walk, { enabled: false }), results: 1 }));
       noWalk = r2.journeys[0] || null;
     }
-    out.innerHTML = r.journeys.map((j, i) => renderJourney(j, i, noWalk, q)).join('');
+    out.innerHTML += r.journeys.map((j, i) => renderJourney(j, i, noWalk, q)).join('');
     bindMaps(out, r.journeys, date, q);
     saveMemory();
+  }
+
+  // 経路が 0 件のときの理由の文（planner.js の reason）．終発後は翌日の始発も添える
+  async function noneMessage(r, date) {
+    const w = k => t('route.why.' + k, k === 'limit' ? { n: r.needTransfers } : { t: r.edge === undefined ? '' : Planner.fmtTime(r.edge) });
+    if (r.reason === 'limit') return w('limit');
+    if (r.reason === 'unconnected') return w('unconnected');
+    if (r.reason === 'before-first') return w('beforeFirst');
+    if (r.reason !== 'after-last') return t('route.none');
+    let msg = w('afterLast');
+    const opts = [...$('rt-date').options].map(o => o.value), k = opts.indexOf(date);
+    if (k >= 0 && k + 1 < opts.length) {
+      try {
+        const nd = opts[k + 1]; await net.ensureDate(nd);
+        const q = Object.assign({ date: nd, from: resolveInput($('rt-from').value), to: resolveInput($('rt-to').value), depart: '00:00' }, options());
+        const n = Planner.plan(net, Object.assign(q, { results: 1, window: 1440 }));
+        const j = n.journeys[0];
+        if (j) msg += t('route.why.nextDay', { d: nd, t: j.depStr, a: j.arrStr });
+      } catch (e) { /* 翌日の探索に失敗したときは終発の案内だけ */ }
+    }
+    return msg;
   }
 
   // 候補ごとの地図（押すと開き，もう一度押すと閉じる．開いている間だけ動かす）

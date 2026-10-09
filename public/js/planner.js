@@ -465,8 +465,34 @@
     };
     list.sort((a, b) => { const x = keyOf(a), y = keyOf(b); for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return x[i] - y[i]; return 0; });
     const journeys = list.slice(0, o.results);
+    if (!journeys.length && !q._diag) return Object.assign({ apiVersion: API_VERSION, date: q.date, dayKind: null, journeys, count: 0 }, diagnose(net, q, arriveMode));
     // 徒歩なしの最良との比較（徒歩を使う候補だけに付ける）
     return { apiVersion: API_VERSION, date: q.date, dayKind: null, journeys, count: list.length };
+  }
+
+  // 経路が 0 件のときの原因を調べる．reason:
+  //   window: 探す幅（既定 3 時間）の外に便がある → 幅を広げた結果を journeys に入れ，widened=true
+  //   limit: 乗換・待ちの上限が厳しい → needTransfers / needWait（上限を外すと出る経路の最小値）
+  //   after-last / before-first: その日はこの時刻以降（以前）の便が無い → lastDep / firstArr
+  //   unconnected: 日のダイヤ全体でも 2 地点をつなぐ経路が無い
+  function diagnose(net, q, arriveMode) {
+    const run = extra => plan(net, Object.assign({}, q, { _diag: true, results: 200, minGainPerTransfer: 0 }, extra));
+    const rw = plan(net, Object.assign({}, q, { _diag: true, window: 1500 }));
+    if (rw.journeys.length) {
+      const first = arriveMode ? Math.max(...rw.journeys.map(j => j.arr)) : Math.min(...rw.journeys.map(j => j.dep));
+      return { reason: 'window', widened: true, journeys: rw.journeys, count: rw.count, edge: first };
+    }
+    const rl = run({ window: 1500, maxTransfers: null, maxWaitMin: 100000 });
+    if (rl.journeys.length) {
+      return { reason: 'limit', needTransfers: Math.min(...rl.journeys.map(j => j.transfers)) };
+    }
+    const ra = arriveMode ? run({ arrive: '47:59', window: 2879, maxTransfers: null, maxWaitMin: 100000 })
+                          : run({ depart: '00:00', window: 2879, maxTransfers: null, maxWaitMin: 100000 });
+    if (ra.journeys.length) {
+      return arriveMode ? { reason: 'before-first', edge: Math.min(...ra.journeys.map(j => j.arr)) }
+                        : { reason: 'after-last', edge: Math.max(...ra.journeys.map(j => j.dep)) };
+    }
+    return { reason: 'unconnected' };
   }
 
   function resolvePlaces(day, spec, w) {
