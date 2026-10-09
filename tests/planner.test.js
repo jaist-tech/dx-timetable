@@ -275,3 +275,14 @@ test('0 件のときは原因を返す（終発後・探す幅の外・乗換上
   const arr = Planner.plan(net, { date: WK, from: 'JAIST', to: '金沢駅', arrive: '04:00' });
   assert.ok(['before-first', 'window'].includes(arr.reason));
 });
+
+test('全停留所が 1 つにつながる（徒歩なし・平日・土曜・日曜）', async () => {
+  const net = await getNet();
+  for (const d of [WK, WE, '2026-10-11']) {
+    await net.ensureDate(d);
+    const day = net.day(d), n = day.places.length, par = [...Array(n).keys()];
+    const f = x => (par[x] === x ? x : (par[x] = f(par[x])));
+    for (const p of day.patterns) for (const s of p.stops) par[f(s)] = f(p.stops[0]);
+    assert.equal(new Set(par.map((_, i) => f(i))).size, 1, d + ' に孤立した停留所群がある');
+  }
+});
