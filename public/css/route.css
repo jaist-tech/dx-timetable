@@ -29,7 +29,8 @@
 .rt-places .swap-btn{grid-column:2;grid-row:1/3;align-self:center;justify-self:center;width:40px;height:40px;border:1px solid var(--border)}
 .rt-places .swap-btn svg{width:20px;height:20px}
 .rt-card .search-field-half{overflow:visible}
-@media (max-width:420px){.rt-wrap{padding:12px 12px 32px}.rt-row{grid-template-columns:repeat(2,minmax(0,1fr))}.rt-row.rt-datetime{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px}.rt-datetime .rt-field select{font-size:.85rem;padding:0 19px 0 7px;background-position:right 5px center}}
+@media (max-width:420px){.rt-wrap{padding:12px 12px 32px}.rt-row{grid-template-columns:repeat(2,minmax(0,1fr))}.rt-row.rt-datetime{grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:6px}.rt-datetime .rt-field select{font-size:.85rem;padding:0 19px 0 7px;background-position:right 5px center}}
+@media (max-width:340px){.rt-row.rt-datetime{grid-template-columns:minmax(0,1fr)}}
 
 /* 出発・到着の選択（路線→停留所／地図） */
 .rt-inp{display:flex;gap:8px;align-items:center}
