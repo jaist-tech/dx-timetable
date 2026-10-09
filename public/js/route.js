@@ -252,6 +252,10 @@
     $('rt-status').textContent = '';
     const fromUrl = applyUrlParams();
     if (!fromUrl) restoreMemory();
+    RoutePicker.init({
+      getNet: () => net, getDate: () => $('rt-date').value,
+      apply: (which, name) => { const el = $(which === 'from' ? 'rt-from' : 'rt-to'); el.value = name; saveMemory(); },
+    });
     $('rt-form').addEventListener('submit', e => { e.preventDefault(); search(); });
     $('rt-swap').addEventListener('click', () => { const a = $('rt-from').value; $('rt-from').value = $('rt-to').value; $('rt-to').value = a; });
     document.querySelectorAll('#rt-form select, #rt-form input').forEach(el => el.addEventListener('change', saveMemory));

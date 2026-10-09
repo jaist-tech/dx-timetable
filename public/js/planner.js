@@ -486,6 +486,31 @@
     return day.places.map(p => p.name);
   }
 
+  // 路線ごとの停留所（画面の「路線から選ぶ」用）．[{id,name,kind,stops:[停留所名（路線の並び順）]}]
+  function listLines(net, dateStr) {
+    const day = net.day(dateStr);
+    const byId = new Map();
+    for (const p of day.patterns) {
+      const names = p.stops.map(i => day.places[i].name);
+      let e = byId.get(p.id);
+      if (!e) { e = { id: p.id, name: p.name, kind: p.kind, stops: [] }; byId.set(p.id, e); }
+      // 最長の並びを土台にし，足りない停留所を元の位置の直後へ挿入する
+      if (names.length > e.stops.length) { const old = e.stops; e.stops = names.slice(); mergeStops(e.stops, old); }
+      else mergeStops(e.stops, names);
+    }
+    // 循環・折り返しで同じ停留所が 2 回出るときは最初の位置だけ残す
+    for (const e of byId.values()) e.stops = e.stops.filter((n, i) => e.stops.indexOf(n) === i);
+    return [...byId.values()];
+  }
+  function mergeStops(base, extra) {
+    let at = -1;
+    for (const n of extra) {
+      const i = base.indexOf(n);
+      if (i >= 0) { at = i; continue; }
+      base.splice(at + 1, 0, n); at++;
+    }
+  }
+
   // ---------- 読み込み（ブラウザ・Node 共通．fetchJson を差し替え可）----------
   async function load(base, fetchJson) {
     const fj0 = fetchJson || (async url => { const r = await fetch(url); if (!r.ok) throw new Error(url + ' ' + r.status); return r.json(); });
@@ -509,7 +534,7 @@
     return net;
   }
 
-  const Planner = { _raptor: raptor, _buildWalks: buildWalks, API_VERSION, DEFAULTS, load, createNetwork, plan, listPlaces, parseTime, fmtTime, pickRegularEntry, dayKeyFor, normName };
+  const Planner = { _raptor: raptor, _buildWalks: buildWalks, API_VERSION, DEFAULTS, load, createNetwork, plan, listPlaces, listLines, parseTime, fmtTime, pickRegularEntry, dayKeyFor, normName };
   if (typeof module !== 'undefined' && module.exports) module.exports = Planner;
   else root.Planner = Planner;
 })(typeof window !== 'undefined' ? window : globalThis);

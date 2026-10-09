@@ -198,3 +198,18 @@ test('データのバージョンがあれば読み込みの URL に ?v= が付�
   const net = await Planner.load(BASE, noVer);
   assert.ok(net.raw.manifest);
 });
+
+test('listLines: 路線ごとの停留所が重複なく並び，全停留所を覆う', async () => {
+  const net = await getNet(); await net.ensureDate(WK);
+  const lines = Planner.listLines(net, WK);
+  assert.ok(lines.length >= 10);
+  const all = new Set(Planner.listPlaces(net, WK));
+  const covered = new Set();
+  for (const l of lines) {
+    assert.equal(new Set(l.stops).size, l.stops.length, l.name + ' に重複');
+    l.stops.forEach(s => covered.add(s));
+  }
+  assert.deepEqual([...all].filter(s => !covered.has(s)), []);
+  const tsurugi = lines.find(l => l.stops[0] === 'JAIST' || l.stops.includes('鶴来駅'));
+  assert.ok(tsurugi);
+});
