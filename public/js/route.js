@@ -11,7 +11,7 @@
     'route.prio.time': '早：到着時刻順', 'route.prio.transfers': '楽：乗換回数順', 'route.prio.wait': '待ち時間順',
     'route.prio.ride': '乗車時間順', 'route.prio.fare': '安：安い順', 'route.prio.fareOff': '安：安い順（運賃表の準備中）',
     'route.advanced': '詳細設定', 'route.maxTransfers': '乗換回数の上限', 'route.unlimited': '無制限',
-    'route.walk': '歩く距離の上限', 'route.walk.none': '歩かない', 'route.speed': '歩く速さ',
+    'route.speed': '歩く速さ',
     'route.speed.slow': 'ゆっくり', 'route.speed.normal': '普通', 'route.speed.fast': '速い',
     'route.maxWait': '待ちの上限', 'route.gain': '乗換を増やして 3 分/回 以上縮まない経路は除く',
     'route.search': '検索', 'route.placeholder': '駅、バス停',
@@ -39,7 +39,7 @@
     'route.prio.time': 'Fast: by arrival time', 'route.prio.transfers': 'Easy: by transfers', 'route.prio.wait': 'By waiting time',
     'route.prio.ride': 'By riding time', 'route.prio.fare': 'Cheap: by fare', 'route.prio.fareOff': 'Cheap: by fare (fare table pending)',
     'route.advanced': 'Advanced', 'route.maxTransfers': 'Max transfers', 'route.unlimited': 'Unlimited',
-    'route.walk': 'Max walking distance', 'route.walk.none': 'None', 'route.speed': 'Walking speed',
+    'route.speed': 'Walking speed',
     'route.speed.slow': 'Slow', 'route.speed.normal': 'Normal', 'route.speed.fast': 'Fast',
     'route.maxWait': 'Max wait', 'route.gain': 'Hide routes that add a transfer but save under 3 min',
     'route.search': 'Search', 'route.placeholder': 'Station, bus stop',
@@ -64,6 +64,7 @@
   const $ = id => document.getElementById(id);
   const MEMORY_KEY = 'routeLastSelection';
   const MEMORY_TTL_MIN = 30;
+  const WALK_MAX_METERS = 400;   // 歩く距離の上限（画面からは変えない）
   let net = null, places = [];
   let urlDepart = null, urlArrive = null;   // URL 引数の時刻（最初の検索だけに使う）
 
@@ -115,7 +116,7 @@
       localStorage.setItem(MEMORY_KEY, JSON.stringify({
         from: $('rt-from').value, to: $('rt-to').value, dateOffset: $('rt-date').selectedIndex,
         prio: $('rt-prio').value,
-        maxtr: $('rt-maxtr').value, walk: $('rt-walk').value, speed: $('rt-speed').value,
+        maxtr: $('rt-maxtr').value, speed: $('rt-speed').value,
         maxwait: $('rt-maxwait').value, gain: $('rt-gain').checked,
         savedDate: ymd(nowDate()), savedAt: Date.now(),
       }));
@@ -127,9 +128,8 @@
       if (!v || Date.now() - v.savedAt > MEMORY_TTL_MIN * 60000 || v.savedDate !== ymd(nowDate())) return false;
       $('rt-from').value = v.from || ''; $('rt-to').value = v.to || '';
       if (v.dateOffset >= 0 && v.dateOffset < $('rt-date').options.length) $('rt-date').selectedIndex = v.dateOffset;
-      for (const [id, key] of [['rt-prio', 'prio'], ['rt-maxtr', 'maxtr'], ['rt-walk', 'walk'], ['rt-speed', 'speed'], ['rt-maxwait', 'maxwait']]) {
+      for (const [id, key] of [['rt-prio', 'prio'], ['rt-maxtr', 'maxtr'], ['rt-speed', 'speed'], ['rt-maxwait', 'maxwait']]) {
         const el = $(id);
-        if (key === 'walk' && ['5', '10', '15'].includes(v.walk)) v.walk = { 5: '400', 10: '800', 15: '1200' }[v.walk];   // 旧: 分の選択
         if (v[key] !== undefined && [...el.options].some(o => o.value === v[key] && !o.disabled)) el.value = v[key];
       }
       $('rt-gain').checked = v.gain !== false;
@@ -154,14 +154,13 @@
 
   // ---- 検索の実行 ----
   function options() {
-    const walkMax = +$('rt-walk').value;
     const mt = $('rt-maxtr').value;
     return {
       priority: $('rt-prio').value,
       maxTransfers: mt === 'unlimited' ? null : +mt,
       maxWaitMin: +$('rt-maxwait').value,
       minGainPerTransfer: $('rt-gain').checked ? 3 : 0,
-      walk: { enabled: walkMax > 0, maxMeters: walkMax || 400, speed: +$('rt-speed').value },
+      walk: { enabled: true, maxMeters: WALK_MAX_METERS, speed: +$('rt-speed').value },
     };
   }
 
