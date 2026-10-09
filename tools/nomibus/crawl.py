@@ -149,6 +149,7 @@ def main():
     timetable_ids = {}  # id -> anchor_text(初出)
     fetched_a = 0
     failed_b = []
+    dead_links = []  # 公式サイトのリンク先が 404（掲載終了・リンク切れ）の時刻表ページ
     for i, (num, name) in enumerate(stop_links, 1):
         try:
             text, was = fetch(num)
@@ -174,6 +175,14 @@ def main():
             _, was = fetch(tid)
             if was:
                 fetched_b += 1
+        except urllib.error.HTTPError as e:
+            if e.code == 404 and not os.path.exists(cache_path(tid)):
+                # 一度も取得できていないページの 404 は公式側のリンク切れ。中断せず記録だけ残す
+                print(f"  DEAD {tid} ({tt}): HTTP 404（公式サイトのリンク切れ。取得対象から外す）")
+                dead_links.append((tid, tt))
+            else:
+                print(f"  SKIP {tid} ({tt}): {e}")
+                failed_b.append((tid, tt))
         except Exception as e:
             print(f"  SKIP {tid} ({tt}): {e}")
             failed_b.append((tid, tt))
@@ -181,6 +190,9 @@ def main():
     if failed_b:
         for tid, tt in failed_b:
             print(f"  NG: {tid}  {tt}")
+
+    if dead_links:
+        print(f"リンク切れ(404): {len(dead_links)} 件 → " + ", ".join(t for t, _ in dead_links))
 
     # --- 収集した時刻表IDの一覧を記録 ---
     manifest_path = os.path.join(os.path.dirname(__file__), "timetable_ids.tsv")
