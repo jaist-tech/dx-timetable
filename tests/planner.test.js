@@ -169,6 +169,27 @@ test('徒歩の乗換は路線の登録順に依存しない', () => {
   }
 });
 
+// 道のりの表（walk.json）: 座標のある 2 停留所の徒歩の分は，直線距離の近似ではなく道のり÷速さで決まる
+function synthRoad(walkData) {
+  const net = synth(['r1', 'r2']);
+  net.stopsExtra = { stops: { B: { lat: 36.0, lon: 136.0 }, C: { lat: 36.0, lon: 136.0036 } }, links: [] };  // 直線約 320 m
+  net.walkData = walkData;
+  net.raw.routes = { default_transfer_min: 5, transfers: [] };
+  return net;
+}
+test('徒歩: 道のりの表があれば道のり÷速さの分と根拠 road を返す', () => {
+  const net = synthRoad({ pairs: [{ a: 'B', b: 'C', m: 640, straight: 320 }], unsnapped: [] });
+  const w = Planner.plan(net, { date: WK, from: 'A', to: 'D', depart: '08:00', minGainPerTransfer: 0, walk: { maxMin: 15 } }).journeys[0].legs.find(l => l.type === 'walk');
+  assert.equal(w.minutes, 8); assert.equal(w.basis, 'road'); assert.equal(w.meters, 640);
+});
+test('徒歩: 道のりの表にある組以外（道のりが上限超）は歩かず，表に無い停留所だけ直線の近似 approx', () => {
+  const none = synthRoad({ pairs: [], unsnapped: [] });
+  assert.equal(Planner.plan(none, { date: WK, from: 'A', to: 'D', depart: '08:00', walk: { maxMin: 15 } }).journeys.length, 0);
+  const apx = synthRoad({ pairs: [], unsnapped: ['C'] });
+  const w = Planner.plan(apx, { date: WK, from: 'A', to: 'D', depart: '08:00', walk: { maxMin: 15 } }).journeys[0].legs.find(l => l.type === 'walk');
+  assert.equal(w.basis, 'approx');
+});
+
 test('徒歩を使わない設定では徒歩の乗換経路を返さない', () => {
   const net = synth(['r1', 'r2']);
   const r = Planner.plan(net, { date: WK, from: 'A', to: 'D', depart: '08:00', walk: { enabled: false } });

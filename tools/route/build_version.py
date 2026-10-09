@@ -8,7 +8,7 @@ import glob, hashlib, json, os
 ROOT = os.path.join(os.path.dirname(__file__), '..', '..')
 D = os.path.join(ROOT, 'public', 'data')
 
-files = [os.path.join(D, f) for f in ('manifest.json', 'routes.json', 'holidays.json', 'fares.json', 'route/stops.json')]
+files = [os.path.join(D, f) for f in ('manifest.json', 'routes.json', 'holidays.json', 'fares.json', 'route/stops.json', 'route/walk.json')]
 files += sorted(glob.glob(f'{D}/regular/*.json')) + sorted(glob.glob(f'{D}/special/*.json'))
 h = hashlib.sha256()
 for f in files:

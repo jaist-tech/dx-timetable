@@ -69,6 +69,7 @@
     const net = {
       raw, fares: raw.fares || null, days: {},
       stopsExtra: raw.stopsExtra || { stops: {}, links: [] },
+      walkData: raw.walkData || null,   // tools/route/build_walk.py の道のり表（無ければ直線距離の近似）
       needFiles(dateStr) {
         const holidays = new Set(raw.holidays || []);
         const reg = [], spe = [];
@@ -177,7 +178,18 @@
         explicit.push({ a: placeIdx.get(l.b), b: placeIdx.get(l.a), min: l.min });
       }
     }
-    return { dateStr, places, placeIdx, patterns, byPlace, coords, sameMin, explicit };
+    // 道のりの表（OSM の歩行者経路．m）と，道に結べなかった停留所（直線距離の近似を使う）
+    const road = new Map(), unsnapped = new Set();
+    const wd = net.walkData;
+    if (wd) {
+      for (const e of wd.pairs || []) {
+        if (!placeIdx.has(e.a) || !placeIdx.has(e.b)) continue;
+        const a = placeIdx.get(e.a), b = placeIdx.get(e.b);
+        road.set(a * 100000 + b, e.m); road.set(b * 100000 + a, e.m);
+      }
+      for (const n of wd.unsnapped || []) if (placeIdx.has(n)) unsnapped.add(placeIdx.get(n));
+    }
+    return { dateStr, places, placeIdx, patterns, byPlace, coords, sameMin, explicit, road, unsnapped, hasRoad: !!wd };
   }
 
   function distM(a, b) {
@@ -192,25 +204,30 @@
     const adj = day.places.map(() => []);
     if (!w.enabled) return adj;
     const best = new Map();
-    const put = (a, b, min) => {
+    // basis: fixed（routes.json・stops.json の個別の値）・road（OSM の道のり）・approx（直線距離×係数の近似）
+    const put = (a, b, min, basis, meters) => {
       const k = a * 100000 + b;
-      if (!best.has(k) || best.get(k) > min) best.set(k, min);
+      if (!best.has(k) || best.get(k).min > min) best.set(k, { min, basis, meters });
     };
     const fixed = new Set();
-    for (const e of day.explicit) { fixed.add(e.a * 100000 + e.b); if (e.min <= w.maxMin) put(e.a, e.b, e.min); }
+    for (const e of day.explicit) { fixed.add(e.a * 100000 + e.b); if (e.min <= w.maxMin) put(e.a, e.b, e.min, 'fixed', null); }
     const idx = day.coords.map((c, i) => (c ? i : -1)).filter(i => i >= 0);
     const maxStraight = (w.maxMin * w.speed) / w.detour;
     for (let x = 0; x < idx.length; x++) for (let y = x + 1; y < idx.length; y++) {
       const a = idx[x], b = idx[y];
       const d = distM(day.coords[a], day.coords[b]);
-      if (d > maxStraight) continue;
-      const m = Math.max(1, Math.ceil((d * w.detour) / w.speed));
+      const rd = day.road.get(a * 100000 + b);
+      if (rd == null && d > maxStraight) continue;   // 道のりの表にある組は直線距離で絞らない（近似だけ迂回係数で絞る）
+      let m, basis, meters = null;
+      if (rd != null) { m = Math.max(1, Math.ceil(rd / w.speed)); basis = 'road'; meters = rd; }
+      else if (!day.hasRoad || day.unsnapped.has(a) || day.unsnapped.has(b)) { m = Math.max(1, Math.ceil((d * w.detour) / w.speed)); basis = 'approx'; meters = Math.round(d * w.detour); }
+      else continue;   // 道のりの表にあり，道のりが上限を超える組は歩かない
       if (m <= w.maxMin) {
-        if (!fixed.has(a * 100000 + b)) put(a, b, m);   // routes.json 等で決めた徒歩の分は，直線距離の近似で上書きしない
-        if (!fixed.has(b * 100000 + a)) put(b, a, m);
+        if (!fixed.has(a * 100000 + b)) put(a, b, m, basis, meters);   // routes.json 等で決めた徒歩の分は，道のり・近似で上書きしない
+        if (!fixed.has(b * 100000 + a)) put(b, a, m, basis, meters);
       }
     }
-    for (const [k, min] of best) adj[Math.floor(k / 100000)].push({ q: k % 100000, walk: min });
+    for (const [k, v] of best) adj[Math.floor(k / 100000)].push({ q: k % 100000, walk: v.min, basis: v.basis, meters: v.meters });
     return adj;
   }
 
@@ -286,7 +303,7 @@
           const ready = arr + o.walk.margin;
           if (ready < bestReady[w.q]) {
             bestReady[w.q] = ready;
-            curW[w.q] = { kind: 'walk', p: w.q, from: p, walk: w.walk, arr, ready, prev: l };
+            curW[w.q] = { kind: 'walk', p: w.q, from: p, walk: w.walk, basis: w.basis, meters: w.meters, arr, ready, prev: l };
             newMarked.add(w.q);
           }
         }
@@ -315,7 +332,7 @@
           dep: l.trip[l.bPos], arr: l.trip[l.aPos], stops: stopsPassed,
         });
       } else if (l.kind === 'walk') {
-        legs.push({ type: 'walk', from: day.places[l.from].name, to: day.places[l.p].name, minutes: l.walk, dep: l.arr - l.walk, arr: l.arr });
+        legs.push({ type: 'walk', from: day.places[l.from].name, to: day.places[l.p].name, minutes: l.walk, basis: l.basis, meters: l.meters, dep: l.arr - l.walk, arr: l.arr });
       }
     }
     return legs;
@@ -580,11 +597,11 @@
     const ver = await fj0(base + 'route/version.json').catch(() => null);
     const fj = ver && ver.version ? url => fj0(url + '?v=' + ver.version) : fj0;
     const opt = async url => { try { return await fj(url); } catch (e) { return null; } };
-    const [manifest, routes, holidays, stopsExtra, fares] = await Promise.all([
+    const [manifest, routes, holidays, stopsExtra, fares, walkData] = await Promise.all([
       fj(base + 'manifest.json'), fj(base + 'routes.json'), opt(base + 'holidays.json'),
-      opt(base + 'route/stops.json'), opt(base + 'fares.json'),
+      opt(base + 'route/stops.json'), opt(base + 'fares.json'), opt(base + 'route/walk.json'),
     ]);
-    const net = createNetwork({ manifest, routes, holidays: holidays || [], stopsExtra: stopsExtra || { stops: {}, links: [] }, fares, regular: {}, special: {} });
+    const net = createNetwork({ manifest, routes, holidays: holidays || [], stopsExtra: stopsExtra || { stops: {}, links: [] }, fares, walkData, regular: {}, special: {} });
     net.ensureDate = async function (dateStr) {
       const need = net.needFiles(dateStr);
       await Promise.all([

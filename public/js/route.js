@@ -26,6 +26,7 @@
     'route.why.window': '指定の時刻から 3 時間以内に便が無いため，範囲を広げて表示しています（最も近い便は ${t}）．',
     'route.count': '${n} 件の候補のうち上位 ${m} 件', 'route.transfers': '乗換${n}回', 'route.direct': '直通',
     'route.total': '合計', 'route.wait': '待ち', 'route.ride': '乗車', 'route.walkMin': '徒歩', 'route.fare': '運賃',
+    'route.basis.road': '道のり約 ${m} m（OSM の歩行者の道）', 'route.basis.approx': '直線距離からの概算 約 ${m} m', 'route.basis.fixed': '個別に決めた値',
     'route.walkLeg': '徒歩', 'route.waitMin': '待ち${n}分', 'route.tight': '乗り遅れに注意',
     'route.walkFaster': '徒歩なしの最良より ${n} 分速い', 'route.walkSame': '徒歩なしの最良と同じ時間',
     'route.best': '最上位', 'route.today': '今日', 'route.min': '分', 'route.yen': '円', 'route.fareUnknown': '運賃は未収集の区間を含みます',
@@ -53,6 +54,7 @@
     'route.why.window': 'No service within 3 hours of your time, so the search range was widened (nearest: ${t}).',
     'route.count': 'Top ${m} of ${n} candidates', 'route.transfers': '${n} transfer(s)', 'route.direct': 'Direct',
     'route.total': 'Total', 'route.wait': 'Waiting', 'route.ride': 'Riding', 'route.walkMin': 'Walking', 'route.fare': 'Fare',
+    'route.basis.road': 'about ${m} m on OSM walking paths', 'route.basis.approx': 'estimated from straight-line distance, about ${m} m', 'route.basis.fixed': 'set individually',
     'route.walkLeg': 'Walk', 'route.waitMin': 'Wait ${n} min', 'route.tight': 'Tight connection',
     'route.walkFaster': '${n} min faster than the best without walking', 'route.walkSame': 'Same time as the best without walking',
     'route.best': 'Top', 'route.today': 'Today', 'route.min': 'min', 'route.yen': 'JPY', 'route.fareUnknown': 'Fare is unknown for some sections',
@@ -234,6 +236,13 @@
   const dur = m => (m >= 60 ? Math.floor(m / 60) + (currentLang === 'ja' ? '時間' : 'h ') : '') + (m % 60) + t('route.min');
   const placeName = n => (n === '出発地' ? (currentLang === 'ja' ? '出発地' : 'Origin') : n === '目的地' ? (currentLang === 'ja' ? '目的地' : 'Destination') : tStop(n));
 
+  // 徒歩の根拠: road=OSM の歩行者の道のり，approx=直線距離からの概算，fixed=個別に決めた値
+  function walkBasis(l) {
+    if (!l.basis) return '';
+    const key = 'route.basis.' + l.basis;
+    return ' · ' + esc(t(key, { m: l.meters == null ? '' : Math.round(l.meters / 10) * 10 }));
+  }
+
   function renderJourney(j, i, noWalk, q) {
     const hasWalk = j.legs.some(l => l.type === 'walk');
     const tags = [
@@ -257,7 +266,7 @@
         gap = `<div class="rt-wait">${esc(t('route.waitMin', { n: w }))}${w <= 3 && l.type === 'trip' && prev.type === 'trip' ? ' <span class="rt-warn">' + esc(t('route.tight')) + '</span>' : ''}</div>`;
       }
       if (l.type === 'walk') {
-        return gap + `<div class="rt-leg walk"><span class="rt-name">${esc(t('route.walkLeg'))} ${l.minutes}${esc(t('route.min'))}</span> ${esc(placeName(l.from))} → ${esc(placeName(l.to))}<small>${Planner.fmtTime(l.dep)} → ${Planner.fmtTime(l.arr)}</small></div>`;
+        return gap + `<div class="rt-leg walk"><span class="rt-name">${esc(t('route.walkLeg'))} ${l.minutes}${esc(t('route.min'))}</span> ${esc(placeName(l.from))} → ${esc(placeName(l.to))}<small>${Planner.fmtTime(l.dep)} → ${Planner.fmtTime(l.arr)}${walkBasis(l)}</small></div>`;
       }
       const rname = currentLang === 'ja' ? (l.routeName || l.routeId) : (typeof SEG_ROUTE_NAMES_EN !== 'undefined' && SEG_ROUTE_NAMES_EN[l.routeName]) || l.routeName;
       const via = l.stops.length > 2 ? l.stops.slice(1, -1).map(s => tStop(s.name)).join(' → ') : '';
