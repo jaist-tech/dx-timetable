@@ -512,6 +512,32 @@
     for (const e of byId.values()) e.stops = e.stops.filter((n, i) => e.stops.indexOf(n) === i);
     return [...byId.values()];
   }
+  // 地点を選ぶ一覧用: 往復の方向別の系統を路線ごと 1 項目にまとめ，停留所を端から端へ重複なく並べる
+  // （探索・時刻表の内部の単位は変えない．listLines の結果を加工するだけ）
+  function routeBaseName(name) {
+    return name.replace(/（[^（）]*[→⇒][^（）]*）\s*$/, '').replace(/\s*[^\s（）]+→[^\s（）]+$/, '').trim();
+  }
+  function listRoutes(net, dateStr) {
+    const groups = new Map();
+    for (const l of listLines(net, dateStr)) {
+      const key = l.kind + '|' + routeBaseName(l.name);
+      const g = groups.get(key);
+      if (!g) { groups.set(key, { name: routeBaseName(l.name), kind: l.kind, stops: l.stops.slice(), ids: [l.id] }); continue; }
+      g.ids.push(l.id);
+      let ex = l.stops.slice();
+      const shared = ex.filter(n => g.stops.includes(n));
+      if (shared.length >= 2) {
+        // 共通の停留所の並びが逆なら反転する
+        if (g.stops.indexOf(shared[0]) > g.stops.indexOf(shared[shared.length - 1])) ex.reverse();
+      } else if (shared.length === 1) {
+        // 共通の停留所が路線の先頭側なら新しい区間を前へ，末尾側なら後ろへつなぐ
+        const front = g.stops.indexOf(shared[0]) < g.stops.length / 2;
+        if (front !== (ex.indexOf(shared[0]) === ex.length - 1)) ex.reverse();
+      }
+      mergeStops(g.stops, ex);
+    }
+    return [...groups.values()];
+  }
   function mergeStops(base, extra) {
     let at = -1;
     for (const n of extra) {
@@ -544,7 +570,7 @@
     return net;
   }
 
-  const Planner = { _raptor: raptor, _buildWalks: buildWalks, API_VERSION, DEFAULTS, load, createNetwork, plan, listPlaces, listLines, parseTime, fmtTime, pickRegularEntry, dayKeyFor, normName };
+  const Planner = { _raptor: raptor, _buildWalks: buildWalks, API_VERSION, DEFAULTS, load, createNetwork, plan, listPlaces, listLines, listRoutes, parseTime, fmtTime, pickRegularEntry, dayKeyFor, normName };
   if (typeof module !== 'undefined' && module.exports) module.exports = Planner;
   else root.Planner = Planner;
 })(typeof window !== 'undefined' ? window : globalThis);

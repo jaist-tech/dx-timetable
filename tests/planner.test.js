@@ -199,6 +199,22 @@ test('データのバージョンがあれば読み込みの URL に ?v= が付�
   assert.ok(net.raw.manifest);
 });
 
+test('listRoutes: 往復の系統が路線ごと 1 項目にまとまり，端から端へ重複なく並ぶ', async () => {
+  const net = await getNet(); await net.ensureDate(WK);
+  const routes = Planner.listRoutes(net, WK);
+  assert.ok(!routes.some(r => /→/.test(r.name)), '方向の表記が残る');
+  const ir = routes.find(r => r.name === 'IRいしかわ鉄道');
+  assert.ok(ir);
+  assert.equal(new Set(ir.stops).size, ir.stops.length);
+  const ends = [ir.stops[0], ir.stops[ir.stops.length - 1]].sort();
+  assert.deepEqual(ends, ['倶利伽羅駅', '大聖寺駅']);
+  assert.ok(ir.stops.indexOf('津幡駅') > ir.stops.indexOf('金沢駅'));
+  assert.equal(routes.filter(r => r.name === '北陸鉄道 石川線').length, 1);
+  const all = new Set(Planner.listPlaces(net, WK));
+  const cov = new Set(routes.flatMap(r => r.stops));
+  assert.deepEqual([...all].filter(s => !cov.has(s)), []);
+});
+
 test('listLines: 路線ごとの停留所が重複なく並び，全停留所を覆う', async () => {
   const net = await getNet(); await net.ensureDate(WK);
   const lines = Planner.listLines(net, WK);

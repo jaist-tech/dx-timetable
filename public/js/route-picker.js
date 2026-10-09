@@ -68,7 +68,7 @@
   }
 
   function showLines(body, choose) {
-    const lines = Planner.listLines(ctx.getNet(), ctx.getDate());
+    const lines = Planner.listRoutes(ctx.getNet(), ctx.getDate());
     const order = { train: 0, bus: 1 };
     lines.sort((a, b) => (order[a.kind] - order[b.kind]) || a.name.localeCompare(b.name, 'ja'));
     const list = () => {
