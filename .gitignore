@@ -9,3 +9,5 @@ tools/parsers/__pycache__/
 tools/nomibus/cache/
 tools/nomibus/intermediate/
 tools/route/osm_walk_cache/
+tools/route/osrm_cache/
+tools/route/osm_rail_cache/

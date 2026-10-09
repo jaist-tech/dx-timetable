@@ -11,11 +11,11 @@
     'route.prio.time': '早：到着時刻順', 'route.prio.transfers': '楽：乗換回数順', 'route.prio.wait': '待ち時間順',
     'route.prio.ride': '乗車時間順', 'route.prio.fare': '安：安い順', 'route.prio.fareOff': '安：安い順（運賃表の準備中）',
     'route.advanced': '詳細設定', 'route.maxTransfers': '乗換回数の上限', 'route.unlimited': '無制限',
-    'route.walk': '徒歩の乗換', 'route.walk.none': '使わない', 'route.speed': '歩く速さ',
+    'route.walk': '歩く距離の上限', 'route.walk.none': '歩かない', 'route.speed': '歩く速さ',
     'route.speed.slow': 'ゆっくり', 'route.speed.normal': '普通', 'route.speed.fast': '速い',
     'route.maxWait': '待ちの上限', 'route.gain': '乗換を増やして 3 分/回 以上縮まない経路は除く',
     'route.search': '検索', 'route.placeholder': '駅、バス停',
-    'route.note': '時刻表のデータに基づく静的な案内です．遅延・運休は反映されません．のみバスの停留所の座標が未確認の箇所があり，徒歩の乗換は一部の停留所のみ使えます．',
+    'route.note': '時刻表のデータに基づく静的な案内です．遅延・運休は反映されません．小松空港連絡バスの 6 停留所は座標が無く，徒歩の乗換と座標指定の出発地には使えません．',
     'route.unknownPlace': '停留所が見つかりません: ${name}', 'route.loading': '時刻表を読み込み中…',
     'route.none': '条件に合う経路がありません．時刻・日付・乗換回数の上限を変えてみてください．',
     'route.why.limit': '乗換${n}回以上にすると経路があります（今の上限では出ません）．乗換回数の上限か待ちの上限を上げてください．',
@@ -29,7 +29,7 @@
     'route.basis.road': '道のり約 ${m} m（OSM の歩行者の道）', 'route.basis.approx': '直線距離からの概算 約 ${m} m', 'route.basis.fixed': '個別に決めた値',
     'route.walkLeg': '徒歩', 'route.waitMin': '待ち${n}分', 'route.tight': '乗り遅れに注意',
     'route.walkFaster': '徒歩なしの最良より ${n} 分速い', 'route.walkSame': '徒歩なしの最良と同じ時間',
-    'route.best': '最上位', 'route.today': '今日', 'route.min': '分', 'route.yen': '円', 'route.fareUnknown': '運賃は未収集の区間を含みます',
+    'route.best': '最上位', 'route.today': '本日', 'route.min': '分', 'route.yen': '円', 'route.fareUnknown': '運賃は未収集の区間を含みます',
     'route.dayErr': 'この日のダイヤを読み込めませんでした',
   });
   Object.assign(TRANSLATIONS.en, {
@@ -39,11 +39,11 @@
     'route.prio.time': 'Fast: by arrival time', 'route.prio.transfers': 'Easy: by transfers', 'route.prio.wait': 'By waiting time',
     'route.prio.ride': 'By riding time', 'route.prio.fare': 'Cheap: by fare', 'route.prio.fareOff': 'Cheap: by fare (fare table pending)',
     'route.advanced': 'Advanced', 'route.maxTransfers': 'Max transfers', 'route.unlimited': 'Unlimited',
-    'route.walk': 'Walking transfers', 'route.walk.none': 'None', 'route.speed': 'Walking speed',
+    'route.walk': 'Max walking distance', 'route.walk.none': 'None', 'route.speed': 'Walking speed',
     'route.speed.slow': 'Slow', 'route.speed.normal': 'Normal', 'route.speed.fast': 'Fast',
     'route.maxWait': 'Max wait', 'route.gain': 'Hide routes that add a transfer but save under 3 min',
     'route.search': 'Search', 'route.placeholder': 'Station, bus stop',
-    'route.note': 'Static guidance from timetable data. Delays and cancellations are not reflected. Some Nomi Bus stop coordinates are unconfirmed, so walking transfers are available at only some stops.',
+    'route.note': 'Static guidance from timetable data. Delays and cancellations are not reflected. The 6 Komatsu Airport bus stops have no coordinates, so they cannot be used for walking transfers or coordinate-based origins.',
     'route.unknownPlace': 'Stop not found: ${name}', 'route.loading': 'Loading timetables…',
     'route.none': 'No route found. Try changing the time, date or transfer limit.',
     'route.why.limit': 'A route exists with ${n}+ transfer(s). Raise the transfer or waiting limit.',
@@ -79,7 +79,7 @@
       const o = document.createElement('option');
       o.value = ymd(d);
       const dow = t('header.dow.' + d.getDay());
-      o.textContent = (i === 0 ? t('route.today') + ' ' : '') + (d.getMonth() + 1) + '/' + d.getDate() + ' (' + dow + ')';
+      o.textContent = (d.getMonth() + 1) + '/' + d.getDate() + ' (' + dow + ')' + (i === 0 ? ' ' + t('route.today') : '');
       sel.appendChild(o);
     }
     if (keep) sel.value = keep;
@@ -129,6 +129,7 @@
       if (v.dateOffset >= 0 && v.dateOffset < $('rt-date').options.length) $('rt-date').selectedIndex = v.dateOffset;
       for (const [id, key] of [['rt-prio', 'prio'], ['rt-maxtr', 'maxtr'], ['rt-walk', 'walk'], ['rt-speed', 'speed'], ['rt-maxwait', 'maxwait']]) {
         const el = $(id);
+        if (key === 'walk' && ['5', '10', '15'].includes(v.walk)) v.walk = { 5: '400', 10: '800', 15: '1200' }[v.walk];   // 旧: 分の選択
         if (v[key] !== undefined && [...el.options].some(o => o.value === v[key] && !o.disabled)) el.value = v[key];
       }
       $('rt-gain').checked = v.gain !== false;
@@ -160,7 +161,7 @@
       maxTransfers: mt === 'unlimited' ? null : +mt,
       maxWaitMin: +$('rt-maxwait').value,
       minGainPerTransfer: $('rt-gain').checked ? 3 : 0,
-      walk: { enabled: walkMax > 0, maxMin: walkMax || 5, speed: +$('rt-speed').value },
+      walk: { enabled: walkMax > 0, maxMeters: walkMax || 400, speed: +$('rt-speed').value },
     };
   }
 
