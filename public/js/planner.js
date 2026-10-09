@@ -450,8 +450,8 @@
     }
     const pr = o.priority;
     const keyOf = j => {
-      const first = pr === 'transfers' ? j.transfers : pr === 'wait' ? j.wait : pr === 'ride' ? j.ride : pr === 'fare' ? (j.fare === null ? Infinity : j.fare) : j.total;
-      return [first, j.total, j.transfers, j.fare === null ? Infinity : j.fare, arriveMode ? -j.dep : -j.dep];
+      const first = pr === 'transfers' ? j.transfers : pr === 'wait' ? j.wait : pr === 'ride' ? j.ride : pr === 'fare' ? (j.fare === null ? Infinity : j.fare) : (arriveMode ? -j.dep : j.arr);
+      return [first, j.arr, j.total, j.transfers, j.fare === null ? Infinity : j.fare, -j.dep];
     };
     list.sort((a, b) => { const x = keyOf(a), y = keyOf(b); for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return x[i] - y[i]; return 0; });
     const journeys = list.slice(0, o.results);
