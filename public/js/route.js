@@ -6,7 +6,7 @@
   // ---- 翻訳（既存の辞書に，このページ用のキーだけを足す．既存ページは影響を受けない）----
   Object.assign(TRANSLATIONS.ja, {
     'route.title': '経路検索（試験公開）',
-    'route.from': '出発', 'route.to': '到着', 'route.date': '日付', 'route.time': '時刻',
+    'route.from': '出発', 'route.to': '到着', 'route.date': '日付',
     'route.priority': '表示順',
     'route.prio.time': '早：到着時刻順', 'route.prio.transfers': '楽：乗換回数順', 'route.prio.wait': '待ち時間順',
     'route.prio.ride': '乗車時間順', 'route.prio.fare': '安：安い順', 'route.prio.fareOff': '安：安い順（運賃表の準備中）',
@@ -24,7 +24,7 @@
     'route.why.unconnected': 'この日のダイヤでは，この 2 地点を結ぶ路線の組み合わせがありません（徒歩の乗換の範囲も含む）．',
     'route.why.nextDay': '翌日（${d}）の始発は ${t} 発 → ${a} 着です．日付を翌日にして探してください．',
     'route.why.window': '指定の時刻から 3 時間以内に便が無いため，範囲を広げて表示しています（最も近い便は ${t}）．',
-    'route.count': '${n} 件の候補のうち上位 ${m} 件', 'route.transfers': '乗換${n}回', 'route.direct': '直通',
+    'route.count': '${n} 件の候補のうち上位 ${m} 件', 'route.countDay': 'この日の経路 ${n} 件', 'route.countDayNow': 'この日の経路 ${n} 件（${t} 以降は ${m} 件）', 'route.transfers': '乗換${n}回', 'route.direct': '直通',
     'route.total': '合計', 'route.wait': '待ち', 'route.ride': '乗車', 'route.walkMin': '徒歩', 'route.fare': '運賃',
     'route.basis.road': '道のり約 ${m} m（OSM の歩行者の道）', 'route.basis.approx': '直線距離からの概算 約 ${m} m', 'route.basis.fixed': '個別に決めた値',
     'route.walkLeg': '徒歩', 'route.waitMin': '待ち${n}分', 'route.tight': '乗り遅れに注意',
@@ -34,7 +34,7 @@
   });
   Object.assign(TRANSLATIONS.en, {
     'route.title': 'Route search (trial)',
-    'route.from': 'From', 'route.to': 'To', 'route.date': 'Date', 'route.time': 'Time',
+    'route.from': 'From', 'route.to': 'To', 'route.date': 'Date',
     'route.priority': 'Sort by',
     'route.prio.time': 'Fast: by arrival time', 'route.prio.transfers': 'Easy: by transfers', 'route.prio.wait': 'By waiting time',
     'route.prio.ride': 'By riding time', 'route.prio.fare': 'Cheap: by fare', 'route.prio.fareOff': 'Cheap: by fare (fare table pending)',
@@ -52,7 +52,7 @@
     'route.why.unconnected': 'No combination of routes (including walking transfers) connects these two places on this date.',
     'route.why.nextDay': 'Next day (${d}): first departure ${t}, arriving ${a}. Change the date to search it.',
     'route.why.window': 'No service within 3 hours of your time, so the search range was widened (nearest: ${t}).',
-    'route.count': 'Top ${m} of ${n} candidates', 'route.transfers': '${n} transfer(s)', 'route.direct': 'Direct',
+    'route.count': 'Top ${m} of ${n} candidates', 'route.countDay': '${n} routes on this day', 'route.countDayNow': '${n} routes on this day (${m} from ${t})', 'route.transfers': '${n} transfer(s)', 'route.direct': 'Direct',
     'route.total': 'Total', 'route.wait': 'Waiting', 'route.ride': 'Riding', 'route.walkMin': 'Walking', 'route.fare': 'Fare',
     'route.basis.road': 'about ${m} m on OSM walking paths', 'route.basis.approx': 'estimated from straight-line distance, about ${m} m', 'route.basis.fixed': 'set individually',
     'route.walkLeg': 'Walk', 'route.waitMin': 'Wait ${n} min', 'route.tight': 'Tight connection',
@@ -65,6 +65,7 @@
   const MEMORY_KEY = 'routeLastSelection';
   const MEMORY_TTL_MIN = 30;
   let net = null, places = [];
+  let urlDepart = null, urlArrive = null;   // URL 引数の時刻（最初の検索だけに使う）
 
   // ---- 日付・時刻 ----
   const pad = n => String(n).padStart(2, '0');
@@ -113,7 +114,7 @@
     try {
       localStorage.setItem(MEMORY_KEY, JSON.stringify({
         from: $('rt-from').value, to: $('rt-to').value, dateOffset: $('rt-date').selectedIndex,
-        time: $('rt-time').value, prio: $('rt-prio').value,
+        prio: $('rt-prio').value,
         maxtr: $('rt-maxtr').value, walk: $('rt-walk').value, speed: $('rt-speed').value,
         maxwait: $('rt-maxwait').value, gain: $('rt-gain').checked,
         savedDate: ymd(nowDate()), savedAt: Date.now(),
@@ -130,7 +131,6 @@
         const el = $(id);
         if (v[key] !== undefined && [...el.options].some(o => o.value === v[key] && !o.disabled)) el.value = v[key];
       }
-      if (v.time) $('rt-time').value = v.time;
       $('rt-gain').checked = v.gain !== false;
       return true;
     } catch (e) { return false; }
@@ -144,8 +144,9 @@
     if (q.get('from')) $('rt-from').value = q.get('from');
     if (q.get('to')) $('rt-to').value = q.get('to');
     if (q.get('date') && [...$('rt-date').options].some(o => o.value === q.get('date'))) $('rt-date').value = q.get('date');
-    // 画面は「その時刻以降に出発する経路の一覧」のみ．arrive= は互換のため時刻として受ける
-    if (q.get('depart') || q.get('arrive')) $('rt-time').value = q.get('depart') || q.get('arrive');
+    // 画面は選んだ日の経路の一覧．depart= はその時刻の位置まで移る目印，arrive= は最初の 1 回だけ到着指定で探す
+    urlDepart = /^\d{1,2}:\d{2}$/.test(q.get('depart') || '') ? q.get('depart') : null;
+    urlArrive = /^\d{1,2}:\d{2}$/.test(q.get('arrive') || '') ? q.get('arrive') : null;
     if (q.get('prio') && [...$('rt-prio').options].some(o => o.value === q.get('prio') && !o.disabled)) $('rt-prio').value = q.get('prio');
     return q.get('from') && q.get('to') && q.get('auto') !== '0';
   }
@@ -175,11 +176,19 @@
     try { await net.ensureDate(date); } catch (e) { st.textContent = t('route.dayErr'); return; }
     const o = options();
     const q = Object.assign({ date, from, to }, o);
-    const time = $('rt-time').value || '00:00';
-    q.depart = time;
+    // 時刻は指定させず，選んだ日の全出発を一覧にする（到着指定の URL 引数だけは最初の 1 回その時刻で探す）
+    const arriveAt = urlArrive; urlArrive = null;
+    if (arriveAt) q.arrive = arriveAt; else Object.assign(q, { depart: '00:00', window: 2000, results: 1000 });
     const r = Planner.plan(net, q);
     if (r.error === 'unknown-place') { st.textContent = t('route.unknownPlace', { name: $('rt-from').value + ' / ' + $('rt-to').value }); return; }
-    st.textContent = r.journeys.length ? t('route.count', { n: r.count, m: r.journeys.length }) : '';
+    // 今日は今の時刻（depart= があればその時刻）より前の出発を薄くし，最初の候補へ移る
+    const nd = nowDate();
+    const refStr = urlDepart || (date === ymd(nd) ? pad(nd.getHours()) + ':' + pad(nd.getMinutes()) : null);
+    const ref = refStr ? Planner.parseTime(refStr) : null;
+    if (!arriveAt) q.ref = ref;
+    const remain = ref === null ? 0 : r.journeys.filter(j => j.dep >= ref).length;
+    st.textContent = !r.journeys.length ? '' : arriveAt ? t('route.count', { n: r.count, m: r.journeys.length })
+      : ref === null ? t('route.countDay', { n: r.journeys.length }) : t('route.countDayNow', { n: r.journeys.length, m: remain, t: refStr });
     if (!r.journeys.length) { out.innerHTML = '<p class="rt-note">' + esc(await noneMessage(r, date)) + '</p>'; saveMemory(); return; }
     if (r.widened) out.innerHTML = '<p class="rt-note">' + esc(t('route.why.window', { t: Planner.fmtTime(r.edge) })) + '</p>';
     // 徒歩を使う候補には，徒歩なしの最良との差を添える
@@ -190,6 +199,10 @@
     }
     out.innerHTML += r.journeys.map((j, i) => renderJourney(j, i, noWalk, q)).join('');
     bindMaps(out, r.journeys, date, q);
+    if (!arriveAt && ref !== null && q.priority === 'time') {
+      const first = out.querySelector('.rt-j:not(.rt-past)');
+      if (first && first !== out.querySelector('.rt-j')) first.scrollIntoView({ block: 'start' });
+    }
     saveMemory();
   }
 
@@ -272,7 +285,7 @@
       const via = l.stops.length > 2 ? l.stops.slice(1, -1).map(s => tStop(s.name)).join(' → ') : '';
       return gap + `<div class="rt-leg"><span class="rt-name">${Planner.fmtTime(l.dep)} ${esc(placeName(l.from))}</span> → ${Planner.fmtTime(l.arr)} ${esc(placeName(l.to))}<small>${esc(rname)}${via ? ' · ' + l.stops.length + ' ' + (currentLang === 'ja' ? '停車' : 'stops') : ''}</small></div>`;
     }).join('');
-    return `<div class="rt-j"><div class="rt-j-head"><span class="rt-j-time">${j.depStr} → ${j.arrStr}</span><span class="rt-j-total">${esc(dur(j.total))}</span><button type="button" class="rt-mapbtn" data-map="${i}" aria-expanded="false" title="${esc(t('route.map'))}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg></button></div><div class="rt-tags">${tags.join('')}</div>${cmp}<div class="rt-legs">${legs}</div></div>`;
+    return `<div class="rt-j${q.ref != null && j.dep < q.ref ? ' rt-past' : ''}"><div class="rt-j-head"><span class="rt-j-time">${j.depStr} → ${j.arrStr}</span><span class="rt-j-total">${esc(dur(j.total))}</span><button type="button" class="rt-mapbtn" data-map="${i}" aria-expanded="false" title="${esc(t('route.map'))}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg></button></div><div class="rt-tags">${tags.join('')}</div>${cmp}<div class="rt-legs">${legs}</div></div>`;
   }
 
   // ---- 起動 ----
@@ -296,8 +309,6 @@
   async function init() {
     initSettingsDropdown();
     buildDateSelect();
-    const n = nowDate();
-    $('rt-time').value = pad(n.getHours()) + ':' + pad(n.getMinutes());
     applyStaticTranslations();
     updateClock(); setInterval(updateClock, 10000);
     $('rt-status').textContent = t('route.loading');
