@@ -10,10 +10,10 @@
 import json, math, os, sys, time, heapq, urllib.request, urllib.parse, hashlib
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from check_lines import dist, osrm, routes, PUB
+from check_lines import dist, osrm, routes, norm, PUB
 RAILCACHE = f'{HERE}/osm_rail_cache'
-MIRRORS = ['https://overpass-api.de/api/interpreter', 'https://overpass.private.coffee/api/interpreter']
-TILES = ['36.25,136.25,36.75,136.70', '36.55,136.62,36.75,136.90']   # 大聖寺〜倶利伽羅・石川線を含む範囲
+MIRRORS = ['https://z.overpass-api.de/api/interpreter', 'https://overpass.openstreetmap.fr/api/interpreter', 'https://overpass-api.de/api/interpreter']
+TILES = ['36.25,136.25,36.75,136.70', '36.58,136.62,36.72,136.80']   # 大聖寺〜倶利伽羅・石川線を含む範囲
 
 def fetch_rail(refresh=False):
     os.makedirs(RAILCACHE, exist_ok=True)
@@ -49,6 +49,18 @@ def rail_graph(ways):
             if a == b: continue
             d = dist(a, b)
             adj.setdefault(a, []).append((b, d)); adj.setdefault(b, []).append((a, d))
+    # 複線は上り・下りが別の線として入り，渡り線が無い所で別の連結成分になる．12 m 以内の別の線の点どうしを（余分な距離を足して）つなぐ
+    grid = {}
+    for n in adj: grid.setdefault((int(n[0] * 3000), int(n[1] * 3000)), []).append(n)
+    for (gx, gy), lst in grid.items():
+        for dx in (0, 1):
+            for dy in (-1, 0, 1):
+                if dx == 0 and dy < 0: continue
+                for a in lst:
+                    for b in grid.get((gx + dx, gy + dy), []):
+                        if a < b or dx or dy:
+                            if a != b and dist(a, b) <= 12 and all(v != b for v, _ in adj[a]):
+                                adj[a].append((b, dist(a, b) + 60)); adj[b].append((a, dist(a, b) + 60))
     return adj
 
 def rail_path(adj, nodes, a, b, snap=150):
@@ -99,18 +111,23 @@ def main():
     for rid, r in routes().items():
         kind = 'train' if rid.startswith(('ir_', 'ishikawa_')) else 'bus'
         al = next((v for k, v in aliases.items() if rid.startswith(k.split('_')[0] + '_')), {})
-        names = [al.get(n, n) for n in r['stops']]
+        names = [n for n in (al.get(n, n) for n in norm(r['stops'])) if n in stops]   # 座標のある停留所だけ（地図側も同じ）
         for a, b in zip(names, names[1:]):
             key = f'{kind}|{a}|{b}'
-            if key in legs or a not in stops or b not in stops or a == b: continue
+            if key in legs or a == b or (kind == 'train' and f'{kind}|{b}|{a}' in legs): continue   # 鉄道は往復で同じ線路（地図側で反転）
             if kind == 'train':
                 rp = rail_path(adj, nodes, stops[a], stops[b])
                 if not rp: miss.append(key); continue
                 pts, d = rp
+            elif rid.startswith('komatsu_'):
+                # JAIST↔小松駅のシャトルは OSM に路線が無く，OSRM（最短の道）とは別の道を通る既存の経路（geo/jaist_komatsu.geojson）を使う（実際の経路は未確認．docs/route-planner.md）
+                g = [(c[1], c[0]) for c in next(x for x in json.load(open(f'{PUB}/geo/jaist_komatsu.geojson'))['features'] if x['geometry']['type'] == 'LineString')['geometry']['coordinates']]
+                if dist(g[0], stops[a]) > dist(g[-1], stops[a]): g = g[::-1]
+                pts, d = [stops[a]] + g + [stops[b]], 0
             else:
                 d, pts = osrm([stops[a], stops[b]])
                 if d is None: miss.append(key); continue
-            ratios.append((key, d / max(dist(stops[a], stops[b]), 1)))
+            ratios.append((key, d / max(dist(stops[a], stops[b]), 1)))   # komatsu は d=0（比に入らない）
             legs[key] = [[round(p[0], 5), round(p[1], 5)] for p in simplify(pts)]
     json.dump({'version': 1, 'note': 'bus=OSRM（OSM の道），train=OSM の線路．A→B の向き', 'legs': legs}, open(f'{PUB}/route/shapes.json', 'w'), ensure_ascii=False, separators=(',', ':'))
     print('区間', len(legs), '結べず', len(miss), miss[:20])
