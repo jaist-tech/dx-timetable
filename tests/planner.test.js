@@ -179,14 +179,14 @@ function synthRoad(walkData) {
 }
 test('徒歩: 道のりの表があれば道のり÷速さの分と根拠 road を返す', () => {
   const net = synthRoad({ pairs: [{ a: 'B', b: 'C', m: 640, straight: 320 }], unsnapped: [] });
-  const w = Planner.plan(net, { date: WK, from: 'A', to: 'D', depart: '08:00', minGainPerTransfer: 0, walk: { maxMin: 15 } }).journeys[0].legs.find(l => l.type === 'walk');
+  const w = Planner.plan(net, { date: WK, from: 'A', to: 'D', depart: '08:00', minGainPerTransfer: 0, walk: { maxMeters: 1200 } }).journeys[0].legs.find(l => l.type === 'walk');
   assert.equal(w.minutes, 8); assert.equal(w.basis, 'road'); assert.equal(w.meters, 640);
 });
 test('徒歩: 道のりの表にある組以外（道のりが上限超）は歩かず，表に無い停留所だけ直線の近似 approx', () => {
   const none = synthRoad({ pairs: [], unsnapped: [] });
-  assert.equal(Planner.plan(none, { date: WK, from: 'A', to: 'D', depart: '08:00', walk: { maxMin: 15 } }).journeys.length, 0);
+  assert.equal(Planner.plan(none, { date: WK, from: 'A', to: 'D', depart: '08:00', walk: { maxMeters: 1200 } }).journeys.length, 0);
   const apx = synthRoad({ pairs: [], unsnapped: ['C'] });
-  const w = Planner.plan(apx, { date: WK, from: 'A', to: 'D', depart: '08:00', walk: { maxMin: 15 } }).journeys[0].legs.find(l => l.type === 'walk');
+  const w = Planner.plan(apx, { date: WK, from: 'A', to: 'D', depart: '08:00', walk: { maxMeters: 1200 } }).journeys[0].legs.find(l => l.type === 'walk');
   assert.equal(w.basis, 'approx');
 });
 

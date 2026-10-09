@@ -15,7 +15,7 @@
     maxWaitMin: 120,        // 乗換での待ちの上限（分）
     window: 180,            // 出発（到着）指定から探す幅（分）
     results: 5,             // 返す候補の数
-    walk: { enabled: true, maxMin: 5, speed: 80, margin: 2, detour: 1.3 },
+    walk: { enabled: true, maxMeters: 400, speed: 80, margin: 2, detour: 1.3 },
     minGainPerTransfer: 3,  // 乗換 1 回増えるごとに，これ以上短縮しない候補は除く（0 で無効）
     priority: 'time',       // time | transfers | wait | ride | fare
   };
@@ -214,10 +214,11 @@
       const k = a * 100000 + b;
       if (!best.has(k) || best.get(k).min > min) best.set(k, { min, basis, meters });
     };
+    const maxM = w.maxMeters != null ? w.maxMeters : (w.maxMin != null ? w.maxMin * w.speed : 400);   // maxMin（分）は旧指定．距離 = 分 × 速さ
     const fixed = new Set();
-    for (const e of day.explicit) { fixed.add(e.a * 100000 + e.b); if (e.min <= w.maxMin) put(e.a, e.b, e.min, 'fixed', null); }
+    for (const e of day.explicit) { fixed.add(e.a * 100000 + e.b); if (e.min * w.speed <= maxM) put(e.a, e.b, e.min, 'fixed', null); }
     const idx = day.coords.map((c, i) => (c ? i : -1)).filter(i => i >= 0);
-    const maxStraight = (w.maxMin * w.speed) / w.detour;
+    const maxStraight = maxM / w.detour;
     for (let x = 0; x < idx.length; x++) for (let y = x + 1; y < idx.length; y++) {
       const a = idx[x], b = idx[y];
       const d = distM(day.coords[a], day.coords[b]);
@@ -227,7 +228,7 @@
       if (rd != null) { m = Math.max(1, Math.ceil(rd / w.speed)); basis = 'road'; meters = rd; }
       else if (!day.hasRoad || day.unsnapped.has(a) || day.unsnapped.has(b)) { m = Math.max(1, Math.ceil((d * w.detour) / w.speed)); basis = 'approx'; meters = Math.round(d * w.detour); }
       else continue;   // 道のりの表にあり，道のりが上限を超える組は歩かない
-      if (m <= w.maxMin) {
+      if ((meters != null ? meters : Infinity) <= maxM) {
         if (!fixed.has(a * 100000 + b)) put(a, b, m, basis, meters);   // routes.json 等で決めた徒歩の分は，道のり・近似で上書きしない
         if (!fixed.has(b * 100000 + a)) put(b, a, m, basis, meters);
       }

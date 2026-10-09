@@ -10,3 +10,5 @@ tools/nomibus/cache/
 tools/nomibus/intermediate/
 tools/watch/events.json
 tools/route/osm_walk_cache/
+tools/route/osrm_cache/
+tools/route/osm_rail_cache/
