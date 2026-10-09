@@ -6,8 +6,8 @@
   // ---- 翻訳（既存の辞書に，このページ用のキーだけを足す．既存ページは影響を受けない）----
   Object.assign(TRANSLATIONS.ja, {
     'route.title': '経路検索（試験公開）',
-    'route.from': '出発', 'route.to': '到着', 'route.date': '日付', 'route.mode': '時刻の指定', 'route.time': '時刻',
-    'route.depart': '出発', 'route.arrive': '到着', 'route.priority': '重視する条件',
+    'route.from': '出発', 'route.to': '到着', 'route.date': '日付', 'route.time': '時刻',
+    'route.priority': '表示順',
     'route.prio.time': '早：到着時刻順', 'route.prio.transfers': '楽：乗換回数順', 'route.prio.wait': '待ち時間順',
     'route.prio.ride': '乗車時間順', 'route.prio.fare': '安：安い順', 'route.prio.fareOff': '安：安い順（運賃表の準備中）',
     'route.advanced': '詳細設定', 'route.maxTransfers': '乗換回数の上限', 'route.unlimited': '無制限',
@@ -34,8 +34,8 @@
   });
   Object.assign(TRANSLATIONS.en, {
     'route.title': 'Route search (trial)',
-    'route.from': 'From', 'route.to': 'To', 'route.date': 'Date', 'route.mode': 'Time is', 'route.time': 'Time',
-    'route.depart': 'Departure', 'route.arrive': 'Arrival', 'route.priority': 'Priority',
+    'route.from': 'From', 'route.to': 'To', 'route.date': 'Date', 'route.time': 'Time',
+    'route.priority': 'Sort by',
     'route.prio.time': 'Fast: by arrival time', 'route.prio.transfers': 'Easy: by transfers', 'route.prio.wait': 'By waiting time',
     'route.prio.ride': 'By riding time', 'route.prio.fare': 'Cheap: by fare', 'route.prio.fareOff': 'Cheap: by fare (fare table pending)',
     'route.advanced': 'Advanced', 'route.maxTransfers': 'Max transfers', 'route.unlimited': 'Unlimited',
@@ -113,7 +113,7 @@
     try {
       localStorage.setItem(MEMORY_KEY, JSON.stringify({
         from: $('rt-from').value, to: $('rt-to').value, dateOffset: $('rt-date').selectedIndex,
-        mode: $('rt-mode').value, time: $('rt-time').value, prio: $('rt-prio').value,
+        time: $('rt-time').value, prio: $('rt-prio').value,
         maxtr: $('rt-maxtr').value, walk: $('rt-walk').value, speed: $('rt-speed').value,
         maxwait: $('rt-maxwait').value, gain: $('rt-gain').checked,
         savedDate: ymd(nowDate()), savedAt: Date.now(),
@@ -126,7 +126,7 @@
       if (!v || Date.now() - v.savedAt > MEMORY_TTL_MIN * 60000 || v.savedDate !== ymd(nowDate())) return false;
       $('rt-from').value = v.from || ''; $('rt-to').value = v.to || '';
       if (v.dateOffset >= 0 && v.dateOffset < $('rt-date').options.length) $('rt-date').selectedIndex = v.dateOffset;
-      for (const [id, key] of [['rt-mode', 'mode'], ['rt-prio', 'prio'], ['rt-maxtr', 'maxtr'], ['rt-walk', 'walk'], ['rt-speed', 'speed'], ['rt-maxwait', 'maxwait']]) {
+      for (const [id, key] of [['rt-prio', 'prio'], ['rt-maxtr', 'maxtr'], ['rt-walk', 'walk'], ['rt-speed', 'speed'], ['rt-maxwait', 'maxwait']]) {
         const el = $(id);
         if (v[key] !== undefined && [...el.options].some(o => o.value === v[key] && !o.disabled)) el.value = v[key];
       }
@@ -144,8 +144,8 @@
     if (q.get('from')) $('rt-from').value = q.get('from');
     if (q.get('to')) $('rt-to').value = q.get('to');
     if (q.get('date') && [...$('rt-date').options].some(o => o.value === q.get('date'))) $('rt-date').value = q.get('date');
-    if (q.get('arrive')) { $('rt-mode').value = 'arrive'; $('rt-time').value = q.get('arrive'); }
-    else if (q.get('depart')) { $('rt-mode').value = 'depart'; $('rt-time').value = q.get('depart'); }
+    // 画面は「その時刻以降に出発する経路の一覧」のみ．arrive= は互換のため時刻として受ける
+    if (q.get('depart') || q.get('arrive')) $('rt-time').value = q.get('depart') || q.get('arrive');
     if (q.get('prio') && [...$('rt-prio').options].some(o => o.value === q.get('prio') && !o.disabled)) $('rt-prio').value = q.get('prio');
     return q.get('from') && q.get('to') && q.get('auto') !== '0';
   }
@@ -176,7 +176,7 @@
     const o = options();
     const q = Object.assign({ date, from, to }, o);
     const time = $('rt-time').value || '00:00';
-    if ($('rt-mode').value === 'arrive') q.arrive = time; else q.depart = time;
+    q.depart = time;
     const r = Planner.plan(net, q);
     if (r.error === 'unknown-place') { st.textContent = t('route.unknownPlace', { name: $('rt-from').value + ' / ' + $('rt-to').value }); return; }
     st.textContent = r.journeys.length ? t('route.count', { n: r.count, m: r.journeys.length }) : '';
