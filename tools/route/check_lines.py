@@ -33,6 +33,14 @@ def osrm(coords):
     r = d['routes'][0]
     return r['distance'], [(c[1], c[0]) for c in r['geometry']['coordinates']]
 
+def norm(names):
+    """のみバスの「(折り返し)」は同じ停留所（planner.js の normName と同じ）．連続する同名は 1 つにする"""
+    out = []
+    for n in names:
+        n = n.replace('(折り返し)', '').strip()
+        if not out or out[-1] != n: out.append(n)
+    return out
+
 def routes():
     man = json.load(open(f'{PUB}/manifest.json'))
     out = {}
@@ -48,7 +56,7 @@ def main():
     aliases = json.load(open(f'{PUB}/routes.json')).get('place_aliases', {})   # 路線別の別名（野々市駅の IR と北鉄）
     for rid, r in routes().items():
         al = next((v for k, v in aliases.items() if rid.startswith(k.split('_')[0] + '_')), {})
-        names = [al.get(n, n) for n in r['stops']]
+        names = [al.get(n, n) for n in norm(r['stops'])]
         if rid.startswith(('ir_', 'ishikawa_')):
             kind = 'train'
         else:
