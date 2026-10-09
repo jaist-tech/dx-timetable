@@ -61,6 +61,11 @@
 
   // ---------- 停留所名の正規化 ----------
   function normName(s) { return String(s).replace(/\(折り返し\)/g, '').trim(); }
+  // 路線ごとの停留所名の別名（routes.json の place_aliases）．別の場所なのに同じ名前の駅（野々市駅の IR と北鉄）を別の地点に分ける
+  function aliasName(routes, base, name) {
+    const n = normName(name), a = routes && routes.place_aliases && routes.place_aliases[base];
+    return (a && a[n]) || n;
+  }
   function kindOf(base) { return /^(ir_|ishikawa_line)/.test(base) ? 'train' : 'bus'; }
 
   // ---------- ネットワーク ----------
@@ -93,8 +98,8 @@
     const { manifest, routes: rcfg } = net.raw;
     const holidays = new Set(net.raw.holidays || []);
     const placeIdx = new Map(), places = [];
-    const place = name => {
-      const n = normName(name);
+    const place = (name, base) => {
+      const n = aliasName(net.raw.routes, base, name);
       if (!placeIdx.has(n)) { placeIdx.set(n, places.length); places.push({ name: n }); }
       return placeIdx.get(n);
     };
@@ -116,7 +121,7 @@
           trips = r.schedules && r.schedules[dk.key];
         }
         if (!trips || !trips.length) continue;
-        const stops = r.stops.map(place);
+        const stops = r.stops.map(s => place(s, base));
         const tl = [];
         for (const raw of trips) {
           const times = []; let prev = -1, add = 0;

@@ -441,6 +441,7 @@ const STOP_NAMES_EN = {
   '西松任駅': 'Nishi-Matto Sta.',
   '松任駅': 'Matto Sta.',
   '野々市駅': 'Nonoichi Sta.',
+  '野々市駅（北鉄）': 'Nonoichi Sta. (Hokutetsu)',
   '西金沢駅': 'Nishi-Kanazawa Sta.',
   '金沢駅': 'Kanazawa Sta.',
   '東金沢駅': 'Higashi-Kanazawa Sta.',

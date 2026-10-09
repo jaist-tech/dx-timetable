@@ -286,3 +286,19 @@ test('全停留所が 1 つにつながる（徒歩なし・平日・土曜・�
     assert.equal(new Set(par.map((_, i) => f(i))).size, 1, d + ' に孤立した停留所群がある');
   }
 });
+
+test('野々市駅: IR と北鉄は別の地点で，北鉄側の運賃・座標を持ち，乗換で結ばれない', async () => {
+  const net = await getNet(); await net.ensureDate(WK);
+  const d = net.day(WK);
+  assert.ok(d.placeIdx.has('野々市駅') && d.placeIdx.has('野々市駅（北鉄）'));
+  const a = d.coords[d.placeIdx.get('野々市駅')], b = d.coords[d.placeIdx.get('野々市駅（北鉄）')];
+  assert.ok(a && b && Math.abs(a.lon - b.lon) > 0.01, '座標が別');
+  const r = Planner.plan(net, { date: WK, from: '野々市駅（北鉄）', to: '野町駅', depart: '08:00', walk: { enabled: false } });
+  assert.ok(r.journeys.length > 0);
+  for (const j of r.journeys) {
+    assert.ok(j.legs.every(l => l.base === 'ishikawa_line'), '石川線だけ');
+    assert.ok(typeof j.fare === 'number' && j.fare > 0, '運賃あり');
+  }
+  const ir = Planner.plan(net, { date: WK, from: '野々市駅', to: '金沢駅', depart: '08:00', walk: { enabled: false } });
+  assert.ok(ir.journeys.length > 0 && ir.journeys.every(j => j.legs.every(l => l.base === 'ir_ishikawa')), 'IR の野々市駅は IR だけ');
+});
