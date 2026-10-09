@@ -10,9 +10,9 @@ PROJECT_ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
 PUBLIC_DATA = os.path.join(PROJECT_ROOT, 'public', 'data')
 JST = timezone(timedelta(hours=9))
 
-DATE_RE = re.compile(r'^\d{4}-\d{2}-\d{2}$')
+DATE_RE = re.compile(r'^\d{4}-\d{2}-\d{2}\Z')
 TIME_RE = re.compile(r'^\d{1,2}:\d{2}$')
-KEY_RE = re.compile(r'^[a-z0-9_]+$')
+KEY_RE = re.compile(r'^[a-z0-9_]+\Z')
 
 # カテゴリ定義
 CAT_BASIC = '基本情報'
@@ -61,6 +61,10 @@ def check_payload(payload, manifest):
     if not segment:
         add_err(CAT_BASIC, '区間 (segment) が指定されていません',
                 '区間ドロップダウンから選択してください')
+    elif not isinstance(segment, str) or not KEY_RE.fullmatch(segment):
+        add_err(CAT_BASIC, f'区間 (segment) の形式が不正: {segment!r}',
+                '英小文字・数字・_ だけで指定してください')
+        segment = None
     else:
         add_pass(CAT_BASIC, f'区間: {segment}')
 

@@ -24,6 +24,7 @@ PUBLIC_DATA = os.path.join(PROJECT_ROOT, 'public', 'data')
 ADMIN_STATIC = HERE  # index.html, app.js, style.css
 
 JST = timezone(timedelta(hours=9))
+ALLOWED_HOSTS = ('localhost', '127.0.0.1')
 
 
 def _now_iso():
@@ -84,6 +85,8 @@ class Handler(BaseHTTPRequestHandler):
     # ---- routing ----
 
     def do_GET(self):
+        if not self._guard(False):
+            return
         parsed = urlparse(self.path)
         path = parsed.path
         if path in ('/', '/index.html'):
@@ -146,7 +149,27 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json({'error': str(e)}, 500)
         return self._send_json(doc)
 
+    def _guard(self, post):
+        """DNS リバインディング・CSRF 対策。Host は localhost 系のみ，
+        POST は Origin が同じ Host で，Content-Type が multipart か JSON のときだけ通す。"""
+        host = self.headers.get('Host', '')
+        if host.rsplit(':', 1)[0] not in ALLOWED_HOSTS:
+            self._send_json({'error': 'forbidden host'}, 403)
+            return False
+        if post:
+            origin = self.headers.get('Origin')
+            if origin is None or urlparse(origin).netloc != host:
+                self._send_json({'error': 'forbidden origin'}, 403)
+                return False
+            ctype = self.headers.get('Content-Type', '').split(';')[0].strip().lower()
+            if ctype not in ('multipart/form-data', 'application/json'):
+                self._send_json({'error': 'unsupported content type'}, 415)
+                return False
+        return True
+
     def do_POST(self):
+        if not self._guard(True):
+            return
         path = urlparse(self.path).path
         if path == '/api/parse':
             return self._handle_parse()

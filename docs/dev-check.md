@@ -52,3 +52,16 @@ dev（main との差分 24 commit・52 ファイル）に，merge を止める�
 | 補強 | `server.js` が 0.0.0.0 で待ち受け | 127.0.0.1 に修正 |
 | 却下 | Nomi の停留所名が unescaped な出力先に届く | 現在は届かない（index.html は Nomi を読まない）．出力側のエスケープは補強として残す |
 | 未検査 | `tools/admin/server.py`（CSRF・DNS リバインディング），`check_commit.py` の segment のファイル名，その他の入口 | 別タスクで点検 |
+
+## tools/admin・その他の入口の点検（2026-10-09）
+
+security-audit で未検査だった範囲の点検．
+
+| 対象 | 内容 | 対応 |
+|---|---|---|
+| `tools/admin/server.py` | Host・Origin・Content-Type の検査が無く，別のサイトからの POST（CSRF）・DNS リバインディングで commit・delete・update が届く | Host を localhost・127.0.0.1 に限定，POST は Origin が Host と同じで Content-Type が multipart か JSON のときだけ許可（403・415）．curl で確認 |
+| `tools/admin/check_commit.py` | `segment` に許可リストが無く，`../` を含むファイル名で書き込める | `segment` を `[a-z0-9_]+` に限定，日付の正規表現を `\Z` 終端に変更（末尾の改行を拒否） |
+| `tools/timetable_viewer.html` | エラー文を innerHTML に入れていた | textContent で挿入 |
+| `tools/check`・`tools/public`・同梱 PDF | `tools/check` は引数の出力先のみ．subprocess・eval 等の使用は無い．`tools/public` はデータのみ | 変更なし |
+
+未対応: 同梱 PDF の内容の解析（pdfplumber の既知の脆弱性の調査）は行っていない（低）．
