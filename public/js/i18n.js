@@ -549,7 +549,7 @@ function t(key, params) {
   if (str === undefined) return key;
   if (params) {
     for (const [k, v] of Object.entries(params)) {
-      str = str.replace('${' + k + '}', v);
+      str = str.replace('${' + k + '}', () => v);
     }
   }
   return str;

@@ -152,6 +152,7 @@
   async function search() {
     const st = $('rt-status'), out = $('rt-results');
     const from = resolveInput($('rt-from').value), to = resolveInput($('rt-to').value);
+    openMaps.forEach(m => m.destroy()); openMaps = [];
     out.innerHTML = '';
     if (!from) { st.textContent = t('route.unknownPlace', { name: $('rt-from').value }); return; }
     if (!to) { st.textContent = t('route.unknownPlace', { name: $('rt-to').value }); return; }

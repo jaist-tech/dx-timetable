@@ -1,4 +1,4 @@
-// Node の自動試験: node --test tests/
+// Node の自動試験: node --test tests/planner.test.js
 const test = require('node:test');
 const assert = require('node:assert');
 const fs = require('fs');
@@ -212,4 +212,12 @@ test('listLines: 路線ごとの停留所が重複なく並び，全停留所を
   assert.deepEqual([...all].filter(s => !covered.has(s)), []);
   const tsurugi = lines.find(l => l.stops[0] === 'JAIST' || l.stops.includes('鶴来駅'));
   assert.ok(tsurugi);
+});
+
+test('運賃: 同じ IR の運賃区間を続けて乗るときは通しの運賃（加賀温泉駅 → 津幡駅 = 1130）', async () => {
+  const net = await getNet(); await net.ensureDate(WK);
+  const r = Planner.plan(net, { date: WK, from: '加賀温泉駅', to: '津幡駅', depart: '08:00', results: 10, minGainPerTransfer: 0 });
+  const j = r.journeys.find(x => x.legs.filter(l => l.type === 'trip').every(l => l.base.startsWith('ir_')));
+  assert.ok(j, 'IR だけの経路がある');
+  assert.equal(j.fare, 1130);
 });

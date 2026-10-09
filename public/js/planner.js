@@ -343,9 +343,19 @@
   // 運賃の合計．のみバス同士の乗継は 2 本目が無料（乗継券．同日・降車時に申し出）．不明な区間があれば null
   function journeyFare(fares, legs) {
     if (!fares) return null;
-    let sum = 0, prev = null;
+    // 同じ鉄道の運賃区間（matrix）で徒歩を挟まず続けて乗る便は，通しの 1 区間として引く（合算より安い場合がある）
+    const parts = [];
+    let cut = true;
     for (const l of legs) {
-      if (l.type !== 'trip') continue;
+      if (l.type !== 'trip') { cut = true; continue; }
+      const last = parts[parts.length - 1];
+      const seg = fares.segments && fares.segments[FARE_SEGMENT(l.base)];
+      if (!cut && last && seg && seg.kind === 'matrix' && FARE_SEGMENT(last.base) === FARE_SEGMENT(l.base)) last.to = l.to;
+      else parts.push({ base: l.base, from: l.from, to: l.to });
+      cut = false;
+    }
+    let sum = 0, prev = null;
+    for (const l of parts) {
       const f = legFare(fares, l);
       if (f === null) return null;
       const free = prev && /^nomi_/.test(prev.base) && /^nomi_/.test(l.base);
