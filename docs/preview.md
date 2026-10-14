@@ -29,14 +29,16 @@ cd ~/project/dx-timetable
 git push -u origin dev
 ```
 
-3. Basic 認証の合言葉を環境変数に設定する．先にプロジェクトを作るため，最初の配備はエラー（503 の画面）で構わない．
+3. Basic 認証の合言葉を環境変数に設定する．
+
+まずプロジェクトを作るために配備する（この時点の画面は 503 で構わない）．
 
 ```bash
 cd ~/project/dx-timetable
 ./tools/preview/deploy.sh
 ```
 
-続けて，ユーザー名と合言葉を入力して設定する（入力は画面に出ない．2 回打つと置き換える）．
+続けて，ユーザー名と合言葉を入力して設定する（合言葉は画面に出ず，もう一度打つと置き換わる）．
 
 ```bash
 cd ~/project/tmp/dx-timetable-preview
@@ -64,7 +66,7 @@ dev に commit した後，手順 2（`git push`）と手順 4 の `./tools/prev
 ## 注意
 
 - 配備されるのは `public/` の内容だけで，`tools/` や `tests/` は含まれない．
-- Vercel の Hobby の無料枠でも使える．アカウントは `satom7f`（CLI のログイン済み）．
+- Vercel は Hobby の無料枠で使え，CLI は `satom7f` のアカウントでログイン済みである．
 - 認証を外して誰でも見られるようにする場合は，公開前に security-audit の要否を確認する．
 - プレビューを止めるときは `~/.local/bin/vercel remove dx-timetable-preview --yes` を実行する．
 - main への merge（GitHub Pages の本番更新）は別の作業で，この手順には含まれない．
