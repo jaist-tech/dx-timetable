@@ -2,6 +2,7 @@
 
 ## 要約
 
+:::message
 dev を GitHub の origin に push すると，Vercel の既存のプロジェクト dx-timetable（GitHub 連携済み）がブランチごとのプレビューの URL を発行する．別の Vercel プロジェクトや配備スクリプトは要らない．
 
 | 項目 | 内容 |
@@ -11,6 +12,7 @@ dev を GitHub の origin に push すると，Vercel の既存のプロジェ�
 | 閲覧する URL | Vercel のダッシュボードのプロジェクト dx-timetable の Deployments で，ブランチ dev のプレビューを開く |
 
 あなたの作業: 下の手順 1〜2 を共有サーバーのターミナルで実行し，ダッシュボードで dev のプレビューの URL を確認する．
+:::
 
 ## 手順
 
