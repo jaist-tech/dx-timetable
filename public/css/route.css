@@ -72,3 +72,16 @@
 .rt-j .rt-ride{color:var(--text-secondary)}
 .rt-sum{font-size:.78rem;color:var(--text-secondary);margin-top:8px}
 .rt-j .rt-mapbtn{margin:8px 0 0}
+
+/* 時刻へ移動・現在地・乗換の後の便 */
+.rt-jumprow{grid-template-columns:minmax(0,1fr)}
+.rt-jumprow .rt-field{max-width:12rem}
+.rt-walkmeta{font-size:.78rem;color:var(--text-secondary)}
+.rt-alt-btn{border:1px solid var(--border);background:none;color:var(--text-secondary);border-radius:8px;padding:2px 8px;font-size:.74rem;cursor:pointer;display:inline-flex;align-items:center;gap:4px;margin-top:4px}
+.rt-alt-btn[aria-expanded=true]{color:var(--primary);border-color:currentColor}
+.rt-alts{margin:6px 0 2px;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.rt-alt{display:flex;width:100%;gap:10px;align-items:center;border:none;border-bottom:1px solid var(--border);background:none;color:var(--text);padding:8px 10px;font-size:.88rem;cursor:pointer;text-align:left}
+.rt-alt:last-child{border-bottom:none}
+.rt-alt[aria-current=true]{background:var(--bg);font-weight:700}
+.rt-alt small{color:var(--text-secondary);margin-left:auto}
+.rt-alt-empty{padding:8px 10px;font-size:.8rem;color:var(--text-secondary)}

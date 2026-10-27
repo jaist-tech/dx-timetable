@@ -66,6 +66,7 @@
       <div class="search-stops-row rt-places">
         <label class="search-field-half rt-field"><span data-i18n="route.from">出発</span>
           <span class="rt-inp"><input id="rt-from" list="rt-stops" type="text" inputmode="search" placeholder="駅、バス停" required>
+          <button type="button" class="rt-pick rt-here" id="rt-here" data-i18n-aria="route.here" aria-label="現在地" title="現在地"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3"/></svg></button>
           <button type="button" class="rt-pick" data-pick="from" data-i18n-aria="route.pick" aria-label="路線・地図から選ぶ" title="路線・地図から選ぶ"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0114 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></button></span></label>
         <button type="button" id="rt-swap" class="swap-btn" data-i18n-aria="search.swap" aria-label="入れ替え" >
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 4v14M3 14l4 4 4-4M17 20V6M13 10l4-4 4 4"/></svg>
@@ -87,6 +88,11 @@
             <option value="wait" data-i18n="route.prio.wait">待ち時間順</option>
             <option value="ride" data-i18n="route.prio.ride">乗車時間順</option>
           </select></label>
+      </div>
+
+      <div class="rt-row rt-jumprow">
+        <label class="rt-field"><span data-i18n="route.jump">時刻へ移動</span>
+          <input id="rt-jump" type="time"></label>
       </div>
 
       <details class="rt-details">

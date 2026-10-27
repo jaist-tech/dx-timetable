@@ -31,6 +31,11 @@
     'route.walkFaster': '徒歩なしの最良より ${n} 分速い', 'route.walkSame': '徒歩なしの最良と同じ時間',
     'route.best': '最上位', 'route.today': '本日', 'route.min': '分', 'route.yen': '円', 'route.fareUnknown': '運賃は未収集の区間を含みます',
     'route.dayErr': 'この日のダイヤを読み込めませんでした',
+    'route.jump': '時刻へ移動', 'route.here': '現在地', 'route.hereLabel': '現在地', 'route.hereWait': '現在地を取得中…',
+    'route.hereErr': '現在地を取得できませんでした（位置情報の許可を確認してください）', 'route.hereUnsupported': 'この端末では現在地を取得できません',
+    'route.noNearby': '近くに停留所がありません（徒歩 15 分以内）',
+    'route.walkBoard': '徒歩${n}分・${s}から乗車', 'route.walkAlight': '${s}で降りて徒歩${n}分',
+    'route.altBtn': '後の便', 'route.altNone': '乗換の時刻以降に選べる便がありません', 'route.altArr': '着',
   });
   Object.assign(TRANSLATIONS.en, {
     'route.title': 'Route search (trial)',
@@ -59,6 +64,11 @@
     'route.walkFaster': '${n} min faster than the best without walking', 'route.walkSame': 'Same time as the best without walking',
     'route.best': 'Top', 'route.today': 'Today', 'route.min': 'min', 'route.yen': 'JPY', 'route.fareUnknown': 'Fare is unknown for some sections',
     'route.dayErr': 'Could not load the timetable for this day',
+    'route.jump': 'Jump to time', 'route.here': 'My location', 'route.hereLabel': 'My location', 'route.hereWait': 'Getting your location…',
+    'route.hereErr': 'Could not get your location (check the location permission)', 'route.hereUnsupported': 'Location is not available on this device',
+    'route.noNearby': 'No stop within a 15-minute walk',
+    'route.walkBoard': 'Walk ${n} min, board at ${s}', 'route.walkAlight': 'Get off at ${s}, walk ${n} min',
+    'route.altBtn': 'Later trips', 'route.altNone': 'No later trips from this transfer', 'route.altArr': 'arr.',
   });
 
   const $ = id => document.getElementById(id);
@@ -66,7 +76,9 @@
   const MEMORY_TTL_MIN = 30;
   const WALK_MAX_METERS = 400;   // 歩く距離の上限（画面からは変えない）
   let net = null, places = [];
-  let urlDepart = null, urlArrive = null;   // URL 引数の時刻（最初の検索だけに使う）
+  let urlDepart = null, urlArrive = null;
+  let herePos = null;   // 「現在地」ボタンで取った座標（保存せず，入力欄には「現在地」の印だけを置く）
+  let cur = null;       // 今の一覧: { journeys, date, q, noWalk }   // URL 引数の時刻（最初の検索だけに使う）
 
   // ---- 日付・時刻 ----
   const pad = n => String(n).padStart(2, '0');
@@ -101,6 +113,7 @@
     const s = text.trim();
     const m = /^(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)$/.exec(s);
     if (m) return { lat: +m[1], lon: +m[2] };
+    if (herePos && s === t('route.hereLabel')) return herePos;
     if (places.includes(s)) return s;
     const low = s.toLowerCase();
     const en = places.filter(n => tStop(n).toLowerCase() === low);
@@ -126,7 +139,7 @@
     try {
       const v = JSON.parse(localStorage.getItem(MEMORY_KEY) || 'null');
       if (!v || Date.now() - v.savedAt > MEMORY_TTL_MIN * 60000 || v.savedDate !== ymd(nowDate())) return false;
-      $('rt-from').value = v.from || ''; $('rt-to').value = v.to || '';
+      $('rt-from').value = v.from === t('route.hereLabel') ? '' : (v.from || ''); $('rt-to').value = v.to || '';
       if (v.dateOffset >= 0 && v.dateOffset < $('rt-date').options.length) $('rt-date').selectedIndex = v.dateOffset;
       for (const [id, key] of [['rt-prio', 'prio'], ['rt-maxtr', 'maxtr'], ['rt-speed', 'speed'], ['rt-maxwait', 'maxwait']]) {
         const el = $(id);
@@ -150,6 +163,18 @@
     urlArrive = /^\d{1,2}:\d{2}$/.test(q.get('arrive') || '') ? q.get('arrive') : null;
     if (q.get('prio') && [...$('rt-prio').options].some(o => o.value === q.get('prio') && !o.disabled)) $('rt-prio').value = q.get('prio');
     return q.get('from') && q.get('to') && q.get('auto') !== '0';
+  }
+
+  // ---- 現在地（探索は端末の中で完結し，座標は送らない・保存しない）----
+  function useHere() {
+    const st = $('rt-status');
+    if (!navigator.geolocation) { st.textContent = t('route.hereUnsupported'); return; }
+    st.textContent = t('route.hereWait');
+    navigator.geolocation.getCurrentPosition(pos => {
+      herePos = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+      $('rt-from').value = t('route.hereLabel'); st.textContent = ''; saveMemory();
+      if ($('rt-to').value) search();
+    }, () => { st.textContent = t('route.hereErr'); }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
   }
 
   // ---- 検索の実行 ----
@@ -180,10 +205,13 @@
     const arriveAt = urlArrive; urlArrive = null;
     if (arriveAt) q.arrive = arriveAt; else Object.assign(q, { depart: '00:00', window: 2000, results: 1000 });
     const r = Planner.plan(net, q);
-    if (r.error === 'unknown-place') { st.textContent = t('route.unknownPlace', { name: $('rt-from').value + ' / ' + $('rt-to').value }); return; }
+    if (r.error === 'unknown-place') {
+      st.textContent = (typeof from === 'object' || typeof to === 'object') ? t('route.noNearby') : t('route.unknownPlace', { name: $('rt-from').value + ' / ' + $('rt-to').value });
+      return;
+    }
     // 今日は今の時刻（depart= があればその時刻）より前の出発を薄くし，最初の候補へ移る
     const nd = nowDate();
-    const refStr = urlDepart || (date === ymd(nd) ? pad(nd.getHours()) + ':' + pad(nd.getMinutes()) : null);
+    const refStr = $('rt-jump').value || urlDepart || (date === ymd(nd) ? pad(nd.getHours()) + ':' + pad(nd.getMinutes()) : null);
     const ref = refStr ? Planner.parseTime(refStr) : null;
     if (!arriveAt) q.ref = ref;
     const remain = ref === null ? 0 : r.journeys.filter(j => j.dep >= ref).length;
@@ -198,18 +226,53 @@
       noWalk = r2.journeys[0] || null;
     }
     q.nextIdx = ref === null ? -1 : r.journeys.findIndex(j => j.dep >= ref);
-    out.innerHTML += '<div class="card rt-list">' + r.journeys.map((j, i) => renderJourney(j, i, noWalk, q)).join('') + '</div>';
-    out.querySelectorAll('.trip-header').forEach(hd => {
-      const toggle = () => { const on = hd.parentElement.classList.toggle('expanded'); hd.setAttribute('aria-expanded', on); };
-      hd.addEventListener('click', toggle);
-      hd.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
-    });
-    bindMaps(out, r.journeys, date, q);
+    cur = { journeys: r.journeys.slice(), date, q, noWalk, head: out.innerHTML, picked: false };
+    renderList();
     if (!arriveAt && ref !== null && q.priority === 'time') {
       const first = out.querySelector('.rt-j:not(.rt-past)');
       if (first && first !== out.querySelector('.rt-j')) first.scrollIntoView({ block: 'start' });
     }
     saveMemory();
+  }
+
+  // 一覧の描画（乗換の選び直しで経路が変わったときも，開いている行を保ったまま描き直す）
+  function renderList(open) {
+    const out = $('rt-results');
+    openMaps.forEach(m => m.destroy()); openMaps = [];
+    const keep = open || new Set();
+    out.innerHTML = cur.head + '<div class="card rt-list">' + cur.journeys.map((j, i) => renderJourney(j, i, cur.noWalk, cur.q)).join('') + '</div>';
+    out.querySelectorAll('.rt-j').forEach(row => {
+      const hd = row.querySelector('.trip-header');
+      if (keep.has(+row.dataset.idx)) { row.classList.add('expanded'); hd.setAttribute('aria-expanded', 'true'); }
+      const toggle = () => { const on = row.classList.toggle('expanded'); hd.setAttribute('aria-expanded', on); };
+      hd.addEventListener('click', toggle);
+      hd.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+    });
+    out.querySelectorAll('.rt-alt-btn').forEach(b => b.addEventListener('click', () => toggleAlts(b)));
+    bindMaps(out, cur.journeys, cur.date, cur.q);
+  }
+
+  // 乗換の停留所から先の後の便（降りる区間の番号 data-leg）を 3〜5 件出し，選ぶと詳細の後半が入れ替わる
+  function toggleAlts(b) {
+    const row = b.closest('.rt-j'), i = +row.dataset.idx, k = +b.dataset.leg;
+    const box = b.nextElementSibling;
+    if (box && box.classList.contains('rt-alts')) { box.remove(); b.setAttribute('aria-expanded', 'false'); return; }
+    const alts = Planner.alternatives(net, cur.q, cur.journeys[i], k, 5);
+    const el = document.createElement('div'); el.className = 'rt-alts';
+    el.innerHTML = alts.length ? alts.map((a, n) => `<button type="button" class="rt-alt" data-n="${n}"${a.same ? ' aria-current="true"' : ''}><span>${Planner.fmtTime(a.legs[k + 1].dep)}</span><span>${a.arrStr} ${esc(t('route.altArr'))}</span><small>${esc(dur(a.total))}${a.transfers ? ' · ' + esc(t('route.transfers', { n: a.transfers })) : ''}</small></button>`).join('')
+      : `<div class="rt-alt-empty">${esc(t('route.altNone'))}</div>`;
+    b.after(el); b.setAttribute('aria-expanded', 'true');
+    el.querySelectorAll('.rt-alt').forEach(btn => btn.addEventListener('click', () => {
+      // 選んだ経路を入れて表示順の条件で並べ直し，開いていた行は経路の同一性で引き継ぐ
+      const openJ = [...document.querySelectorAll('.rt-j.expanded')].map(x => cur.journeys[+x.dataset.idx]);
+      const picked = alts[+btn.dataset.n];
+      openJ.push(picked);
+      cur.journeys[i] = picked; cur.picked = true;
+      Planner.sortJourneys(cur.journeys, cur.q.priority, false);
+      const ref = cur.q.ref;
+      cur.q.nextIdx = ref == null ? -1 : cur.journeys.findIndex(j => j.dep >= ref);
+      renderList(new Set(openJ.map(j => cur.journeys.indexOf(j)).filter(x => x >= 0)));
+    }));
   }
 
   // 経路が 0 件のときの理由の文（planner.js の reason）．終発後は翌日の始発も添える
@@ -288,6 +351,9 @@
       const parts = [tm(l.arr, 'trip.arr')];
       if (w > 0) parts.push(`<div class="seg-transfer walk">${esc(t('route.waitMin', { n: w }))}${tight}</div>`);
       parts.push(tm(next.dep, 'trip.dep'));
+      if (l.type === 'trip' && (next.type === 'trip' || (next.type === 'walk' && k + 2 < j.legs.length))) {
+        parts.push(`<button type="button" class="rt-alt-btn" data-leg="${k}" aria-expanded="false" title="${esc(t('route.altBtn'))}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>${esc(t('route.altBtn'))}</button>`);
+      }
       h += row(l.to, parts);
     });
     const sum = [];
@@ -309,8 +375,12 @@
     const cls = 'trip-item rt-j' + (past ? ' past rt-past' : '') + (isNext ? ' next-dep' : '');
     const badge = isNext ? `<span class="next-dep-badge">${esc(t('trip.nextDep'))}</span>` : (i === 0 && q.ref == null ? `<span class="next-dep-badge">${esc(t('route.best'))}</span>` : '');
     const meta = [`<span class="trip-duration">${esc(dur(j.total))}</span>`];
+    // 出発・到着の端の徒歩（停留所名の出発地・到着地の隣の停留所，座標の出発地）
+    const L = j.legs, aw = L[0].type === 'walk' ? L[0] : null, ew = L.length > 1 && L[L.length - 1].type === 'walk' ? L[L.length - 1] : null;
     if (j.transfers > 0) meta.push(`<span class="trip-transfers">${esc(t('route.transfers', { n: j.transfers }))}</span>`);
-    else meta.push(`<span class="trip-duration">${esc(t('route.direct'))}</span>`);
+    else if (!aw && !ew) meta.push(`<span class="trip-duration">${esc(t('route.direct'))}</span>`);
+    if (aw) meta.push(`<span class="rt-walkmeta">${esc(t('route.walkBoard', { n: aw.minutes, s: placeName(L[1].from) }))}</span>`);
+    if (ew) meta.push(`<span class="rt-walkmeta">${esc(t('route.walkAlight', { n: ew.minutes, s: placeName(ew.from) }))}</span>`);
     if (j.fare !== null) meta.push(`<span class="trip-duration">${j.fare}${esc(t('route.yen'))}</span>`);
     return `<div class="${cls}" data-idx="${i}"><div class="trip-header" role="button" tabindex="0" aria-expanded="false"><div class="trip-header-content"><div class="trip-times"><span class="trip-dep">${j.depStr}</span><span class="trip-arrow">&rarr;</span><span class="trip-arr">${j.arrStr}</span>${badge}</div><div class="trip-meta">${meta.join('')}</div></div><span class="trip-expand-btn">${CHEVRON}</span></div><div class="trip-segments-wrapper"><div class="trip-segments-inner rt-detail">${renderDetail(j, i, noWalk)}</div></div></div>`;
   }
@@ -332,6 +402,8 @@
     setPlaceholders();
     const keep = $('rt-date').value; buildDateSelect(keep);
     fillStops(); updateFareOption(!!(net && net.fares));
+    // 乗換の選び直しをした一覧は再検索せず，今の経路のまま描き直す（言語だけが変わる）
+    if (cur && cur.picked) { renderList(new Set([...document.querySelectorAll('.rt-j.expanded')].map(x => +x.dataset.idx))); return; }
     if ($('rt-results').children.length) search();
   };
 
@@ -362,6 +434,8 @@
     $('rt-form').addEventListener('submit', e => { e.preventDefault(); search(); });
     $('rt-swap').addEventListener('click', () => { const a = $('rt-from').value; $('rt-from').value = $('rt-to').value; $('rt-to').value = a; });
     document.querySelectorAll('#rt-form select, #rt-form input').forEach(el => el.addEventListener('change', saveMemory));
+    $('rt-jump').addEventListener('change', () => { if ($('rt-from').value && $('rt-to').value) search(); });
+    $('rt-here').addEventListener('click', useHere);
     const hasParams = [...new URLSearchParams(location.search).keys()].length > 0;
     if (fromUrl || (!hasParams && $('rt-from').value && $('rt-to').value)) search();
     window.JaistRoute = { plan: q => Planner.plan(net, q), net, Planner };
