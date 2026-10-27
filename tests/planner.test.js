@@ -47,7 +47,7 @@ test('乗換の最小時間: 到着直後の便には乗り換えない', async 
   for (const j of r.journeys) {
     for (let i = 1; i < j.legs.length; i++) {
       const a = j.legs[i - 1], b = j.legs[i];
-      assert.ok(b.dep - a.arr >= (b.type === 'walk' ? 0 : 1), 'gap ' + (b.dep - a.arr));
+      assert.ok(b.dep - a.arr >= (b.type === 'walk' || a.type === 'walk' ? 0 : 1), 'gap ' + (b.dep - a.arr));   // 端の徒歩（出発地から乗り場）は余裕を持たない
     }
     const trips = j.legs.filter(l => l.type === 'trip');
     for (let i = 1; i < trips.length; i++) assert.ok(trips[i].dep - trips[i - 1].arr >= 1);
@@ -317,4 +317,98 @@ test('1 日の一覧: 00:00 起点・window 2000 で全出発が昇順に並び�
   const part = Planner.plan(net, { date: WK, from: 'JAIST', to: '金沢駅', depart: '08:00', results: 1000, maxTransfers: 3 });
   assert.ok(part.journeys.every(j => r.journeys.some(x => x.dep === j.dep && x.arr === j.arr)), '時刻指定の候補は 1 日一覧に含まれる');
   assert.ok(ms < 2000);
+});
+
+test('出発地の徒歩: JAIST → 能美根上駅 で，隣の先端大学から乗る経路が端点・根拠つきで出る', async () => {
+  const net = await getNet(); await net.ensureDate(WK);
+  const r = Planner.plan(net, { date: WK, from: 'JAIST', to: '能美根上駅', depart: '00:00', window: 2000, results: 1000 });
+  const j = r.journeys.find(x => x.legs[0].type === 'walk' && x.legs[0].to === '先端大学');
+  assert.ok(j, '先端大学から乗る経路');
+  assert.equal(j.legs[0].from, 'JAIST');
+  assert.ok(j.legs[0].basis, '徒歩の根拠');
+  assert.ok(j.legs[0].minutes > 0);
+  assert.equal(j.dep, j.legs[0].dep);
+  // 出発前の待ちを除いた乗換の待ちは短い（以前は 53 分待ちの経路が出ていた）
+  assert.ok(Math.max(...r.journeys.map(x => x.wait)) < 53);
+});
+
+test('到着地の徒歩: 到着地の隣の停留所で降りて歩く経路の端点は実際の停留所名', async () => {
+  const net = await getNet(); await net.ensureDate(WK);
+  const r = Planner.plan(net, { date: WK, from: '能美根上駅', to: 'JAIST', depart: '00:00', window: 2000, results: 1000 });
+  const j = r.journeys.find(x => x.legs[x.legs.length - 1].type === 'walk');
+  assert.ok(j, '最後に歩く経路');
+  const last = j.legs[j.legs.length - 1];
+  assert.equal(last.to, 'JAIST');
+  assert.notEqual(last.from, 'JAIST');
+  assert.ok(last.basis);
+});
+
+test('乗換の足切り: 離れた時刻の直通と比べて経路を除かない', async () => {
+  const net = await getNet(); await net.ensureDate(WK);
+  const q = { date: WK, from: '先端大学前', to: '能美警察署前', depart: '00:00', window: 2000, results: 1000 };
+  const on = Planner.plan(net, q).journeys, off = Planner.plan(net, Object.assign({}, q, { minGainPerTransfer: 0 })).journeys;
+  // 乗換あり（昼）と直通（夕方）が 60 分以上離れているとき，乗換ありを除かない
+  for (const j of off.filter(x => x.transfers > 0)) {
+    const rival = off.find(x => x.transfers < j.transfers && x.dep >= j.dep && x.arr <= j.arr + 3 * (j.transfers - x.transfers));
+    if (!rival) assert.ok(on.some(x => x.dep === j.dep && x.arr === j.arr), 'kept ' + j.depStr);
+  }
+});
+
+test('乗換の選び直し: 乗換の停留所から後の便を選ぶと，前半はそのまま・待ちと運賃が結合後に計算し直される', async () => {
+  const net = await getNet(); await net.ensureDate(WK);
+  const q = { date: WK, from: 'JAIST', to: '金沢駅', depart: '00:00', window: 2000, results: 1000, maxTransfers: 3 };
+  const j = Planner.plan(net, q).journeys.find(x => x.transfers === 1 && x.legs.length === 2);
+  assert.ok(j, '乗換 1 回の経路');
+  const alts = Planner.alternatives(net, q, j, 0, 5);
+  assert.ok(alts.length >= 1 && alts.length <= 5);
+  for (const a of alts) {
+    assert.deepEqual(a.legs[0], j.legs[0]);
+    assert.ok(a.legs[1].dep >= j.legs[0].arr + 1, '乗換の最小時間');
+    assert.equal(a.dep, j.dep);
+    assert.equal(a.transfers, 1);
+    assert.equal(a.wait, a.legs[1].dep - a.legs[0].arr);
+  }
+  assert.ok(alts.some(a => a.same), '元の経路が候補に含まれる');
+  // 乗換の上限を使い切っているときは乗換を増やす候補を出さない
+  const alts0 = Planner.alternatives(net, Object.assign({}, q, { maxTransfers: 1 }), j, 0, 5);
+  for (const a of alts0) assert.ok(a.transfers <= 1);
+  assert.deepEqual(Planner.alternatives(net, Object.assign({}, q, { maxTransfers: 0 }), j, 0, 5), []);
+});
+
+test('乗換の選び直し: 乗換回数の上限を省略しても既定値（3 回）を超えない・並べ替えは plan と同じ', async () => {
+  const net = await getNet(); await net.ensureDate(WK);
+  const q = { date: WK, from: 'JAIST', to: '金沢駅', depart: '00:00', window: 2000, results: 1000 };
+  const j = Planner.plan(net, q).journeys.find(x => x.transfers === 1 && x.legs.length === 2);
+  for (const a of Planner.alternatives(net, q, j, 0, 20)) assert.ok(a.transfers <= 3);
+  const list = Planner.plan(net, q).journeys.slice().reverse();
+  Planner.sortJourneys(list, 'time', false);
+  assert.deepEqual(list.map(x => x.arr), list.map(x => x.arr).slice().sort((a, b) => a - b));
+});
+
+test('乗換の選び直し: 徒歩の乗換の後の便は，徒歩の余裕を空けて乗れる便だけ', async () => {
+  const net = await getNet(); await net.ensureDate(WK);
+  const q = { date: WK, from: 'JAIST', to: '能美根上駅', depart: '00:00', window: 2000, results: 1000 };
+  const j = Planner.plan(net, q).journeys.find(x => x.legs[0].type === 'walk' && x.legs.length === 2);
+  // 出発側の徒歩を含む経路の選び直しは，乗車 1 回の経路では候補を返さない（降りた先が到着地）
+  assert.deepEqual(Planner.alternatives(net, q, j, 1, 5), []);
+  const k = Planner.plan(net, Object.assign({}, q, { to: '金沢駅' })).journeys.find(x => x.legs.some(l => l.type === 'walk' && l.from === '新西金沢駅'));
+  if (k) {
+    const idx = k.legs.findIndex(l => l.type === 'trip' && k.legs[k.legs.indexOf(l) + 1] && k.legs[k.legs.indexOf(l) + 1].type === 'walk');
+    for (const a of Planner.alternatives(net, Object.assign({}, q, { to: '金沢駅' }), k, idx, 5)) {
+      for (let i = idx + 1; i < a.legs.length; i++) assert.ok(a.legs[i].dep >= a.legs[i - 1].arr, 'gap');
+    }
+  }
+});
+
+test('到着地の徒歩: 片方向だけの接続でも，隣の停留所→到着地の向きで探す', () => {
+  const walks = [[{ q: 1, walk: 3, basis: 'fixed', meters: null }], []];   // 停留所 0→1 の接続だけ
+  const dst = [{ p: 1, walk: 0 }], src = [{ p: 0, walk: 0 }];
+  Planner._addNeighbors(dst, walks, true);
+  Planner._addNeighbors(src, walks, false);
+  assert.deepEqual(dst.map(x => x.p), [1, 0]);   // 到着地 1 へは 0 で降りて歩ける
+  assert.equal(dst[1].via.p, 1);
+  assert.deepEqual(src.map(x => x.p), [0, 1]);   // 出発地 0 からは 1 へ歩ける
+  const dst0 = [{ p: 0, walk: 0 }];
+  Planner._addNeighbors(dst0, walks, true);
+  assert.deepEqual(dst0.map(x => x.p), [0]);     // 1→0 の接続は無いため，到着地 0 には足さない
 });

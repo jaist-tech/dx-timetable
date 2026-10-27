@@ -21,6 +21,7 @@
   };
   const UNLIMITED_ROUNDS = 8;
   const DAY = 1440;
+  const DEFAULTS_TRANSFER_MIN = 5;
 
   // ---------- 時刻・日付 ----------
   function parseTime(s) {
@@ -412,6 +413,15 @@
       (b.dep > a.dep || b.arr < a.arr || b.transfers < a.transfers);
   }
 
+  // 重視する条件で並べ替える（辞書式．list を直接並べ替える）
+  function sortJourneys(list, pr, arriveMode) {
+    const keyOf = j => {
+      const first = pr === 'transfers' ? j.transfers : pr === 'wait' ? j.wait : pr === 'ride' ? j.ride : pr === 'fare' ? (j.fare === null ? Infinity : j.fare) : (arriveMode ? -j.dep : j.arr);
+      return [first, j.arr, j.total, j.transfers, j.fare === null ? Infinity : j.fare, -j.dep];
+    };
+    return list.sort((a, b) => { const x = keyOf(a), y = keyOf(b); for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return x[i] - y[i]; return 0; });
+  }
+
   // ---------- 探索（公開）----------
   // q: { date, from, to, depart|arrive ('HH:MM'), priority, maxTransfers, walk:{...}, results, window, maxWaitMin }
   //   from / to: 停留所名 | {lat, lon} | 配列（複数候補）．座標は徒歩 15 分以内の近い 5 つを候補にする
@@ -422,6 +432,9 @@
     const walks = buildWalks(day, o.walk);
     const src = resolvePlaces(day, q.from, o.walk), dst = resolvePlaces(day, q.to, o.walk);
     if (!src.length || !dst.length) return { apiVersion: API_VERSION, date: q.date, journeys: [], error: 'unknown-place' };
+    // 停留所名で指定した出発地・到着地は，徒歩の上限（既定 400 m）以内の隣の停留所も候補にする
+    addNeighbors(src, walks, false); addNeighbors(dst, walks, true);
+    const srcInfo = new Map(src.map(s => [s.p, s])), dstInfo = new Map(dst.map(d => [d.p, d]));
     const dests = new Map(dst.map(d => [d.p, d.walk]));
     const K = o.maxTransfers === null || o.maxTransfers === undefined || o.maxTransfers === Infinity ? UNLIMITED_ROUNDS : o.maxTransfers + 1;
     const arriveMode = q.arrive !== undefined && q.arrive !== null;
@@ -429,6 +442,8 @@
     // 出発時刻の候補: 出発地の停留所で乗れる便の出発時刻
     const lo = arriveMode ? Math.max(0, T - o.window) - 0 : T;
     const hi = arriveMode ? T : T + o.window;
+    // _lag（乗換の選び直し用）: 出発地の停留所で乗るまでに空ける時間（同じ停留所 stay・隣の停留所 via）
+    const lagOf = s => (q._lag ? (s.via ? q._lag.via : q._lag.stay) : 0);
     const depSet = new Map(); // t -> srcs
     for (const s of src) {
       for (const pi of day.byPlace[s.p]) {
@@ -439,7 +454,7 @@
             const d = tr[i];
             if (d === null) continue;
             const t = d - s.walk;            // 出発地を出る時刻
-            if (t < lo - 0 || t > hi) continue;
+            if (t < lo - 0 + lagOf(s) || t > hi) continue;
             if (!depSet.has(t)) depSet.set(t, []);
           }
         });
@@ -448,7 +463,7 @@
     const times = [...depSet.keys()].sort((a, b) => b - a);
     const found = new Map();
     for (const t of times) {
-      const srcs = src.map(s => ({ p: s.p, t: t + s.walk, access: s.walk }));
+      const srcs = src.filter(s => t >= lo + lagOf(s)).map(s => ({ p: s.p, t: t + s.walk, access: s.walk }));
       const recs = raptor(day, walks, srcs, dests, K, o);
       recs.forEach(arrK => {
         // この round の，目的地候補ごとの最良ラベルから最も早く着くものを 1 つ採る
@@ -461,14 +476,15 @@
         const legs = legsFrom(day, best.l);
         const org = (function () { let x = best.l; while (x.prev) x = x.prev; return x; })();
         const access = org.access || 0;
+        const si = srcInfo.get(org.p), di = dstInfo.get(best.l.p);
         const first = legs[0];
         if (!first) return;
         const s = summarize(day, legs, net, access, best.eg);
         // 出発地側の徒歩（座標指定）を行程に加える
         const out = [];
-        if (access) out.push({ type: 'walk', from: '出発地', to: first.from, minutes: access, dep: first.dep - access, arr: first.dep });
+        if (access) out.push(edgeWalk(si && si.via ? day.places[si.via.p].name : '出発地', first.from, access, si && si.via, first.dep - access, first.dep));
         out.push(...legs);
-        if (best.eg) { const lastL = legs[legs.length - 1]; out.push({ type: 'walk', from: lastL.to, to: '目的地', minutes: best.eg, dep: lastL.arr, arr: lastL.arr + best.eg }); }
+        if (best.eg) { const lastL = legs[legs.length - 1]; out.push(edgeWalk(lastL.to, di && di.via ? day.places[di.via.p].name : '目的地', best.eg, di && di.via, lastL.arr, lastL.arr + best.eg)); }
         const key = sigOf(legs);
         if (!found.has(key)) found.set(key, Object.assign({ legs: out }, s));
       });
@@ -479,14 +495,13 @@
     if (o.priority === 'time' || o.priority === 'transfers') list = list.filter(j => !list.some(x => x !== j && dominated(j, x)));
     if (o.minGainPerTransfer > 0 && (o.priority === 'time' || o.priority === 'transfers')) {
       // 乗換が増えても 3 分/回 以上は短くならない候補を除く
-      list = list.filter(j => !list.some(x => x.transfers < j.transfers && j.total > x.total - o.minGainPerTransfer * (j.transfers - x.transfers)));
+      // 比較の相手は，出発が同じか遅く，到着が 3 分/回 の範囲を超えて遅くはならない経路に限る（離れた時刻の経路とは比べない）
+      list = list.filter(j => !list.some(x => {
+        const g = o.minGainPerTransfer * (j.transfers - x.transfers);
+        return x.transfers < j.transfers && x.dep >= j.dep && x.arr <= j.arr + g && j.total > x.total - g;
+      }));
     }
-    const pr = o.priority;
-    const keyOf = j => {
-      const first = pr === 'transfers' ? j.transfers : pr === 'wait' ? j.wait : pr === 'ride' ? j.ride : pr === 'fare' ? (j.fare === null ? Infinity : j.fare) : (arriveMode ? -j.dep : j.arr);
-      return [first, j.arr, j.total, j.transfers, j.fare === null ? Infinity : j.fare, -j.dep];
-    };
-    list.sort((a, b) => { const x = keyOf(a), y = keyOf(b); for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return x[i] - y[i]; return 0; });
+    sortJourneys(list, o.priority, arriveMode);
     const journeys = list.slice(0, o.results);
     if (!journeys.length && !q._diag) return Object.assign({ apiVersion: API_VERSION, date: q.date, dayKind: null, journeys, count: 0 }, diagnose(net, q, arriveMode));
     // 徒歩なしの最良との比較（徒歩を使う候補だけに付ける）
@@ -516,6 +531,57 @@
                         : { reason: 'after-last', edge: Math.max(...ra.journeys.map(j => j.dep)) };
     }
     return { reason: 'unconnected' };
+  }
+
+  // 経路 j の k 番目の区間（乗車）で降りた停留所から先を，乗換の時刻以降で選び直す候補（前半は j のまま）
+  // 乗換回数の上限は全体から前半の乗車回数を引いた値，待ち・乗換回数・運賃は結合後に計算し直す
+  function alternatives(net, q, j, k, n) {
+    const l = j.legs[k];
+    if (!l || l.type !== 'trip' || k >= j.legs.length - 1) return [];
+    const day = net.day(q.date);
+    const prefix = j.legs.slice(0, k + 1);
+    const used = prefix.filter(x => x.type === 'trip').length;
+    const mtq = q.maxTransfers === undefined ? DEFAULTS.maxTransfers : q.maxTransfers;   // plan と同じ既定値
+    const unlimited = mtq === null || mtq === Infinity;
+    const mt = unlimited ? null : mtq - used;
+    if (!unlimited && mt < 0) return [];
+    // 降りた時刻から数える．同じ停留所の便は乗換の最小時間，隣の停留所へ歩く場合は徒歩の余裕（margin）を空ける
+    const pi = day.placeIdx.get(l.to);
+    const stay = pi !== undefined ? day.sameMin[pi] : DEFAULTS_TRANSFER_MIN;
+    const dep = Math.floor(l.arr / 60) + ':' + String(l.arr % 60).padStart(2, '0');
+    const r = plan(net, Object.assign({}, q, { from: l.to, depart: dep, arrive: undefined, window: 180, results: n, priority: 'time', maxTransfers: mt, _diag: true, _lag: { stay, via: Object.assign({}, DEFAULTS.walk, q.walk || {}).margin } }));
+    const cur = sigOf(j.legs);
+    return r.journeys.map(x => {
+      const legs = prefix.concat(x.legs);
+      return Object.assign({ legs, same: sigOf(legs) === cur }, summarize(day, legs, net, 0, 0));
+    });
+  }
+
+  // 出発地・到着地の端の徒歩の行．via があれば根拠と距離を引き継ぐ
+  function edgeWalk(from, to, minutes, via, dep, arr) {
+    const l = { type: 'walk', from, to, minutes, dep, arr };
+    if (via && via.basis) { l.basis = via.basis; l.meters = via.meters; }
+    return l;
+  }
+  // 停留所名で指定した地点（walk 0）から歩ける隣の停留所を足す．via = 元の停留所 p と徒歩の根拠
+  // reverse: 到着地は「隣の停留所で降りて到着地へ歩く」向き（隣→到着地の接続）で探す
+  function addNeighbors(list, walks, reverse) {
+    const have = new Set(list.map(x => x.p));
+    const add = [];
+    let rev = null;
+    if (reverse) {
+      rev = walks.map(() => []);
+      walks.forEach((es, a) => es.forEach(e => rev[e.q].push({ q: a, walk: e.walk, basis: e.basis, meters: e.meters })));
+    }
+    for (const x of list) {
+      if (x.walk !== 0 || x.via) continue;
+      for (const e of (reverse ? rev : walks)[x.p]) {
+        if (have.has(e.q)) continue;
+        have.add(e.q);
+        add.push({ p: e.q, walk: e.walk, via: { p: x.p, basis: e.basis, meters: e.meters } });
+      }
+    }
+    list.push(...add);
   }
 
   function resolvePlaces(day, spec, w) {
@@ -619,7 +685,7 @@
     return net;
   }
 
-  const Planner = { _raptor: raptor, _buildWalks: buildWalks, API_VERSION, DEFAULTS, load, createNetwork, plan, listPlaces, listLines, listRoutes, parseTime, fmtTime, pickRegularEntry, dayKeyFor, normName };
+  const Planner = { alternatives, sortJourneys, _addNeighbors: addNeighbors, _raptor: raptor, _buildWalks: buildWalks, API_VERSION, DEFAULTS, load, createNetwork, plan, listPlaces, listLines, listRoutes, parseTime, fmtTime, pickRegularEntry, dayKeyFor, normName };
   if (typeof module !== 'undefined' && module.exports) module.exports = Planner;
   else root.Planner = Planner;
 })(typeof window !== 'undefined' ? window : globalThis);
