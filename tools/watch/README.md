@@ -94,13 +94,13 @@ JAIST のメール（受信箱）を読んで改定を検知する案は，個�
 ## 本番への反映の流れ
 
 ```
-cron（月・木 09:00）→ run_local.py（手元のコード）: クローンを手元の dev から作り直し，watch→apply→validate
+cron（月・木 09:00）→ run_local.py（手元のコード）: クローンを手元の main から作り直し，watch→apply→validate
  → 変化があれば auto/timetable-日付 の新ブランチに commit（ここで止まる．push しない）
  → メール（プレビューの URL・差分・push のコマンド）→ あなた: 確認 → git push -u origin <ブランチ> → PR → merge
  → deploy.yml が public/ を GitHub Pages に公開（Pages の公開元は main のみ）
 ```
 
-- 実行するコードは手元のリポジトリ（`~/project/dx-timetable`）の commit 済みの内容だけ．クローン `~/project/tmp/dx-timetable-watch` は手元から作り（origin＝手元，pushurl＝GitHub），リモートのコードは取得も実行もしない（cron がリモートの dev のコードを実行する危険は無い．`docs/dev-check.md` の要検証 1 件はこの流れでは起きない）
+- 実行するコードは手元のリポジトリ（`~/project/dx-timetable`）の commit 済みの内容だけ．クローン `~/project/tmp/dx-timetable-watch` は手元から作り（origin＝手元，pushurl＝GitHub），リモートのコードは取得も実行もしない（cron がリモートのコードを実行する危険は無い）
 - プレビューは閲覧サーバー（8800）の `tmp/dx-timetable-watch/public/index.html`．変化が無い・反映できなかったときはブランチを作らず，要手動の行だけをメールする
 - 同じ内容のメールは再送しない．確認して問題があれば何もせず，次の改定を待つ
 - cron: `0 9 * * 1,4 ~/project/dx-timetable/tools/watch/run_local.sh`（ログ `~/project/tmp/dx-timetable-watch.log`）．2026-10-10 まで `run_local.sh` の cd が 1 階層多く一度も動いていなかった（修正済み）

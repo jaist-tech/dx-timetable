@@ -14,6 +14,7 @@
 自動反映しない（人が確認する）もの: 特別ダイヤ，整合性エラーのあるもの，石川線の既存期間の内容変更
 """
 import argparse
+import subprocess
 import json
 import os
 import re
@@ -218,6 +219,12 @@ def main():
                 continue
             w = check_commit.commit_payload(pl, manifest)
             print(f"| {name} | {seg} {period} | 反映 {w['data_file']}（便数 {n}） |")
+    rebuild = os.path.join(os.path.dirname(__file__), "..", "route", "rebuild.py")
+    if not args.dry_run and os.path.exists(rebuild):  # 経路検索の機能のブランチが入った後だけ，派生データ（座標表・データのバージョン）を作り直して試験を回す
+        r = subprocess.run([sys.executable, rebuild])
+        if r.returncode:
+            print("\n経路検索の試験に落ちた（tools/route/rebuild.py）．")
+            manual += 1
     return 10 if manual else 0
 
 

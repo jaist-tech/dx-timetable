@@ -3,7 +3,7 @@
 
 専用のクローン（既定 ~/project/tmp/dx-timetable-watch）は，手元のリポジトリ（~/project/dx-timetable）から作る．
 リモート（GitHub）のコードは取得も実行もしない（cron がリモートの任意のコードを実行する危険を避ける）．
-起点（既定は手元の dev）から，変化の都度 auto/timetable-日付 の新しいブランチを作って watch.py と apply.py を実行し，
+起点（既定は手元の main）から，変化の都度 auto/timetable-日付 の新しいブランチを作って watch.py と apply.py を実行し，
 public/ をプレビュー（閲覧サーバーの URL）として案内する．変化（新規・更新・期限切れ・要手動）があり，
 前回のメールと内容が違うときだけ，morning-paper の SMTP（Simple Mail Transfer Protocol）設定でメールを送る．
 push と PR（Pull Request）はユーザーが行う．
@@ -121,7 +121,7 @@ def parse_args():
     ap = argparse.ArgumentParser()
     ap.add_argument("--clone", default=os.path.expanduser("~/project/tmp/dx-timetable-watch"))
     ap.add_argument("--source", default=LOCAL_REPO, help="クローン元（手元のリポジトリ）")
-    ap.add_argument("--base", default="origin/dev", help="作業ブランチの起点（クローン元の dev）")
+    ap.add_argument("--base", default="origin/main", help="作業ブランチの起点（クローン元の main．時刻表のデータだけを変えるブランチにするため）")
     ap.add_argument("--no-mail", action="store_true")
     return ap.parse_args()
 
@@ -186,7 +186,7 @@ def run(args):
    差分: cd {d} && git show --stat HEAD && git diff {args.base} -- public/data/manifest.json
 2. 問題なければ push する: cd {d} && git push -u origin {branch}
 3. GitHub で {branch} → main の PR（Pull Request）を作り，確認して merge する（main への push で deploy.yml が GitHub Pages に公開する）
-問題があれば何もしなくてよい（次回の実行で同じ内容は再送しない）．起点は手元の dev（{args.base}）で，dev の未 push の commit も PR に含まれる．"""
+問題があれば何もしなくてよい（次回の実行で同じ内容は再送しない）．起点は手元の main（{args.base}）で，PR には時刻表のデータの変更だけが含まれる．main へのマージはあなたの確認と承認を取ってから行う．"""
     else:
         head = "時刻表ソースの更新または期限切れを検知しましたが，自動で反映できたデータはありません（ブランチは作っていません）．"
         steps = "## あなたの作業\n下の「要手動」「検知レポート」の行を確認し，必要なら tools/admin/ で PDF を追加してください．"
