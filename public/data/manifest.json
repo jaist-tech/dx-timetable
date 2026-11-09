@@ -128,6 +128,11 @@
         "file": "limo_komatsu_2026-09-01_2026-09-30.json",
         "valid_from": "2026-09-01",
         "valid_until": "2026-09-30"
+      },
+      {
+        "file": "limo_komatsu_2026-10-25_2026-11-30.json",
+        "valid_from": "2026-10-25",
+        "valid_until": "2026-11-30"
       }
     ],
     "shuttle_komatsu": [
@@ -150,6 +155,11 @@
         "file": "shuttle_komatsu_2026-10-01_2026-10-31.json",
         "valid_from": "2026-10-01",
         "valid_until": "2026-10-31"
+      },
+      {
+        "file": "shuttle_komatsu_2026-11-01_2026-11-30.json",
+        "valid_from": "2026-11-01",
+        "valid_until": "2026-11-30"
       }
     ],
     "shuttle_tsurugi": [
