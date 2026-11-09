@@ -28,6 +28,7 @@ def sh(args, cwd, check=True, **kw):
 
 def send_mail(subject, body):
     import smtplib
+    import ssl
     from email.message import EmailMessage
     from email.utils import formatdate
     with open(os.path.join(MORNING, "secrets.toml"), "rb") as f:
@@ -37,7 +38,7 @@ def send_mail(subject, body):
     msg["From"], msg["To"] = n.get("mail_from") or n["smtp_user"], n["mail_to"]
     msg.set_content(body)
     with smtplib.SMTP(n["smtp_host"], int(n.get("smtp_port", 587)), timeout=60) as s:
-        s.starttls()
+        s.starttls(context=ssl.create_default_context())  # 証明書とホスト名を検証してからパスワードを送る
         s.login(n["smtp_user"], n["smtp_pass"])
         s.send_message(msg)
 
