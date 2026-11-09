@@ -16,7 +16,10 @@ test('既存 6 経路: JAIST → 小松駅 は直通 1 本で，時刻表の便�
   const net = await getNet(); await net.ensureDate(WK);
   const r = Planner.plan(net, { date: WK, from: 'JAIST', to: '小松駅', depart: '08:00', results: 20, minGainPerTransfer: 0 });
   assert.ok(r.journeys.length > 0);
-  const sched = JSON.parse(fs.readFileSync(BASE + 'regular/shuttle_komatsu_2026-10-01_2026-10-31.json'));
+  // 時刻表のデータは別のブランチで更新されるため，ファイル名を固定せず manifest から WK を覆う（無ければ最後の）エントリを選ぶ
+  const entries = JSON.parse(fs.readFileSync(BASE + 'manifest.json')).regular.shuttle_komatsu;
+  const entry = entries.find(e => e.valid_from <= WK && (!e.valid_until || WK <= e.valid_until)) || entries[entries.length - 1];
+  const sched = JSON.parse(fs.readFileSync(BASE + 'regular/' + entry.file));
   const out = sched.routes.find(x => x.id === 'komatsu_outbound').schedules.weekday;
   const deps = new Set(out.map(t => t[0]));
   const direct = r.journeys.filter(j => j.transfers === 0);
