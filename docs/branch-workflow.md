@@ -10,10 +10,11 @@ main は GitHub Pages と Vercel に紐づくため，main へのマージ・pus
 |---|---|---|---|
 | `auto/timetable-日付` | main | 時刻表のデータと自動更新の仕組み（監視・解析・検査・のみバス取得・メール通知） | `public/data/manifest.json`，`public/data/regular/`，`tools/watch/`，`tools/nomibus/`，`tools/parsers/`，`tools/admin/parser_adapter.py` |
 | `feature/route-search` | main | のみバスを含む経路検索（route.html・planner.js・運賃・地図・徒歩の乗換・試験・設計の文書） | `public/route.html`，`public/js/`，`public/css/`，`public/data/fares.json`，`public/data/routes.json`，`public/data/route/`，`public/data/geo/`，`tools/route/`，`tests/`，`docs/` |
-| `dev` | main | 上の 2 つが混ざった従来のブランチ．消さずに残す（以後は新しい変更を入れない） | 両方 |
 
 両ブランチが変更するファイルは `.gitignore` だけで，行の位置を離してあり衝突しない．
 経路検索が読む `fares.json`・`stops.json`・`walk.json` などは機能のブランチだけが変更する．
+上の 2 つが混ざった従来のブランチ `dev` は，内容がすべて 2 つのブランチに入ったことを確認して 2026-11-24 に削除した．
+削除前の `dev` は，共有サーバーの `~/project/tmp/dx-timetable-deleted-branches-20261124.bundle` に退避してある．
 
 ## マージの順番
 
@@ -27,6 +28,8 @@ main は GitHub Pages と Vercel に紐づくため，main へのマージ・pus
 ## 時刻表の自動更新
 
 - 共有サーバーの cron（月・木 09:00）が `tools/watch/run_local.sh` を実行する．
+- cron は手元の取り出し（`~/project/dx-timetable`）にある `run_local.sh` を実行するため，取り出しは main にしておく．
 - 起点は手元の main で，変化があるときだけ `auto/timetable-日付` の新しいブランチを作って commit する（push しない）．
 - ユーザーがプレビューで確認して push し，GitHub で main への PR を作り，承認してマージする．
-- 手元の main が GitHub の main より古いと，古い起点でブランチが作られる．main を更新してから実行されるよう，ユーザーが main を取り込んだ後に確認する．
+- 手元の main が GitHub の main より古いと，古い起点でブランチが作られる．
+- 新しい main を起点に実行されるよう，ユーザーが main を手元に取り込んだ後に確認する．
