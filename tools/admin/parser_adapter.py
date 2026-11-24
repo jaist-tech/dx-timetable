@@ -153,7 +153,7 @@ def _parse_limo_komatsu(pdf_path):
 
     # 有効期間を抽出
     version_match = re.search(
-        r'(\d{4})年\s*(\d{1,2})月(\d{1,2})日\s*[～~]\s*(\d{4})年\s*(\d{1,2})月(\d{1,2})日',
+        r'(\d{4})年\s*(\d{1,2})月\s*(\d{1,2})日\s*[～~]\s*(\d{4})年\s*(\d{1,2})月\s*(\d{1,2})日',
         text,
     )
     if version_match:

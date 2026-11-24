@@ -8,6 +8,7 @@ public/data/regular/nomi_*.json および manifest.json を更新する。
     cd tools/nomibus
     python3 run.py              # キャッシュ再利用 + 差分のみ更新
     python3 run.py --fetch      # キャッシュを破棄して全ページを再取得
+    python3 run.py --refresh    # 条件付き GET で更新分だけ再取得（定期実行用）
     python3 run.py --dry-run    # public/ を書き換えずに変更内容だけ表示
 
 通常の更新フロー:
@@ -39,15 +40,21 @@ INTERMEDIATE_DIR = os.path.join(HERE, "intermediate")
 JST = timezone(timedelta(hours=9))
 
 
-def step_fetch(force: bool):
+def step_fetch(force: bool, refresh: bool = False):
     """Step 1: HTML キャッシュ取得"""
     print("=== Step 1: クロール ===")
+    import crawl
+    crawl.REFRESH = refresh
+    if refresh:
+        print("  --refresh: 条件付き GET で更新のあったページだけ再取得します（キャッシュは残す）")
     if force:
         print("  --fetch: cache/ を削除して全ページ再取得します")
         if os.path.isdir(CACHE_DIR):
             shutil.rmtree(CACHE_DIR)
-    import crawl
-    crawl.main()
+    failed = crawl.main()
+    if failed:
+        print(f"取得に失敗したページが {len(failed)} 件あるため中断します")
+        sys.exit(2)
 
 
 def step_parse():
@@ -126,11 +133,12 @@ def update_manifest(convert_results, today_str: str, dry_run: bool):
         existing = regular.get(segment, [])
 
         if status == "new_version":
-            # 旧エントリのうち valid_until が None のものを閉じる
+            # 旧エントリのうち valid_until が None のものを閉じる（新バージョンの valid_from の前日．重ならないように）
+            day_before_new = (date.fromisoformat(valid_from) - timedelta(days=1)).isoformat()
             for e in existing:
                 if e.get("valid_until") is None and e.get("file") != fname:
-                    e["valid_until"] = yesterday
-                    print(f"  旧バージョン終了: {e['file']} → valid_until={yesterday}")
+                    e["valid_until"] = day_before_new
+                    print(f"  旧バージョン終了: {e['file']} → valid_until={day_before_new}")
             # 同一ファイル名が既にあれば上書き、なければ追加
             idx = next((i for i, e in enumerate(existing) if e.get("file") == fname), None)
             if idx is not None:
@@ -185,6 +193,10 @@ def main():
         help="cache/ を削除して全ページを再取得する（ダイヤ改正後に使用）"
     )
     parser.add_argument(
+        "--refresh", action="store_true",
+        help="キャッシュを残し，条件付き GET（ETag / Last-Modified）で更新のあったページだけ再取得する（定期実行用）"
+    )
+    parser.add_argument(
         "--dry-run", action="store_true",
         help="manifest.json を書き換えずに変換結果だけ表示する"
     )
@@ -200,7 +212,7 @@ def main():
     print(f"のみバス時刻表更新ツール  実行時刻: {added_at}")
     print(f"出力先: {os.path.relpath(REGULAR_DIR)}\n")
 
-    step_fetch(args.fetch)
+    step_fetch(args.fetch, args.refresh)
     step_parse()
     results = step_convert(added_at, today_str)
     update_manifest(results, today_str, args.dry_run)

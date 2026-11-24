@@ -1,0 +1,92 @@
+{
+ "checked_at": "2026-11-09T16:11:12+09:00",
+ "pdfs": {
+  "https://www.jaist.ac.jp/top/data/shuttle_komatsu2026.pdf": {
+   "source": "jaist_access",
+   "segments": [
+    "shuttle_komatsu",
+    "shuttle_tsurugi"
+   ],
+   "label": "（2026年10月1日～11月30日）",
+   "last_modified": "Tue, 13 Oct 2026 05:11:57 GMT",
+   "etag": "\"44362-65db1da8d174d\"",
+   "size": 279394,
+   "is_pdf": true,
+   "sha256": "ad182e27634d0e505a4905ddacf4c306b35db2a56c7ae31ae5e7f0a8aa44403a"
+  },
+  "https://www.jaist.ac.jp/top/data/shuttle_turugi2026.pdf": {
+   "source": "jaist_access",
+   "segments": [
+    "shuttle_komatsu",
+    "shuttle_tsurugi"
+   ],
+   "label": "（2026年6月1日現在）",
+   "last_modified": "Wed, 10 Jun 2026 03:01:20 GMT",
+   "etag": "\"c4b4-653dd753fcc76\"",
+   "size": 50356,
+   "is_pdf": true,
+   "sha256": "e38c28297adb43478372fcda892bd001300443ce431404c7afb92c92bb872b6e"
+  },
+  "https://www.jaist.ac.jp/top/data/shuttle_turugi2026-2.pdf": {
+   "source": "jaist_access",
+   "segments": [
+    "shuttle_komatsu",
+    "shuttle_tsurugi"
+   ],
+   "label": "（2026年6月1日現在）",
+   "last_modified": "Wed, 10 Jun 2026 03:01:04 GMT",
+   "etag": "\"702d-653dd74535895\"",
+   "size": 28717,
+   "is_pdf": true,
+   "sha256": "98d0cd1c2677ec6c69d5ea8691acaf5dd7e6b9d141a108e62b8c3e426ee95b64"
+  },
+  "https://www.hokutetsu.co.jp/_wp/wp-content/uploads/2026/04/ishikawa-line_timetable_weekday_20260429.pdf": {
+   "source": "hokutetsu_ishikawa",
+   "segments": [
+    "ishikawa_line"
+   ],
+   "label": "石川線情報",
+   "last_modified": "Mon, 27 Apr 2026 07:27:38 GMT",
+   "etag": "\"4b8da-6506c0c9b74fa\"",
+   "size": 309466,
+   "is_pdf": true,
+   "sha256": "959d24d0d5d500c02840f81ffe9102cd310f0a6a6d209d15a99ecf8b5d66a2bf"
+  },
+  "https://www.hokutetsu.co.jp/_wp/wp-content/uploads/2026/04/ishikawa-line_timetable_holiday_20260429.pdf": {
+   "source": "hokutetsu_ishikawa",
+   "segments": [
+    "ishikawa_line"
+   ],
+   "label": "時刻表（平日） PDF",
+   "last_modified": "Mon, 27 Apr 2026 07:27:36 GMT",
+   "etag": "\"4bd54-6506c0c777606\"",
+   "size": 310612,
+   "is_pdf": true,
+   "sha256": "afcaeeac6f4738c66ed438fce8b8bb6439ee890ceb01ac1778ed834a0389773c"
+  },
+  "https://www.ishikawa-railway.jp/timetable/pdf/20260314.pdf": {
+   "source": "ir_ishikawa",
+   "segments": [
+    "ir_ishikawa"
+   ],
+   "label": "くりから 全線時刻表 2026年3月14日からの運行ダイヤを掲載しております。 下り・上り（大聖寺～金沢～倶利伽羅）時刻表",
+   "last_modified": "Wed, 11 Mar 2026 01:54:44 GMT",
+   "etag": "\"c39d11d-968ac-64cb5eb89572d\"",
+   "size": 616620,
+   "is_pdf": true,
+   "sha256": "e60df5d234383931dad304acac72f491d8b5c2a1a2ff0d23fd0993d8a8003e1d"
+  },
+  "https://www.hokutetsu.co.jp/_wp/wp-content/uploads/2026/10/limo_komatsu-komatsu_20261025-1130.pdf": {
+   "source": "hokutetsu_airport",
+   "segments": [
+    "limo_komatsu"
+   ],
+   "label": "新着情報 一覧を見る",
+   "last_modified": "Fri, 16 Oct 2026 01:06:48 GMT",
+   "etag": "\"1b7b2-65deac75c9803\"",
+   "size": 112562,
+   "is_pdf": true,
+   "sha256": "bc25290580a38a4c12a6ab585df1b0e21a8876f9f65510948904dbe3d3b9cff0"
+  }
+ }
+}
