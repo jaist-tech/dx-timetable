@@ -31,4 +31,5 @@ main は GitHub Pages と Vercel に紐づくため，main へのマージ・pus
 - cron は手元の取り出し（`~/project/dx-timetable`）にある `run_local.sh` を実行するため，取り出しは main にしておく．
 - 起点は手元の main で，変化があるときだけ `auto/timetable-日付` の新しいブランチを作って commit する（push しない）．
 - ユーザーがプレビューで確認して push し，GitHub で main への PR を作り，承認してマージする．
-- 手元の main が GitHub の main より古いと，古い起点でブランチが作られる．main を更新してから実行されるよう，ユーザーが main を取り込んだ後に確認する．
+- 手元の main が GitHub の main より古いと，古い起点でブランチが作られる．
+- 新しい main を起点に実行されるよう，ユーザーが main を手元に取り込んだ後に確認する．
